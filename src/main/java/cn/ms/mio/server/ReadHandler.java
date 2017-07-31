@@ -59,8 +59,7 @@ public class ReadHandler implements CompletionHandler<Integer, ByteBuffer> {
 							// 创建新的Buffer
 							ByteBuffer readBuffer = ByteBuffer.allocate(1024);
 							// 异步读 第三个参数为接收消息回调的业务Handler
-							channel.read(readBuffer, readBuffer,
-									new ReadHandler(channel));
+							channel.read(readBuffer, readBuffer, new ReadHandler(channel));
 						}
 					}
 
