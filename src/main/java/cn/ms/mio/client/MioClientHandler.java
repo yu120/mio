@@ -6,12 +6,12 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.concurrent.CountDownLatch;
 
-public class WriteHandler implements CompletionHandler<Integer, ByteBuffer> {
+public class MioClientHandler implements CompletionHandler<Integer, ByteBuffer> {
 	
 	private AsynchronousSocketChannel clientChannel;
 	private CountDownLatch latch;
 
-	public WriteHandler(AsynchronousSocketChannel clientChannel,
+	public MioClientHandler(AsynchronousSocketChannel clientChannel,
 			CountDownLatch latch) {
 		this.clientChannel = clientChannel;
 		this.latch = latch;

@@ -5,12 +5,17 @@ import java.net.InetSocketAddress;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.util.concurrent.CountDownLatch;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * AIO服务端
  * 
  * @author lry
  */
 public class Server implements Runnable {
+
+	private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
 	private static int DEFAULT_PORT = 12345;
 	public volatile static long clientCount = 0;
@@ -27,9 +32,9 @@ public class Server implements Runnable {
 			try {
 				channel = AsynchronousServerSocketChannel.open();// 创建服务端通道
 				channel.bind(new InetSocketAddress(port));// 绑定端口
-				System.out.println("服务器已启动，端口号：" + port);
+				logger.debug("服务器已启动，端口号：{}", port);
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error("The init is fail.", e);
 			}
 		}
 	}
@@ -40,19 +45,13 @@ public class Server implements Runnable {
 
 	@Override
 	public void run() {
-		/**
-		 * CountDownLatch初始化<br>
-		 * 的作用：在完成一组正在执行的操作之前，允许当前的现场一直阻塞<br>
-		 * 此处，让现场在此阻塞，防止服务端执行完成后退出<br>
-		 * 也可以使用while(true)+sleep<br>
-		 * 生成环境就不需要担心这个问题，以为服务端是不会退出的
-		 **/
-		latch = new CountDownLatch(1);
-		channel.accept(this, new AcceptHandler());// 用于接收客户端的连接
 		try {
+			latch = new CountDownLatch(1);
+			channel.accept(this, new MioServerHandler());// 用于接收客户端的连接
+
 			latch.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			logger.error("The start is fail.", e);
 		}
 	}
 

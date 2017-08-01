@@ -9,7 +9,7 @@ import java.nio.channels.CompletionHandler;
  * 
  * @author lry
  */
-public class AcceptHandler implements CompletionHandler<AsynchronousSocketChannel, Server> {
+public class MioServerHandler implements CompletionHandler<AsynchronousSocketChannel, Server> {
 
 	@Override
 	public void completed(AsynchronousSocketChannel channel, Server serverHandler) {

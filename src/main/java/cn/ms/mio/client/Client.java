@@ -77,7 +77,7 @@ public class Client implements CompletionHandler<Void, Client>, Runnable {
 		writeBuffer.put(req);
 		writeBuffer.flip();
 		// 异步写
-		clientChannel.write(writeBuffer, writeBuffer, new WriteHandler(clientChannel, latch));
+		clientChannel.write(writeBuffer, writeBuffer, new MioClientHandler(clientChannel, latch));
 		
 		return true;
 	}
