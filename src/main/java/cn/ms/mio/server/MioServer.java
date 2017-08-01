@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
  * 
  * @author lry
  */
-public class Server implements Runnable {
+public class MioServer implements Runnable {
 
-	private static final Logger logger = LoggerFactory.getLogger(Server.class);
+	private static final Logger logger = LoggerFactory.getLogger(MioServer.class);
 
 	private static int DEFAULT_PORT = 12345;
 	public volatile static long clientCount = 0;
@@ -23,11 +23,11 @@ public class Server implements Runnable {
 	public CountDownLatch latch;
 	public AsynchronousServerSocketChannel channel;
 
-	public Server() {
+	public MioServer() {
 		this(DEFAULT_PORT);
 	}
 
-	public Server(int port) {
+	public MioServer(int port) {
 		synchronized (this) {
 			try {
 				channel = AsynchronousServerSocketChannel.open();// 创建服务端通道
@@ -40,7 +40,7 @@ public class Server implements Runnable {
 	}
 
 	public static void main(String[] args) {
-		new Thread(new Server(), "Server").start();
+		new Thread(new MioServer(), "Server").start();
 	}
 
 	@Override

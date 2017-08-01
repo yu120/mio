@@ -9,12 +9,12 @@ import java.nio.channels.CompletionHandler;
  * 
  * @author lry
  */
-public class MioServerHandler implements CompletionHandler<AsynchronousSocketChannel, Server> {
+public class MioServerHandler implements CompletionHandler<AsynchronousSocketChannel, MioServer> {
 
 	@Override
-	public void completed(AsynchronousSocketChannel channel, Server serverHandler) {
-		Server.clientCount++;// 继续接受其他客户端的请求
-		System.out.println("连接的客户端数：" + Server.clientCount);
+	public void completed(AsynchronousSocketChannel channel, MioServer serverHandler) {
+		MioServer.clientCount++;// 继续接受其他客户端的请求
+		System.out.println("连接的客户端数：" + MioServer.clientCount);
 
 		serverHandler.channel.accept(serverHandler, this);
 		ByteBuffer buffer = ByteBuffer.allocate(1024);// 创建新的Buffer
@@ -22,7 +22,7 @@ public class MioServerHandler implements CompletionHandler<AsynchronousSocketCha
 	}
 
 	@Override
-	public void failed(Throwable exc, Server serverHandler) {
+	public void failed(Throwable exc, MioServer serverHandler) {
 		exc.printStackTrace();
 		serverHandler.latch.countDown();
 	}

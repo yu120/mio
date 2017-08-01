@@ -7,7 +7,7 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.concurrent.CountDownLatch;
 
-public class Client implements CompletionHandler<Void, Client>, Runnable {
+public class MioClient implements CompletionHandler<Void, MioClient>, Runnable {
 	
 	private static String DEFAULT_HOST = "127.0.0.1";
 	private static int DEFAULT_PORT = 12345;
@@ -18,10 +18,10 @@ public class Client implements CompletionHandler<Void, Client>, Runnable {
 	private static CountDownLatch latch;
 	
 	public static void main(String[] args) {
-		new Thread(new Client(DEFAULT_HOST, DEFAULT_PORT), "Client").start();
+		new Thread(new MioClient(DEFAULT_HOST, DEFAULT_PORT), "Client").start();
 	}
 
-	public Client(String host, int port) {
+	public MioClient(String host, int port) {
 		this.host = host;
 		this.port = port;
 		try {
@@ -53,13 +53,13 @@ public class Client implements CompletionHandler<Void, Client>, Runnable {
 	// 连接服务器成功
 	// 意味着TCP三次握手完成
 	@Override
-	public void completed(Void result, Client attachment) {
+	public void completed(Void result, MioClient attachment) {
 		System.out.println("客户端成功连接到服务器...");
 	}
 
 	// 连接服务器失败
 	@Override
-	public void failed(Throwable exc, Client attachment) {
+	public void failed(Throwable exc, MioClient attachment) {
 		System.err.println("连接服务器失败...");
 		exc.printStackTrace();
 		try {
