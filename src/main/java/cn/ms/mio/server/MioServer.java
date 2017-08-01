@@ -22,6 +22,10 @@ public class MioServer implements Runnable {
 
 	public CountDownLatch latch;
 	public AsynchronousServerSocketChannel channel;
+	
+	public static void main(String[] args) {
+		new Thread(new MioServer(), "Server").start();
+	}
 
 	public MioServer() {
 		this(DEFAULT_PORT);
@@ -37,10 +41,6 @@ public class MioServer implements Runnable {
 				logger.error("The init is fail.", e);
 			}
 		}
-	}
-
-	public static void main(String[] args) {
-		new Thread(new MioServer(), "Server").start();
 	}
 
 	@Override
