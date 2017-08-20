@@ -22,14 +22,6 @@ public class MioClient {
 	
 	private AsynchronousSocketChannel socketChannel;
     
-    public static void main(String[] args) {
-    	MioClient mioClient =new MioClient();
-    	mioClient.start(URL.valueOf("mio://localhost:7777/test"));
-    	for (int i = 0; i < 100; i++) {
-			mioClient.send("测试报文".getBytes());
-		}
-    }
-    
     public void start(URL url){
         try {
         	socketChannel = AsynchronousSocketChannel.open();

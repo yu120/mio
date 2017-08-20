@@ -17,6 +17,9 @@ public class MioServerHandler implements CompletionHandler<AsynchronousSocketCha
 	private static final Logger logger = LoggerFactory.getLogger(MioServerHandler.class);
 	private final ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
 
+	public MioServerHandler(Processor processor) {
+	}
+	
 	@Override
 	public void completed(AsynchronousSocketChannel socketChannel, AsynchronousServerSocketChannel serverSocketChannel) {
 		// 注意接收一个连接之后，紧接着可以接收下一个连接，所以必须再次调用accept方法
