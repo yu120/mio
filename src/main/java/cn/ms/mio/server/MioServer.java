@@ -40,7 +40,7 @@ public class MioServer {
                 serverSocketChannel.bind(new InetSocketAddress(IP, DEFAULT_PORT));
                 logger.info("Waiting for connections...");
                 
-                serverSocketChannel.accept(serverSocketChannel, new MioAcceptHandler());
+                serverSocketChannel.accept(serverSocketChannel, new MioServerHandler());
                 
                 threadGroup.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
             } else {

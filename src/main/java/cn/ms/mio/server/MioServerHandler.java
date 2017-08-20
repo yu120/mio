@@ -12,9 +12,9 @@ import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MioAcceptHandler implements CompletionHandler<AsynchronousSocketChannel, AsynchronousServerSocketChannel> {
+public class MioServerHandler implements CompletionHandler<AsynchronousSocketChannel, AsynchronousServerSocketChannel> {
 
-	private static final Logger logger = LoggerFactory.getLogger(MioAcceptHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(MioServerHandler.class);
 	private final ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
 
 	@Override
