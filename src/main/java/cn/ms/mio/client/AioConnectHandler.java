@@ -4,21 +4,21 @@ import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class AioConnectHandler implements CompletionHandler<Void, AsynchronousSocketChannel> {
 	
-	private Integer content = 0;
+	private byte[] data;
 
-	public AioConnectHandler(Integer value) {
-		this.content = value;
+	public AioConnectHandler(byte[] data) {
+		this.data = data;
 	}
 
+	@Override
 	public void completed(Void attachment, AsynchronousSocketChannel connector) {
 		try {
-			connector
-					.write(ByteBuffer.wrap(String.valueOf(content).getBytes()))
-					.get();
-			startRead(connector);
+			connector.write(ByteBuffer.wrap(data)).get();
+			this.doReceiveRead(connector);
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 		} catch (InterruptedException ep) {
@@ -26,17 +26,15 @@ public class AioConnectHandler implements CompletionHandler<Void, AsynchronousSo
 		}
 	}
 
+	@Override
 	public void failed(Throwable exc, AsynchronousSocketChannel attachment) {
 		exc.printStackTrace();
 	}
 
-	public void startRead(AsynchronousSocketChannel socket) {
+	private void doReceiveRead(AsynchronousSocketChannel socket) {
 		ByteBuffer clientBuffer = ByteBuffer.allocate(1024);
-		socket.read(clientBuffer, clientBuffer, new AioReadHandler(socket));
-		try {
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		AioReadHandler aioReadHandler = new AioReadHandler(socket);
+		socket.read(clientBuffer, 30000, TimeUnit.MILLISECONDS, clientBuffer, aioReadHandler);
 	}
+	
 }
