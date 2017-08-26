@@ -1,7 +1,7 @@
 package cn.ms.mio;
 
 import cn.ms.mio.protocol.Protocol;
-import cn.ms.mio.transport.MioSession;
+import cn.ms.mio.transport.support.MioSession;
 
 import java.nio.ByteBuffer;
 

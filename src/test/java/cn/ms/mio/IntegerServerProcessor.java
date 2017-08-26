@@ -1,7 +1,7 @@
 package cn.ms.mio;
 
 import cn.ms.mio.service.process.MessageProcessor;
-import cn.ms.mio.transport.MioSession;
+import cn.ms.mio.transport.support.MioSession;
 
 /**
  * @author Seer
