@@ -59,7 +59,7 @@ public class MioServer<T> {
                 } catch (IOException e) {
                     LOGGER.catching(e);
                 }
-                AioSession<T> session = new AioSession<T>(channel, config, mioReadHandler, mioWriteHandler, smartFilterChain);
+                MioSession<T> session = new MioSession<T>(channel, config, mioReadHandler, mioWriteHandler, smartFilterChain);
                 config.getProcessor().initSession(session);
                 session.channelReadProcess(false);
             }

@@ -7,12 +7,12 @@ import java.nio.ByteBuffer;
 import java.nio.channels.CompletionHandler;
 import java.util.AbstractMap;
 
-class MioWriteHandler<T> implements CompletionHandler<Integer, AbstractMap.SimpleEntry<AioSession<T>, ByteBuffer>> {
+class MioWriteHandler<T> implements CompletionHandler<Integer, AbstractMap.SimpleEntry<MioSession<T>, ByteBuffer>> {
     private static final Logger logger = LogManager.getLogger(MioWriteHandler.class);
 
     @Override
-    public void completed(Integer result, AbstractMap.SimpleEntry<AioSession<T>, ByteBuffer> attachment) {
-        AioSession<T> aioSession = attachment.getKey();
+    public void completed(Integer result, AbstractMap.SimpleEntry<MioSession<T>, ByteBuffer> attachment) {
+        MioSession<T> aioSession = attachment.getKey();
         ByteBuffer writeBuffer = attachment.getValue();
         //服务端Session才具备流控功能
         aioSession.channelReadProcess(true);
@@ -48,7 +48,7 @@ class MioWriteHandler<T> implements CompletionHandler<Integer, AbstractMap.Simpl
     }
 
     @Override
-    public void failed(Throwable exc, AbstractMap.SimpleEntry<AioSession<T>, ByteBuffer> attachment) {
+    public void failed(Throwable exc, AbstractMap.SimpleEntry<MioSession<T>, ByteBuffer> attachment) {
         logger.warn(exc.getMessage());
         attachment.getKey().close();
     }

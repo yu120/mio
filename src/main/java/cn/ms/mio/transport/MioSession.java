@@ -23,8 +23,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * AIO传输层会话
  * Created by seer on 2017/6/29.
  */
-public class AioSession<T> {
-    private static final Logger logger = LogManager.getLogger(AioSession.class);
+public class MioSession<T> {
+    private static final Logger logger = LogManager.getLogger(MioSession.class);
     /**
      * Session状态:已关闭
      */
@@ -73,7 +73,7 @@ public class AioSession<T> {
      */
     private SmartFilterChain<T> chain;
 
-    private AbstractMap.SimpleEntry<AioSession<T>, ByteBuffer> writeAttach = new AbstractMap.SimpleEntry<AioSession<T>, ByteBuffer>(this, null);
+    private AbstractMap.SimpleEntry<MioSession<T>, ByteBuffer> writeAttach = new AbstractMap.SimpleEntry<MioSession<T>, ByteBuffer>(this, null);
     /**
      * 响应消息缓存队列
      */
@@ -103,7 +103,7 @@ public class AioSession<T> {
      */
     private AtomicBoolean serverFlowLimit;
 
-    public AioSession(AsynchronousSocketChannel channel, IoServerConfig<T> config, MioReadHandler<T> readCompletionHandler, MioWriteHandler<T> writeCompletionHandler, SmartFilterChain<T> smartFilterChain) {
+    public MioSession(AsynchronousSocketChannel channel, IoServerConfig<T> config, MioReadHandler<T> readCompletionHandler, MioWriteHandler<T> writeCompletionHandler, SmartFilterChain<T> smartFilterChain) {
         this.readBuffer = ByteBuffer.allocate(config.getReadBufferSize());
         this.channel = channel;
         this.protocol = config.getProtocol();

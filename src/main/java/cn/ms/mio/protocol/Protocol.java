@@ -1,6 +1,6 @@
 package cn.ms.mio.protocol;
 
-import cn.ms.mio.transport.AioSession;
+import cn.ms.mio.transport.MioSession;
 
 import java.nio.ByteBuffer;
 
@@ -19,7 +19,7 @@ public interface Protocol<T> {
 	 * @param data
 	 * @return 本次解码所成功解析的消息实例集合,返回null则表示解码未完成
 	 */
-	public T decode(ByteBuffer data, AioSession<T> session);
+	public T decode(ByteBuffer data, MioSession<T> session);
 
 
 	/**
@@ -29,6 +29,6 @@ public interface Protocol<T> {
 	 * @param session
 	 * @return
 	 */
-	public ByteBuffer encode(T t,AioSession<T> session);
+	public ByteBuffer encode(T t,MioSession<T> session);
 
 }

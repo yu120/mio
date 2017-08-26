@@ -3,7 +3,7 @@ package cn.ms.mio.service.filter.impl;
 import cn.ms.mio.service.filter.SmartFilter;
 import cn.ms.mio.service.filter.SmartFilterChain;
 import cn.ms.mio.service.process.MessageProcessor;
-import cn.ms.mio.transport.AioSession;
+import cn.ms.mio.transport.MioSession;
 
 /**
  * 业务层消息预处理器
@@ -22,7 +22,7 @@ public class SmartFilterChainImpl<T> implements SmartFilterChain<T> {
         this.withoutFilter = handlers == null || handlers.length == 0;
     }
 
-    public void doChain(AioSession<T> session, T dataEntry, int readSize) {
+    public void doChain(MioSession<T> session, T dataEntry, int readSize) {
         if (dataEntry == null) {
             return;
         }

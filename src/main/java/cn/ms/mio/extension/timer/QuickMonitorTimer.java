@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import cn.ms.mio.service.filter.SmartFilter;
-import cn.ms.mio.transport.AioSession;
+import cn.ms.mio.transport.MioSession;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -55,19 +55,19 @@ public class QuickMonitorTimer<T> extends QuickTimerTask implements SmartFilter<
         return TimeUnit.MINUTES.toMillis(1);
     }
 
-    public void processFilter(AioSession<T> session, T d) {
+    public void processFilter(MioSession<T> session, T d) {
         processMsgNum.incrementAndGet();
         messageStorage.decrementAndGet();
         totleProcessMsgNum++;
     }
 
-    public void readFilter(AioSession<T> session, T d, int readSize) {
+    public void readFilter(MioSession<T> session, T d, int readSize) {
         flow.addAndGet(readSize);
         recMsgnum.incrementAndGet();
         messageStorage.incrementAndGet();
     }
 
-    public void processFailHandler(AioSession<T> session, T d) {
+    public void processFailHandler(MioSession<T> session, T d) {
         processFailNum.incrementAndGet();
         messageStorage.decrementAndGet();
     }

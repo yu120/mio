@@ -38,7 +38,7 @@ public class MioClient<T> {
     public void start() throws IOException, ExecutionException, InterruptedException {
         this.socketChannel = AsynchronousSocketChannel.open(asynchronousChannelGroup);
         socketChannel.connect(new InetSocketAddress(config.getHost(), config.getPort())).get();
-        final AioSession<T> session = new AioSession<T>(socketChannel, config, new MioReadHandler<T>(), new MioWriteHandler<T>(), new SmartFilterChainImpl<T>(config.getProcessor(), config.getFilters()));
+        final MioSession<T> session = new MioSession<T>(socketChannel, config, new MioReadHandler<T>(), new MioWriteHandler<T>(), new SmartFilterChainImpl<T>(config.getProcessor(), config.getFilters()));
         config.getProcessor().initSession(session);
         session.channelReadProcess(false);
     }

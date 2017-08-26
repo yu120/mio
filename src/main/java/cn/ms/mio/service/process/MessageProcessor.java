@@ -1,6 +1,6 @@
 package cn.ms.mio.service.process;
 
-import cn.ms.mio.transport.AioSession;
+import cn.ms.mio.transport.MioSession;
 
 /**
  * 消息处理器
@@ -17,7 +17,7 @@ public interface MessageProcessor<T> {
      * @param session
      * @throws Exception
      */
-    public void process(AioSession<T> session, T msg) throws Exception;
+    public void process(MioSession<T> session, T msg) throws Exception;
 
     /**
      * 初始化业务层Session对象
@@ -25,5 +25,5 @@ public interface MessageProcessor<T> {
      * @param session 传输层会话
      * @return
      */
-    public void initSession(AioSession<T> session);
+    public void initSession(MioSession<T> session);
 }

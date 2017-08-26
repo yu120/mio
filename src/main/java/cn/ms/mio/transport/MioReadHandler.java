@@ -5,12 +5,12 @@ import org.apache.logging.log4j.Logger;
 
 import java.nio.channels.CompletionHandler;
 
-class MioReadHandler<T> implements CompletionHandler<Integer, AioSession<T>> {
+class MioReadHandler<T> implements CompletionHandler<Integer, MioSession<T>> {
     private static final Logger logger = LogManager.getLogger(MioReadHandler.class);
 
 
     @Override
-    public void completed(Integer result, AioSession<T> aioSession) {
+    public void completed(Integer result, MioSession<T> aioSession) {
         if (result == -1) {
             logger.debug("read end:" + aioSession);
             aioSession.close(false);
@@ -20,7 +20,7 @@ class MioReadHandler<T> implements CompletionHandler<Integer, AioSession<T>> {
     }
 
     @Override
-    public void failed(Throwable exc, AioSession<T> aioSession) {
+    public void failed(Throwable exc, MioSession<T> aioSession) {
         logger.info(exc);
         aioSession.close();
     }
