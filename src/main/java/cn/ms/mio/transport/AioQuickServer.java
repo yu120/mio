@@ -113,7 +113,8 @@ public class AioQuickServer<T> {
      * @param filters
      * @return
      */
-    public AioQuickServer<T> setFilters(SmartFilter<T>... filters) {
+    @SuppressWarnings("unchecked")
+	public AioQuickServer<T> setFilters(SmartFilter<T>... filters) {
         this.config.setFilters(filters);
         return this;
     }
