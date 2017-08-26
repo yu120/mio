@@ -1,8 +1,6 @@
-package cn.ms.mio.service.filter.impl;
+package cn.ms.mio.filter;
 
-import cn.ms.mio.service.filter.MioFilter;
-import cn.ms.mio.service.filter.MioFilterChain;
-import cn.ms.mio.service.process.IProcessor;
+import cn.ms.mio.transport.support.IProcessor;
 import cn.ms.mio.transport.support.MioSession;
 
 /**

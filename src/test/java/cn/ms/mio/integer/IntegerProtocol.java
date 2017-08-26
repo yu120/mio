@@ -1,9 +1,9 @@
 package cn.ms.mio.integer;
 
+import java.nio.ByteBuffer;
+
 import cn.ms.mio.protocol.Protocol;
 import cn.ms.mio.transport.support.MioSession;
-
-import java.nio.ByteBuffer;
 
 public class IntegerProtocol implements Protocol<Integer> {
 

@@ -1,8 +1,8 @@
 package cn.ms.mio.protocol;
 
-import cn.ms.mio.transport.support.MioSession;
-
 import java.nio.ByteBuffer;
+
+import cn.ms.mio.transport.support.MioSession;
 
 /**
  * 消息传输采用的协议<br>

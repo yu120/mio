@@ -1,8 +1,7 @@
 package cn.ms.mio.transport.support;
 
+import cn.ms.mio.filter.MioFilter;
 import cn.ms.mio.protocol.Protocol;
-import cn.ms.mio.service.filter.MioFilter;
-import cn.ms.mio.service.process.IProcessor;
 
 /**
  * 服务端/客户端配置信息

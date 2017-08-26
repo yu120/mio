@@ -1,6 +1,6 @@
 package cn.ms.mio.integer;
 
-import cn.ms.mio.service.process.IProcessor;
+import cn.ms.mio.transport.support.IProcessor;
 import cn.ms.mio.transport.support.MioSession;
 
 public class IntegerClientProcessor implements IProcessor<Integer> {

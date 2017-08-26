@@ -1,4 +1,4 @@
-package cn.ms.mio.service.filter;
+package cn.ms.mio.filter;
 
 import cn.ms.mio.transport.support.MioSession;
 

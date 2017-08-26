@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import cn.ms.mio.service.filter.MioFilter;
+import cn.ms.mio.filter.MioFilter;
 import cn.ms.mio.transport.support.MioSession;
 
 /**

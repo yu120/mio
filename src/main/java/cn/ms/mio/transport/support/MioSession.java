@@ -1,12 +1,5 @@
 package cn.ms.mio.transport.support;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import cn.ms.mio.protocol.Protocol;
-import cn.ms.mio.service.filter.MioFilterChain;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
@@ -18,6 +11,13 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import cn.ms.mio.filter.MioFilterChain;
+import cn.ms.mio.protocol.Protocol;
 
 /**
  * AIO传输层会话

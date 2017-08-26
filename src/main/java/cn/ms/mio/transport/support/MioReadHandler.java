@@ -1,9 +1,9 @@
 package cn.ms.mio.transport.support;
 
+import java.nio.channels.CompletionHandler;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.nio.channels.CompletionHandler;
 
 public class MioReadHandler<T> implements CompletionHandler<Integer, MioSession<T>> {
     

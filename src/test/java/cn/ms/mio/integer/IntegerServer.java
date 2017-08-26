@@ -1,8 +1,8 @@
 package cn.ms.mio.integer;
 
-import cn.ms.mio.transport.MioServer;
-
 import java.io.IOException;
+
+import cn.ms.mio.transport.MioServer;
 
 public class IntegerServer {
     public static void main(String[] args) {
