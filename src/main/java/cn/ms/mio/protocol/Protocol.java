@@ -1,6 +1,6 @@
 package cn.ms.mio.protocol;
 
-import cn.ms.mio.transport.MioSession;
+import cn.ms.mio.transport.support.MioSession;
 
 import java.nio.ByteBuffer;
 

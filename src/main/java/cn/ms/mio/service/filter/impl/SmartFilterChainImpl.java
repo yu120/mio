@@ -3,7 +3,7 @@ package cn.ms.mio.service.filter.impl;
 import cn.ms.mio.service.filter.SmartFilter;
 import cn.ms.mio.service.filter.SmartFilterChain;
 import cn.ms.mio.service.process.MessageProcessor;
-import cn.ms.mio.transport.MioSession;
+import cn.ms.mio.transport.support.MioSession;
 
 /**
  * 业务层消息预处理器

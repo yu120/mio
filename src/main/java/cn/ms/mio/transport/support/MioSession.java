@@ -1,4 +1,4 @@
-package cn.ms.mio.transport;
+package cn.ms.mio.transport.support;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -148,7 +148,7 @@ public class MioSession<T> {
      *
      * @param releaseFlowLimitCheck 是否触发释放流控校验
      */
-    void channelReadProcess(boolean releaseFlowLimitCheck) {
+    public void channelReadProcess(boolean releaseFlowLimitCheck) {
         //释放流控,仅在WriteCompletionHandler中触发
         if (releaseFlowLimitCheck) {
             if (serverFlowLimit != null && writeCacheQueue.size() < RELEASE_LINE && serverFlowLimit.get()) {

@@ -1,11 +1,11 @@
-package cn.ms.mio.transport;
+package cn.ms.mio.transport.support;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.channels.CompletionHandler;
 
-class MioReadHandler<T> implements CompletionHandler<Integer, MioSession<T>> {
+public class MioReadHandler<T> implements CompletionHandler<Integer, MioSession<T>> {
     private static final Logger logger = LogManager.getLogger(MioReadHandler.class);
 
 

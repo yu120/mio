@@ -1,4 +1,4 @@
-package cn.ms.mio.transport;
+package cn.ms.mio.transport.support;
 
 import cn.ms.mio.protocol.Protocol;
 import cn.ms.mio.service.filter.SmartFilter;
@@ -9,7 +9,7 @@ import cn.ms.mio.service.process.MessageProcessor;
  *
  * @author Seer
  */
-final class IoServerConfig<T> {
+public final class IoServerConfig<T> {
 
     /**
      * 消息队列缓存大小
