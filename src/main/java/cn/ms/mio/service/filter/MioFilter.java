@@ -7,7 +7,7 @@ import cn.ms.mio.transport.support.MioSession;
  *
  * @author lry
  */
-public interface SmartFilter<T> {
+public interface MioFilter<T> {
 
     /**
      * 消息处理前置预处理

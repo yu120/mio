@@ -1,9 +1,9 @@
 package cn.ms.mio.integer;
 
-import cn.ms.mio.service.process.MessageProcessor;
+import cn.ms.mio.service.process.IProcessor;
 import cn.ms.mio.transport.support.MioSession;
 
-public class IntegerClientProcessor implements MessageProcessor<Integer> {
+public class IntegerClientProcessor implements IProcessor<Integer> {
     private MioSession<Integer> session;
 
     @Override

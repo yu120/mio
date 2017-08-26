@@ -1,9 +1,9 @@
 package cn.ms.mio.transport;
 
 import cn.ms.mio.protocol.Protocol;
-import cn.ms.mio.service.filter.SmartFilter;
-import cn.ms.mio.service.filter.impl.SmartFilterChainImpl;
-import cn.ms.mio.service.process.MessageProcessor;
+import cn.ms.mio.service.filter.MioFilter;
+import cn.ms.mio.service.filter.impl.DefaultMioFilterChain;
+import cn.ms.mio.service.process.IProcessor;
 import cn.ms.mio.transport.support.IoServerConfig;
 import cn.ms.mio.transport.support.MioReadHandler;
 import cn.ms.mio.transport.support.MioSession;
@@ -40,7 +40,7 @@ public class MioClient<T> {
     public void start() throws IOException, ExecutionException, InterruptedException {
         this.socketChannel = AsynchronousSocketChannel.open(asynchronousChannelGroup);
         socketChannel.connect(new InetSocketAddress(config.getHost(), config.getPort())).get();
-        final MioSession<T> session = new MioSession<T>(socketChannel, config, new MioReadHandler<T>(), new MioWriteHandler<T>(), new SmartFilterChainImpl<T>(config.getProcessor(), config.getFilters()));
+        final MioSession<T> session = new MioSession<T>(socketChannel, config, new MioReadHandler<T>(), new MioWriteHandler<T>(), new DefaultMioFilterChain<T>(config.getProcessor(), config.getFilters()));
         config.getProcessor().initSession(session);
         session.channelReadProcess(false);
     }
@@ -89,7 +89,7 @@ public class MioClient<T> {
      * @param filters
      * @return
      */
-    public MioClient<T> setFilters(SmartFilter<T>[] filters) {
+    public MioClient<T> setFilters(MioFilter<T>[] filters) {
         this.config.setFilters(filters);
         return this;
     }
@@ -100,7 +100,7 @@ public class MioClient<T> {
      * @param processor
      * @return
      */
-    public MioClient<T> setProcessor(MessageProcessor<T> processor) {
+    public MioClient<T> setProcessor(IProcessor<T> processor) {
         this.config.setProcessor(processor);
         return this;
     }

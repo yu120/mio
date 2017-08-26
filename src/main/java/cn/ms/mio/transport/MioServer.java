@@ -4,10 +4,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import cn.ms.mio.protocol.Protocol;
-import cn.ms.mio.service.filter.SmartFilter;
-import cn.ms.mio.service.filter.SmartFilterChain;
-import cn.ms.mio.service.filter.impl.SmartFilterChainImpl;
-import cn.ms.mio.service.process.MessageProcessor;
+import cn.ms.mio.service.filter.MioFilter;
+import cn.ms.mio.service.filter.MioFilterChain;
+import cn.ms.mio.service.filter.impl.DefaultMioFilterChain;
+import cn.ms.mio.service.process.IProcessor;
 import cn.ms.mio.transport.support.IoServerConfig;
 import cn.ms.mio.transport.support.MioReadHandler;
 import cn.ms.mio.transport.support.MioSession;
@@ -36,14 +36,14 @@ public class MioServer<T> {
     /**
      * 消息过滤器
      */
-    private SmartFilterChain<T> smartFilterChain;
+    private MioFilterChain<T> mioFilterChain;
 
     public MioServer() {
         this.config = new IoServerConfig<T>(true);
     }
 
     public void start() throws IOException {
-        smartFilterChain = new SmartFilterChainImpl<T>(config.getProcessor(), config.getFilters());
+        mioFilterChain = new DefaultMioFilterChain<T>(config.getProcessor(), config.getFilters());
         final AtomicInteger threadIndex = new AtomicInteger(0);
         asynchronousChannelGroup = AsynchronousChannelGroup.withFixedThreadPool(config.getThreadNum(), new ThreadFactory() {
             @Override
@@ -64,7 +64,7 @@ public class MioServer<T> {
                     LOGGER.catching(e);
                 }
                 
-                MioSession<T> session = new MioSession<T>(channel, config, mioReadHandler, mioWriteHandler, smartFilterChain);
+                MioSession<T> session = new MioSession<T>(channel, config, mioReadHandler, mioWriteHandler, mioFilterChain);
                 config.getProcessor().initSession(session);
                 session.channelReadProcess(false);
             }
@@ -119,7 +119,7 @@ public class MioServer<T> {
      * @return
      */
     @SuppressWarnings("unchecked")
-	public MioServer<T> setFilters(SmartFilter<T>... filters) {
+	public MioServer<T> setFilters(MioFilter<T>... filters) {
         this.config.setFilters(filters);
         return this;
     }
@@ -130,7 +130,7 @@ public class MioServer<T> {
      * @param processor
      * @return
      */
-    public MioServer<T> setProcessor(MessageProcessor<T> processor) {
+    public MioServer<T> setProcessor(IProcessor<T> processor) {
         this.config.setProcessor(processor);
         return this;
     }

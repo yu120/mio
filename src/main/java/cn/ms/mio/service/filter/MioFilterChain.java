@@ -7,7 +7,7 @@ import cn.ms.mio.transport.support.MioSession;
  *
  * @author lry
  */
-public interface SmartFilterChain<T> {
+public interface MioFilterChain<T> {
 
     void doChain(MioSession<T> session, T buffer, int readSize);
 }

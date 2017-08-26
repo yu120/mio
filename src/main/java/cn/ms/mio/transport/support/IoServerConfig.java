@@ -1,8 +1,8 @@
 package cn.ms.mio.transport.support;
 
 import cn.ms.mio.protocol.Protocol;
-import cn.ms.mio.service.filter.SmartFilter;
-import cn.ms.mio.service.process.MessageProcessor;
+import cn.ms.mio.service.filter.MioFilter;
+import cn.ms.mio.service.process.IProcessor;
 
 /**
  * 服务端/客户端配置信息
@@ -31,7 +31,7 @@ public final class IoServerConfig<T> {
 	/**
 	 * 服务器消息拦截器
 	 */
-	private SmartFilter<T>[] filters;
+	private MioFilter<T>[] filters;
 
 	/**
 	 * 服务器端口号
@@ -41,7 +41,7 @@ public final class IoServerConfig<T> {
 	/**
 	 * 消息处理器
 	 */
-	private MessageProcessor<T> processor;
+	private IProcessor<T> processor;
 
 	/**
 	 * 协议编解码
@@ -97,11 +97,11 @@ public final class IoServerConfig<T> {
 		return !serverOrClient;
 	}
 
-	public final SmartFilter<T>[] getFilters() {
+	public final MioFilter<T>[] getFilters() {
 		return filters;
 	}
 
-	public final void setFilters(SmartFilter<T>[] filters) {
+	public final void setFilters(MioFilter<T>[] filters) {
 		this.filters = filters;
 	}
 
@@ -113,11 +113,11 @@ public final class IoServerConfig<T> {
 		this.protocol = protocol;
 	}
 
-	public final MessageProcessor<T> getProcessor() {
+	public final IProcessor<T> getProcessor() {
 		return processor;
 	}
 
-	public final void setProcessor(MessageProcessor<T> processor) {
+	public final void setProcessor(IProcessor<T> processor) {
 		this.processor = processor;
 	}
 

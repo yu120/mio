@@ -5,7 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import cn.ms.mio.protocol.Protocol;
-import cn.ms.mio.service.filter.SmartFilterChain;
+import cn.ms.mio.service.filter.MioFilterChain;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -78,7 +78,7 @@ public class MioSession<T> {
     /**
      * 消息过滤器
      */
-    private SmartFilterChain<T> chain;
+    private MioFilterChain<T> chain;
 
     private AbstractMap.SimpleEntry<MioSession<T>, ByteBuffer> writeAttach = new AbstractMap.SimpleEntry<MioSession<T>, ByteBuffer>(this, null);
     
@@ -112,7 +112,7 @@ public class MioSession<T> {
      */
     private AtomicBoolean serverFlowLimit;
 
-    public MioSession(AsynchronousSocketChannel channel, IoServerConfig<T> config, MioReadHandler<T> readCompletionHandler, MioWriteHandler<T> writeCompletionHandler, SmartFilterChain<T> smartFilterChain) {
+    public MioSession(AsynchronousSocketChannel channel, IoServerConfig<T> config, MioReadHandler<T> readCompletionHandler, MioWriteHandler<T> writeCompletionHandler, MioFilterChain<T> smartFilterChain) {
         this.readBuffer = ByteBuffer.allocate(config.getReadBufferSize());
         this.channel = channel;
         this.protocol = config.getProtocol();

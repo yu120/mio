@@ -1,8 +1,8 @@
 package cn.ms.mio.service.filter.impl;
 
-import cn.ms.mio.service.filter.SmartFilter;
-import cn.ms.mio.service.filter.SmartFilterChain;
-import cn.ms.mio.service.process.MessageProcessor;
+import cn.ms.mio.service.filter.MioFilter;
+import cn.ms.mio.service.filter.MioFilterChain;
+import cn.ms.mio.service.process.IProcessor;
 import cn.ms.mio.transport.support.MioSession;
 
 /**
@@ -10,13 +10,13 @@ import cn.ms.mio.transport.support.MioSession;
  *
  * @author lry
  */
-public class SmartFilterChainImpl<T> implements SmartFilterChain<T> {
+public class DefaultMioFilterChain<T> implements MioFilterChain<T> {
  
-	private MessageProcessor<T> receiver;
-    private SmartFilter<T>[] handlers = null;
+	private IProcessor<T> receiver;
+    private MioFilter<T>[] handlers = null;
     private boolean withoutFilter = true;//是否无过滤器
 
-    public SmartFilterChainImpl(MessageProcessor<T> receiver, SmartFilter<T>[] handlers) {
+    public DefaultMioFilterChain(IProcessor<T> receiver, MioFilter<T>[] handlers) {
         this.receiver = receiver;
         this.handlers = handlers;
         this.withoutFilter = handlers == null || handlers.length == 0;
@@ -36,17 +36,17 @@ public class SmartFilterChainImpl<T> implements SmartFilterChain<T> {
         }
 
         // 接收到的消息进行预处理
-        for (SmartFilter<T> h : handlers) {
+        for (MioFilter<T> h : handlers) {
             h.readFilter(session, dataEntry, readSize);
         }
         try {
-            for (SmartFilter<T> h : handlers) {
+            for (MioFilter<T> h : handlers) {
                 h.processFilter(session, dataEntry);
             }
             receiver.process(session, dataEntry);
         } catch (Exception e) {
             e.printStackTrace();
-            for (SmartFilter<T> h : handlers) {
+            for (MioFilter<T> h : handlers) {
                 h.processFailHandler(session, dataEntry);
             }
         }

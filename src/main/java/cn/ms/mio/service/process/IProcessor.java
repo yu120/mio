@@ -7,7 +7,7 @@ import cn.ms.mio.transport.support.MioSession;
  *
  * @author lry
  */
-public interface MessageProcessor<T> {
+public interface IProcessor<T> {
 
     /**
      * 用于处理指定session内的一个消息实例,若直接在该方法内处理消息,则实现的是同步处理方式.

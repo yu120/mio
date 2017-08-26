@@ -1,9 +1,9 @@
 package cn.ms.mio.integer;
 
-import cn.ms.mio.service.process.MessageProcessor;
+import cn.ms.mio.service.process.IProcessor;
 import cn.ms.mio.transport.support.MioSession;
 
-public class IntegerServerProcessor implements MessageProcessor<Integer> {
+public class IntegerServerProcessor implements IProcessor<Integer> {
     @Override
     public void process(MioSession<Integer> session, Integer msg) throws Exception {
         Integer respMsg=msg+1;

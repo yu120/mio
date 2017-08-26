@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import cn.ms.mio.service.filter.SmartFilter;
+import cn.ms.mio.service.filter.MioFilter;
 import cn.ms.mio.transport.support.MioSession;
 
 /**
@@ -16,7 +16,7 @@ import cn.ms.mio.transport.support.MioSession;
  *
  * @author lry
  */
-public class QuickMonitorTimer<T> extends QuickTimerTask implements SmartFilter<T> {
+public class QuickMonitorTimer<T> extends QuickTimerTask implements MioFilter<T> {
     
 	private static Logger logger = LogManager.getLogger(QuickMonitorTimer.class);
     
