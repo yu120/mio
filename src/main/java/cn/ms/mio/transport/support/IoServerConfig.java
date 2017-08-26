@@ -35,7 +35,7 @@ public final class IoServerConfig<T> {
 	/**
 	 * 服务器端口号
 	 */
-	private int port = 8888;
+	private int port = 10001;
 
 	/**
 	 * 消息处理器

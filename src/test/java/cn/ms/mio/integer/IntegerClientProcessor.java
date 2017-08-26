@@ -3,7 +3,7 @@ package cn.ms.mio.integer;
 import cn.ms.mio.transport.support.IProcessor;
 import cn.ms.mio.transport.support.MioSession;
 
-public class IntegerClientProcessor implements IProcessor<Integer> {
+public class IntegerClientProcessor extends IProcessor<Integer> {
     private MioSession<Integer> session;
 
     @Override

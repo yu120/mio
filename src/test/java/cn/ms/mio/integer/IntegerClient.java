@@ -10,7 +10,7 @@ public class IntegerClient {
                 .setProtocol(new IntegerProtocol())
                 .setProcessor(processor);
         aioQuickClient.start();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1000; i++) {
         	processor.getSession().write(i);
 		}
         Thread.sleep(1000);

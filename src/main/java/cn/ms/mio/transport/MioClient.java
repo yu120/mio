@@ -104,5 +104,13 @@ public class MioClient<T> {
         this.config.setProcessor(processor);
         return this;
     }
+    
+    public IoServerConfig<T> getConfig() {
+		return this.config;
+	}
+    
+    public MioSession<T> getSession() {
+    	return this.getConfig().getProcessor().getSession();
+	}
 
 }
