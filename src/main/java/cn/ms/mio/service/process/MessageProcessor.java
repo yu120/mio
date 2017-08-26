@@ -5,8 +5,7 @@ import cn.ms.mio.transport.support.MioSession;
 /**
  * 消息处理器
  *
- * @author Seer
- * @version MessageProcessor.java, v 0.1 2015年3月13日 下午3:26:55 Seer Exp.
+ * @author lry
  */
 public interface MessageProcessor<T> {
 
@@ -17,7 +16,7 @@ public interface MessageProcessor<T> {
      * @param session
      * @throws Exception
      */
-    public void process(MioSession<T> session, T msg) throws Exception;
+    void process(MioSession<T> session, T msg) throws Exception;
 
     /**
      * 初始化业务层Session对象
@@ -25,5 +24,6 @@ public interface MessageProcessor<T> {
      * @param session 传输层会话
      * @return
      */
-    public void initSession(MioSession<T> session);
+    void initSession(MioSession<T> session);
+    
 }

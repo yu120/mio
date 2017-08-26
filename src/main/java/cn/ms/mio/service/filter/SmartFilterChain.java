@@ -5,7 +5,7 @@ import cn.ms.mio.transport.support.MioSession;
 /**
  * 业务层消息预处理器
  *
- * @author Seer
+ * @author lry
  */
 public interface SmartFilterChain<T> {
 

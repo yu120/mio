@@ -8,7 +8,8 @@ import java.nio.channels.CompletionHandler;
 import java.util.AbstractMap;
 
 public class MioWriteHandler<T> implements CompletionHandler<Integer, AbstractMap.SimpleEntry<MioSession<T>, ByteBuffer>> {
-    private static final Logger logger = LogManager.getLogger(MioWriteHandler.class);
+   
+	private static final Logger logger = LogManager.getLogger(MioWriteHandler.class);
 
     @Override
     public void completed(Integer result, AbstractMap.SimpleEntry<MioSession<T>, ByteBuffer> attachment) {
@@ -32,6 +33,7 @@ public class MioWriteHandler<T> implements CompletionHandler<Integer, AbstractMa
             aioSession.channel.write(writeBuffer, attachment, this);
             return;
         }
+        
         if (aioSession.writeCacheQueue.isEmpty()) {
             aioSession.semaphore.release();
             if (aioSession.isInvalid()) {
@@ -44,12 +46,12 @@ public class MioWriteHandler<T> implements CompletionHandler<Integer, AbstractMa
         } else {
             aioSession.channelWriteProcess(false);
         }
-
     }
 
     @Override
     public void failed(Throwable exc, AbstractMap.SimpleEntry<MioSession<T>, ByteBuffer> attachment) {
-        logger.warn(exc.getMessage());
+        logger.error(exc);
         attachment.getKey().close();
     }
+    
 }

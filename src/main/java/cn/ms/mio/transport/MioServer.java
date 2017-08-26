@@ -23,16 +23,16 @@ import java.nio.channels.CompletionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Created by seer on 2017/6/28.
- */
 public class MioServer<T> {
+	
     private static final Logger LOGGER = LogManager.getLogger(MioServer.class);
+    
     private AsynchronousServerSocketChannel serverSocketChannel = null;
     private AsynchronousChannelGroup asynchronousChannelGroup;
     private IoServerConfig<T> config;
     private MioReadHandler<T> mioReadHandler = new MioReadHandler<T>();
     private MioWriteHandler<T> mioWriteHandler = new MioWriteHandler<T>();
+    
     /**
      * 消息过滤器
      */
@@ -48,7 +48,7 @@ public class MioServer<T> {
         asynchronousChannelGroup = AsynchronousChannelGroup.withFixedThreadPool(config.getThreadNum(), new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {
-                return new Thread(r, "AIO-Server-" + threadIndex.incrementAndGet());
+                return new Thread(r, "Mio-Server-" + threadIndex.incrementAndGet());
             }
         });
 
@@ -63,6 +63,7 @@ public class MioServer<T> {
                 } catch (IOException e) {
                     LOGGER.catching(e);
                 }
+                
                 MioSession<T> session = new MioSession<T>(channel, config, mioReadHandler, mioWriteHandler, smartFilterChain);
                 config.getProcessor().initSession(session);
                 session.channelReadProcess(false);
@@ -133,4 +134,5 @@ public class MioServer<T> {
         this.config.setProcessor(processor);
         return this;
     }
+    
 }

@@ -21,11 +21,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * AIO传输层会话
- * Created by seer on 2017/6/29.
+ * 
+ * @author lry
+ *
+ * @param <T>
  */
 public class MioSession<T> {
-    private static final Logger logger = LogManager.getLogger(MioSession.class);
-    /**
+   
+	private static final Logger logger = LogManager.getLogger(MioSession.class);
+    
+	/**
      * Session状态:已关闭
      */
     public static final byte SESSION_STATUS_CLOSED = 1;
@@ -39,10 +44,12 @@ public class MioSession<T> {
      * Session状态:正常
      */
     public static final byte SESSION_STATUS_ENABLED = 3;
+    
     /**
      * Session ID生成器
      */
     private static final AtomicInteger NEXT_ID = new AtomicInteger(0);
+    
     /**
      * 唯一标识
      */
@@ -74,6 +81,7 @@ public class MioSession<T> {
     private SmartFilterChain<T> chain;
 
     private AbstractMap.SimpleEntry<MioSession<T>, ByteBuffer> writeAttach = new AbstractMap.SimpleEntry<MioSession<T>, ByteBuffer>(this, null);
+    
     /**
      * 响应消息缓存队列
      */
@@ -98,6 +106,7 @@ public class MioSession<T> {
 
     private MioReadHandler<T> mioReadHandler;
     private MioWriteHandler<T> mioWriteHandler;
+    
     /**
      * 数据read限流标志,仅服务端需要进行限流
      */
@@ -110,6 +119,7 @@ public class MioSession<T> {
         if (config.isServer()) {
             serverFlowLimit = new AtomicBoolean(false);
         }
+        
         this.chain = smartFilterChain;
         this.mioReadHandler = readCompletionHandler;
         this.mioWriteHandler = writeCompletionHandler;
@@ -118,8 +128,7 @@ public class MioSession<T> {
         RELEASE_LINE = (int) (config.getWriteQueueSize() * 0.6);
     }
 
-
-    void decodeAndProcess() {
+   public void decodeAndProcess() {
         readBuffer.flip();
         // 将从管道流中读取到的字节数据添加至当前会话中以便进行消息解析
         T dataEntry;
@@ -158,37 +167,36 @@ public class MioSession<T> {
             return;
         }
 
-        //触发流控
+        // 触发流控
         if (serverFlowLimit != null && writeCacheQueue.size() > FLOW_LIMIT_LINE) {
             serverFlowLimit.set(true);
-        }
-        //正常读取
-        else {
+        } else { // 正常读取
             channel.read(readBuffer, this, mioReadHandler);
         }
     }
-
 
     public void write(final ByteBuffer buffer) throws IOException {
         if (isInvalid()) {
             return;
         }
+        
         buffer.flip();
+        
         try {
             writeCacheQueue.put(buffer);
         } catch (InterruptedException e) {
             logger.error(e);
         }
+        
         channelWriteProcess(true);
     }
-
 
     /**
      * 触发AIO的写操作
      *
      * @param ackSemaphore 是否申请信号量
      */
-    void channelWriteProcess(boolean ackSemaphore) {
+    public void channelWriteProcess(boolean ackSemaphore) {
         if (isInvalid()) {
             logger.warn("AioSession channelWriteProcess is" + status);
             return;
@@ -221,10 +229,12 @@ public class MioSession<T> {
                     break;
                 }
             }
+            
             ByteBuffer buffer = ByteBuffer.allocate(totalSize);
             while (buffer.hasRemaining()) {
                 buffer.put(writeCacheQueue.poll());
             }
+            
             buffer.flip();
             writeAttach.setValue(buffer);
             channel.write(buffer, writeAttach, mioWriteHandler);
@@ -248,6 +258,7 @@ public class MioSession<T> {
             } catch (IOException e) {
                 logger.debug(e);
             }
+            
             status = SESSION_STATUS_CLOSED;
         } else {
             status = SESSION_STATUS_CLOSING;
@@ -274,7 +285,6 @@ public class MioSession<T> {
         return status != SESSION_STATUS_ENABLED;
     }
 
-
     public final void write(T t) throws IOException {
         write(protocol.encode(t, this));
     }
@@ -283,7 +293,6 @@ public class MioSession<T> {
     public final <T1> T1 getAttribute(String key) {
         return attribute == null ? null : (T1) attribute.get(key);
     }
-
 
     public final void setAttribute(String key, Object value) {
         if (attribute == null) {
@@ -303,4 +312,5 @@ public class MioSession<T> {
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
+    
 }

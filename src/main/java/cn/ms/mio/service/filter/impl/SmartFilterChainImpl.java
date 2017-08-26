@@ -8,11 +8,11 @@ import cn.ms.mio.transport.support.MioSession;
 /**
  * 业务层消息预处理器
  *
- * @author Seer
- * @version SmartFilterChainImpl.java, v 0.1 2015年8月26日 下午5:08:31 Seer Exp.
+ * @author lry
  */
 public class SmartFilterChainImpl<T> implements SmartFilterChain<T> {
-    private MessageProcessor<T> receiver;
+ 
+	private MessageProcessor<T> receiver;
     private SmartFilter<T>[] handlers = null;
     private boolean withoutFilter = true;//是否无过滤器
 
@@ -51,4 +51,5 @@ public class SmartFilterChainImpl<T> implements SmartFilterChain<T> {
             }
         }
     }
+    
 }

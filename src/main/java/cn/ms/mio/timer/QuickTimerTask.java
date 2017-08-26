@@ -9,10 +9,10 @@ import java.util.TimerTask;
 /**
  * 服务器定时任务
  *
- * @author Seer
- *
+ * @author lry
  */
 public abstract class QuickTimerTask extends TimerTask {
+	
 	private static Logger logger = LogManager.getLogger(QuickTimerTask.class);
 	private static Timer timer = new Timer("Quick Timer", true);
 
@@ -40,4 +40,5 @@ public abstract class QuickTimerTask extends TimerTask {
 	public static void cancelQuickTask() {
 		timer.cancel();
 	}
+	
 }

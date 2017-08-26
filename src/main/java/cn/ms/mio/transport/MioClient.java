@@ -16,11 +16,9 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadFactory;
 
-/**
- * Created by seer on 2017/6/28.
- */
 public class MioClient<T> {
-    private AsynchronousSocketChannel socketChannel = null;
+   
+	private AsynchronousSocketChannel socketChannel = null;
     private AsynchronousChannelGroup asynchronousChannelGroup;
     private IoServerConfig<T> config;
 
@@ -55,6 +53,7 @@ public class MioClient<T> {
                 e.printStackTrace();
             }
         }
+        
         if (asynchronousChannelGroup != null) {
             asynchronousChannelGroup.shutdown();
         }

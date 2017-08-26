@@ -14,15 +14,17 @@ import cn.ms.mio.transport.support.MioSession;
  * 服务器监测定时器
  * <p>统计一分钟内接收到的数据流量，接受消息数，处理消息数，处理失败消息数</p>
  *
- * @author Seer
- * @version QuickMonitorTimer.java, v 0.1 2015年3月18日 下午11:25:21 Seer Exp.
+ * @author lry
  */
 public class QuickMonitorTimer<T> extends QuickTimerTask implements SmartFilter<T> {
-    private static Logger logger = LogManager.getLogger(QuickMonitorTimer.class);
-    /**
+    
+	private static Logger logger = LogManager.getLogger(QuickMonitorTimer.class);
+    
+	/**
      * 当前周期内消息 流量监控
      */
     private AtomicLong flow = new AtomicLong(0);
+    
     /**
      * 当前周期内接受消息数
      */
@@ -85,6 +87,5 @@ public class QuickMonitorTimer<T> extends QuickTimerTask implements SmartFilter<
                 + "\r\n待处理消息量:\t" + messageStorage.get() + "\r\n已处理消息总量:\t"
                 + totleProcessMsgNum);
     }
-
 
 }
