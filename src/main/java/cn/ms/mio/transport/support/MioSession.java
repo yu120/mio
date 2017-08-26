@@ -112,7 +112,7 @@ public class MioSession<T> {
      */
     private AtomicBoolean serverFlowLimit;
 
-    public MioSession(AsynchronousSocketChannel channel, IoServerConfig<T> config, MioReadHandler<T> readCompletionHandler, MioWriteHandler<T> writeCompletionHandler, MioFilterChain<T> smartFilterChain) {
+    public MioSession(AsynchronousSocketChannel channel, MioConfig<T> config, MioReadHandler<T> readCompletionHandler, MioWriteHandler<T> writeCompletionHandler, MioFilterChain<T> smartFilterChain) {
         this.readBuffer = ByteBuffer.allocate(config.getReadBufferSize());
         this.channel = channel;
         this.protocol = config.getProtocol();

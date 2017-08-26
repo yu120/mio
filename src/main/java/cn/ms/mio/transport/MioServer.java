@@ -18,7 +18,7 @@ import cn.ms.mio.filter.MioFilter;
 import cn.ms.mio.filter.MioFilterChain;
 import cn.ms.mio.protocol.Protocol;
 import cn.ms.mio.transport.support.IProcessor;
-import cn.ms.mio.transport.support.IoServerConfig;
+import cn.ms.mio.transport.support.MioConfig;
 import cn.ms.mio.transport.support.MioReadHandler;
 import cn.ms.mio.transport.support.MioSession;
 import cn.ms.mio.transport.support.MioWriteHandler;
@@ -29,7 +29,7 @@ public class MioServer<T> {
     
     private AsynchronousServerSocketChannel serverSocketChannel = null;
     private AsynchronousChannelGroup asynchronousChannelGroup;
-    private IoServerConfig<T> config;
+    private MioConfig<T> config;
     private MioReadHandler<T> mioReadHandler = new MioReadHandler<T>();
     private MioWriteHandler<T> mioWriteHandler = new MioWriteHandler<T>();
     
@@ -39,7 +39,7 @@ public class MioServer<T> {
     private MioFilterChain<T> mioFilterChain;
 
     public MioServer() {
-        this.config = new IoServerConfig<T>(true);
+        this.config = new MioConfig<T>(true);
     }
 
     public void start() throws IOException {
@@ -135,7 +135,7 @@ public class MioServer<T> {
         return this;
     }
     
-    public IoServerConfig<T> getConfig() {
+    public MioConfig<T> getConfig() {
 		return this.config;
 	}
     

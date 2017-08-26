@@ -10,7 +10,7 @@ import cn.ms.mio.protocol.Protocol;
  *
  * @param <T> 解码后生成的对象类型
  */
-public final class IoServerConfig<T> {
+public final class MioConfig<T> {
 
 	/**
 	 * 消息队列缓存大小
@@ -60,7 +60,7 @@ public final class IoServerConfig<T> {
 	/**
 	 * @param serverOrClient true:服务器,false:客户端
 	 */
-	public IoServerConfig(boolean serverOrClient) {
+	public MioConfig(boolean serverOrClient) {
 		this.serverOrClient = serverOrClient;
 	}
 
