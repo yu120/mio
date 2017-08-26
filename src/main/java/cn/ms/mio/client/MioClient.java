@@ -14,7 +14,7 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.ms.micro.common.URL;
+import cn.ms.neural.NURL;
 
 public class MioClient {
 	
@@ -22,7 +22,7 @@ public class MioClient {
 	
 	private AsynchronousSocketChannel socketChannel;
     
-    public void start(URL url){
+    public void start(NURL nurl){
         try {
         	socketChannel = AsynchronousSocketChannel.open();
             if (socketChannel.isOpen()) {
@@ -31,7 +31,7 @@ public class MioClient {
                 socketChannel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
                 
                 final CountDownLatch countDownLatch = new CountDownLatch(1);
-                socketChannel.connect(new InetSocketAddress(url.getHost(), url.getPort()), null, new CompletionHandler<Void, Void>() {
+                socketChannel.connect(new InetSocketAddress(nurl.getHost(), nurl.getPort()), null, new CompletionHandler<Void, Void>() {
                     @Override
                     public void completed(Void result, Void attachment) {
                     	try {

@@ -1,14 +1,14 @@
 package cn.ms.mio;
 
-import cn.ms.micro.common.URL;
 import cn.ms.mio.server.MioServer;
 import cn.ms.mio.server.Processor;
+import cn.ms.neural.NURL;
 
 public class MioServerTest {
 
 	public static void main(String[] args) {
 		MioServer mioServer = new MioServer();
-		URL url = URL.valueOf("mio://localhost:7777/test");
+		NURL url = NURL.valueOf("mio://localhost:7777/test");
 		mioServer.start(url, new Processor() {
 			
 			@Override

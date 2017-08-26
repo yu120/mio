@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.ms.micro.common.URL;
+import cn.ms.neural.NURL;
 
 public class MioServer {
 
@@ -23,11 +23,11 @@ public class MioServer {
 	private Processor processor;
 	private MioServerHandler mioServerHandler;
 
-	public void start(URL url, Processor processor) {
+	public void start(NURL nurl, Processor processor) {
 		this.processor = processor;
 		
 		try {
-			int coreThread = url.getParameter("coreThread", 10);
+			int coreThread = nurl.getParameter("coreThread", 10);
 			threadGroup = AsynchronousChannelGroup.withFixedThreadPool(coreThread, Executors.defaultThreadFactory());
 		} catch (IOException e) {
 			logger.error("The create thread group is exception.", e);
@@ -39,7 +39,7 @@ public class MioServer {
 				serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEADDR, true);// 表示在前一个连接处于TIME_WAIT状态时，下一个连接是否可以重用通道地址
 				serverSocketChannel.setOption(StandardSocketOptions.SO_RCVBUF, 8 * 1024);// 设置通道接收的字节大小
 
-				serverSocketChannel.bind(new InetSocketAddress(url.getHost(), url.getPort()));
+				serverSocketChannel.bind(new InetSocketAddress(nurl.getHost(), nurl.getPort()));
 				logger.info("Waiting for connections...");
 
 				mioServerHandler = new MioServerHandler(this.processor);
