@@ -1,13 +1,10 @@
-package cn.ms.mio;
+package cn.ms.mio.integer;
 
 import cn.ms.mio.protocol.Protocol;
 import cn.ms.mio.transport.support.MioSession;
 
 import java.nio.ByteBuffer;
 
-/**
- * Created by seer on 2018/08/23.
- */
 public class IntegerProtocol implements Protocol<Integer> {
 
     private static final int INT_LENGTH = 4;

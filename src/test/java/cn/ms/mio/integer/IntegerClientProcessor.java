@@ -1,12 +1,8 @@
-package cn.ms.mio;
+package cn.ms.mio.integer;
 
 import cn.ms.mio.service.process.MessageProcessor;
 import cn.ms.mio.transport.support.MioSession;
 
-/**
- * @author Seer
- * @version V1.0 , 2017/8/23
- */
 public class IntegerClientProcessor implements MessageProcessor<Integer> {
     private MioSession<Integer> session;
 

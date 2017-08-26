@@ -1,10 +1,7 @@
-package cn.ms.mio;
+package cn.ms.mio.integer;
 
 import cn.ms.mio.transport.MioClient;
 
-/**
- * Created by seer on 2017/7/12.
- */
 public class IntegerClient {
     public static void main(String[] args) throws Exception {
         IntegerClientProcessor processor=new IntegerClientProcessor();
