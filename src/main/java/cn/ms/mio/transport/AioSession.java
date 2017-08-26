@@ -96,14 +96,14 @@ public class AioSession<T> {
 
     AsynchronousSocketChannel channel;
 
-    private ReadCompletionHandler<T> readCompletionHandler;
-    private WriteCompletionHandler<T> writeCompletionHandler;
+    private MioReadHandler<T> mioReadHandler;
+    private MioWriteHandler<T> mioWriteHandler;
     /**
      * 数据read限流标志,仅服务端需要进行限流
      */
     private AtomicBoolean serverFlowLimit;
 
-    public AioSession(AsynchronousSocketChannel channel, IoServerConfig<T> config, ReadCompletionHandler<T> readCompletionHandler, WriteCompletionHandler<T> writeCompletionHandler, SmartFilterChain<T> smartFilterChain) {
+    public AioSession(AsynchronousSocketChannel channel, IoServerConfig<T> config, MioReadHandler<T> readCompletionHandler, MioWriteHandler<T> writeCompletionHandler, SmartFilterChain<T> smartFilterChain) {
         this.readBuffer = ByteBuffer.allocate(config.getReadBufferSize());
         this.channel = channel;
         this.protocol = config.getProtocol();
@@ -111,8 +111,8 @@ public class AioSession<T> {
             serverFlowLimit = new AtomicBoolean(false);
         }
         this.chain = smartFilterChain;
-        this.readCompletionHandler = readCompletionHandler;
-        this.writeCompletionHandler = writeCompletionHandler;
+        this.mioReadHandler = readCompletionHandler;
+        this.mioWriteHandler = writeCompletionHandler;
         this.writeCacheQueue = new ArrayBlockingQueue<ByteBuffer>(config.getWriteQueueSize());
         FLOW_LIMIT_LINE = (int) (config.getWriteQueueSize() * 0.9);
         RELEASE_LINE = (int) (config.getWriteQueueSize() * 0.6);
@@ -153,7 +153,7 @@ public class AioSession<T> {
         if (releaseFlowLimitCheck) {
             if (serverFlowLimit != null && writeCacheQueue.size() < RELEASE_LINE && serverFlowLimit.get()) {
                 serverFlowLimit.set(false);
-                channel.read(readBuffer, this, readCompletionHandler);
+                channel.read(readBuffer, this, mioReadHandler);
             }
             return;
         }
@@ -164,7 +164,7 @@ public class AioSession<T> {
         }
         //正常读取
         else {
-            channel.read(readBuffer, this, readCompletionHandler);
+            channel.read(readBuffer, this, mioReadHandler);
         }
     }
 
@@ -227,7 +227,7 @@ public class AioSession<T> {
             }
             buffer.flip();
             writeAttach.setValue(buffer);
-            channel.write(buffer, writeAttach, writeCompletionHandler);
+            channel.write(buffer, writeAttach, mioWriteHandler);
         }
     }
 

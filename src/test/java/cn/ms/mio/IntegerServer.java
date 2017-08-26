@@ -1,6 +1,6 @@
 package cn.ms.mio;
 
-import cn.ms.mio.transport.AioQuickServer;
+import cn.ms.mio.transport.MioServer;
 
 import java.io.IOException;
 
@@ -9,7 +9,7 @@ import java.io.IOException;
  */
 public class IntegerServer {
     public static void main(String[] args) {
-        AioQuickServer<Integer> server = new AioQuickServer<Integer>()
+        MioServer<Integer> server = new MioServer<Integer>()
                 .bind(8888)
                 .setProtocol(new IntegerProtocol())
                 .setProcessor(new IntegerServerProcessor());

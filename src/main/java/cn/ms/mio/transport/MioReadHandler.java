@@ -5,8 +5,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.nio.channels.CompletionHandler;
 
-class ReadCompletionHandler<T> implements CompletionHandler<Integer, AioSession<T>> {
-    private static final Logger logger = LogManager.getLogger(ReadCompletionHandler.class);
+class MioReadHandler<T> implements CompletionHandler<Integer, AioSession<T>> {
+    private static final Logger logger = LogManager.getLogger(MioReadHandler.class);
 
 
     @Override

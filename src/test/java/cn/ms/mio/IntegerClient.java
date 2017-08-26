@@ -1,6 +1,6 @@
 package cn.ms.mio;
 
-import cn.ms.mio.transport.AioQuickClient;
+import cn.ms.mio.transport.MioClient;
 
 /**
  * Created by seer on 2017/7/12.
@@ -8,7 +8,7 @@ import cn.ms.mio.transport.AioQuickClient;
 public class IntegerClient {
     public static void main(String[] args) throws Exception {
         IntegerClientProcessor processor=new IntegerClientProcessor();
-        AioQuickClient<Integer> aioQuickClient=new AioQuickClient<Integer>()
+        MioClient<Integer> aioQuickClient=new MioClient<Integer>()
                 .connect("localhost",8888)
                 .setProtocol(new IntegerProtocol())
                 .setProcessor(processor);

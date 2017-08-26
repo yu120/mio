@@ -15,17 +15,17 @@ import java.util.concurrent.ThreadFactory;
 /**
  * Created by seer on 2017/6/28.
  */
-public class AioQuickClient<T> {
+public class MioClient<T> {
     private AsynchronousSocketChannel socketChannel = null;
     private AsynchronousChannelGroup asynchronousChannelGroup;
     private IoServerConfig<T> config;
 
-    public AioQuickClient(AsynchronousChannelGroup asynchronousChannelGroup) {
+    public MioClient(AsynchronousChannelGroup asynchronousChannelGroup) {
         this.config = new IoServerConfig<T>(false);
         this.asynchronousChannelGroup = asynchronousChannelGroup;
     }
 
-    public AioQuickClient() throws IOException {
+    public MioClient() throws IOException {
         this.config = new IoServerConfig<T>(false);
         this.asynchronousChannelGroup = AsynchronousChannelGroup.withFixedThreadPool(2, new ThreadFactory() {
             @Override
@@ -38,7 +38,7 @@ public class AioQuickClient<T> {
     public void start() throws IOException, ExecutionException, InterruptedException {
         this.socketChannel = AsynchronousSocketChannel.open(asynchronousChannelGroup);
         socketChannel.connect(new InetSocketAddress(config.getHost(), config.getPort())).get();
-        final AioSession<T> session = new AioSession<T>(socketChannel, config, new ReadCompletionHandler<T>(), new WriteCompletionHandler<T>(), new SmartFilterChainImpl<T>(config.getProcessor(), config.getFilters()));
+        final AioSession<T> session = new AioSession<T>(socketChannel, config, new MioReadHandler<T>(), new MioWriteHandler<T>(), new SmartFilterChainImpl<T>(config.getProcessor(), config.getFilters()));
         config.getProcessor().initSession(session);
         session.channelReadProcess(false);
     }
@@ -63,7 +63,7 @@ public class AioQuickClient<T> {
      * @param port
      * @return
      */
-    public AioQuickClient<T> connect(String host, int port) {
+    public MioClient<T> connect(String host, int port) {
         this.config.setHost(host);
         this.config.setPort(port);
         return this;
@@ -75,7 +75,7 @@ public class AioQuickClient<T> {
      * @param protocol
      * @return
      */
-    public AioQuickClient<T> setProtocol(Protocol<T> protocol) {
+    public MioClient<T> setProtocol(Protocol<T> protocol) {
         this.config.setProtocol(protocol);
         return this;
     }
@@ -86,7 +86,7 @@ public class AioQuickClient<T> {
      * @param filters
      * @return
      */
-    public AioQuickClient<T> setFilters(SmartFilter<T>[] filters) {
+    public MioClient<T> setFilters(SmartFilter<T>[] filters) {
         this.config.setFilters(filters);
         return this;
     }
@@ -97,7 +97,7 @@ public class AioQuickClient<T> {
      * @param processor
      * @return
      */
-    public AioQuickClient<T> setProcessor(MessageProcessor<T> processor) {
+    public MioClient<T> setProcessor(MessageProcessor<T> processor) {
         this.config.setProcessor(processor);
         return this;
     }

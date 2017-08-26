@@ -22,19 +22,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by seer on 2017/6/28.
  */
-public class AioQuickServer<T> {
-    private static final Logger LOGGER = LogManager.getLogger(AioQuickServer.class);
+public class MioServer<T> {
+    private static final Logger LOGGER = LogManager.getLogger(MioServer.class);
     private AsynchronousServerSocketChannel serverSocketChannel = null;
     private AsynchronousChannelGroup asynchronousChannelGroup;
     private IoServerConfig<T> config;
-    private ReadCompletionHandler<T> readCompletionHandler = new ReadCompletionHandler<T>();
-    private WriteCompletionHandler<T> writeCompletionHandler = new WriteCompletionHandler<T>();
+    private MioReadHandler<T> mioReadHandler = new MioReadHandler<T>();
+    private MioWriteHandler<T> mioWriteHandler = new MioWriteHandler<T>();
     /**
      * 消息过滤器
      */
     private SmartFilterChain<T> smartFilterChain;
 
-    public AioQuickServer() {
+    public MioServer() {
         this.config = new IoServerConfig<T>(true);
     }
 
@@ -59,7 +59,7 @@ public class AioQuickServer<T> {
                 } catch (IOException e) {
                     LOGGER.catching(e);
                 }
-                AioSession<T> session = new AioSession<T>(channel, config, readCompletionHandler, writeCompletionHandler, smartFilterChain);
+                AioSession<T> session = new AioSession<T>(channel, config, mioReadHandler, mioWriteHandler, smartFilterChain);
                 config.getProcessor().initSession(session);
                 session.channelReadProcess(false);
             }
@@ -86,7 +86,7 @@ public class AioQuickServer<T> {
      * @param port
      * @return
      */
-    public AioQuickServer<T> bind(int port) {
+    public MioServer<T> bind(int port) {
         this.config.setPort(port);
         return this;
     }
@@ -97,12 +97,12 @@ public class AioQuickServer<T> {
      * @param num
      * @return
      */
-    public AioQuickServer<T> setThreadNum(int num) {
+    public MioServer<T> setThreadNum(int num) {
         this.config.setThreadNum(num);
         return this;
     }
 
-    public AioQuickServer<T> setProtocol(Protocol<T> protocol) {
+    public MioServer<T> setProtocol(Protocol<T> protocol) {
         this.config.setProtocol(protocol);
         return this;
     }
@@ -114,7 +114,7 @@ public class AioQuickServer<T> {
      * @return
      */
     @SuppressWarnings("unchecked")
-	public AioQuickServer<T> setFilters(SmartFilter<T>... filters) {
+	public MioServer<T> setFilters(SmartFilter<T>... filters) {
         this.config.setFilters(filters);
         return this;
     }
@@ -125,7 +125,7 @@ public class AioQuickServer<T> {
      * @param processor
      * @return
      */
-    public AioQuickServer<T> setProcessor(MessageProcessor<T> processor) {
+    public MioServer<T> setProcessor(MessageProcessor<T> processor) {
         this.config.setProcessor(processor);
         return this;
     }
