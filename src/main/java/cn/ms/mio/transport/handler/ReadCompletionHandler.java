@@ -22,7 +22,8 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, MioS
 
     @Override
     public void failed(Throwable exc, MioSession<T> aioSession) {
-        logger.error("", exc);
+        logger.error("Read completion handler is failed", exc);
         aioSession.close();
     }
+    
 }
