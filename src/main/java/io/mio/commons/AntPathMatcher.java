@@ -14,28 +14,17 @@ import java.util.regex.Pattern;
 public class AntPathMatcher {
 
     public static final String DEFAULT_PATH_SEPARATOR = "/";
-
     private static final int CACHE_TURNOFF_THRESHOLD = 65536;
-
+    private static final char[] WILDCARD_CHARS = {'*', '?', '{'};
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{[^/]+?\\}");
 
-    private static final char[] WILDCARD_CHARS = {'*', '?', '{'};
-
-
     private String pathSeparator;
-
-    private PathSeparatorPatternCache pathSeparatorPatternCache;
-
-    private boolean caseSensitive = true;
-
     private boolean trimTokens = false;
-
+    private boolean caseSensitive = true;
     private volatile Boolean cachePatterns;
-
+    private PathSeparatorPatternCache pathSeparatorPatternCache;
     private final Map<String, String[]> tokenizedPatternCache = new ConcurrentHashMap<>(256);
-
     private final Map<String, AntPathStringMatcher> stringMatcherCache = new ConcurrentHashMap<>(256);
-
 
     public AntPathMatcher() {
         this.pathSeparator = DEFAULT_PATH_SEPARATOR;
