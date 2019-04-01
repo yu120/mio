@@ -1,4 +1,4 @@
-package io.mio.commons.metric;
+package io.mio.metric;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;

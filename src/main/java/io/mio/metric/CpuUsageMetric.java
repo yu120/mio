@@ -1,4 +1,4 @@
-package io.mio.commons.metric;
+package io.mio.metric;
 
 import io.mio.commons.extension.Extension;
 
