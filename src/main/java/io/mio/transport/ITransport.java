@@ -1,9 +1,9 @@
 package io.mio.transport;
 
-import io.mio.CallbackListener;
-import io.mio.MioResponseFuture;
-import io.mio.MioRequest;
-import io.mio.MioResponse;
+import io.mio.support.CallbackListener;
+import io.mio.model.ResponseFuture;
+import io.mio.model.Request;
+import io.mio.model.Response;
 
 /**
  * Transport
@@ -12,19 +12,19 @@ import io.mio.MioResponse;
  */
 public class ITransport {
 
-    public static MioResponse call(MioRequest request) {
+    public static Response call(Request request) {
         return null;
     }
 
-    public static MioResponseFuture send(MioRequest request) {
+    public static ResponseFuture send(Request request) {
         return null;
     }
 
-    public static void callback(MioRequest request, CallbackListener listener) {
+    public static void callback(Request request, CallbackListener listener) {
 
     }
 
-    public static void promise(MioRequest request, CallbackListener listener) {
+    public static void promise(Request request, CallbackListener listener) {
 
     }
 
