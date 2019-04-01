@@ -24,7 +24,7 @@ public enum TraceStatistic {
 
     private static final Map<String, LongAdder[]> REQUESTS = new ConcurrentHashMap<>();
 
-    private static final String STATISTIC = "Request Statistic[{}]:" +
+    private static final String STATISTIC = "MioRequest Statistic[{}]:" +
             "[0-49ms->{}][50-199ms->{}][200-499ms->{}][500-2999ms->{}][3000ms+->{}]";
 
     private static final int SECTION2 = 50;
