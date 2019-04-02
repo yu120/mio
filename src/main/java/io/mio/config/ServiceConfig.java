@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Service Config
@@ -17,19 +18,24 @@ import java.io.Serializable;
 public class ServiceConfig implements Serializable {
 
     /**
-     * The service name
+     * Service name
      */
     protected String name;
 
     /**
-     * The service version
-     */
-    protected String version;
-
-    /**
-     * The service group
+     * Service group
      */
     protected String group;
+
+    /**
+     * Service version
+     */
+    protected String version = "1.0.0";
+
+    /**
+     * Service modules, e.g: method names
+     */
+    protected List<String> modules;
 
     /**
      * whether the service is deprecated
@@ -39,17 +45,12 @@ public class ServiceConfig implements Serializable {
     /**
      * The service weight
      */
-    protected Integer weight;
+    protected Integer weight = 100;
 
     /**
      * Document center
      */
     protected String document;
-
-    /**
-     * The providerIds
-     */
-    private String providerIds;
 
     /**
      * The application config

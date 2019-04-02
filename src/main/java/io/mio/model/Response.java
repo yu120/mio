@@ -1,4 +1,14 @@
 package io.mio.model;
 
-public class Response {
+import lombok.Data;
+import lombok.ToString;
+
+import java.io.Serializable;
+
+@Data
+@ToString
+public class Response implements Serializable {
+
+    private Object data;
+
 }

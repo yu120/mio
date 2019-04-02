@@ -1,4 +1,14 @@
 package io.mio.model;
 
-public class Request {
+import lombok.Data;
+import lombok.ToString;
+
+import java.io.Serializable;
+
+@Data
+@ToString
+public class Request implements Serializable {
+
+    private String module;
+
 }
