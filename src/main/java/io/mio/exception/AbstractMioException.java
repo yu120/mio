@@ -1,6 +1,5 @@
 package io.mio.exception;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 /**
@@ -9,17 +8,16 @@ import lombok.Getter;
  * @author lry
  */
 @Getter
-@EqualsAndHashCode(callSuper = false)
 public abstract class AbstractMioException extends RuntimeException {
 
     protected int code;
     protected String message;
 
-    public AbstractMioException(int code, String message) {
+    AbstractMioException(int code, String message) {
         this(code, message, null);
     }
 
-    public AbstractMioException(int code, String message, Throwable cause) {
+    AbstractMioException(int code, String message, Throwable cause) {
         super(message, cause);
         this.code = code;
     }

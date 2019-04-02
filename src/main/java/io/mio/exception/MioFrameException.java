@@ -1,15 +1,10 @@
 package io.mio.exception;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-
 /**
  * Mio Frame Exception
  *
  * @author lry
  */
-@Getter
-@EqualsAndHashCode(callSuper = false)
 public class MioFrameException extends AbstractMioException {
 
     private static final int CODE_VALUE = 600;
