@@ -31,11 +31,11 @@ public class Exporter {
     private static Map<String, IProcessor> serviceProcessorMap = new ConcurrentHashMap<>();
 
     /**
-     * Add service
+     * Publish service
      *
-     * @param serviceObj
+     * @param serviceObj object service instance
      */
-    public static void addService(Object serviceObj) {
+    public static void publishService(Object serviceObj) {
         Class<?> clz = serviceObj.getClass();
 
         // get @MioService Annotation
@@ -89,8 +89,9 @@ public class Exporter {
             }
             Method tempMethod = tempMethodMap.get(request.getModule());
 
-            Object returnObj = null;
+            Object returnObj;
             try {
+                // TODO: 更换高性能的动态代理方式
                 returnObj = tempMethod.invoke(serviceObj);
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 throw new MioFrameException("Service invoke exception", e);
