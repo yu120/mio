@@ -16,8 +16,7 @@ public abstract class AbstractMioException extends RuntimeException {
     protected String message;
 
     public AbstractMioException(int code, String message) {
-        this.code = code;
-        this.message = message;
+        this(code, message, null);
     }
 
     public AbstractMioException(int code, String message, Throwable cause) {

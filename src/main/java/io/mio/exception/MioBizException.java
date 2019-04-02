@@ -22,4 +22,12 @@ public class MioBizException extends AbstractMioException {
         super(CODE_VALUE, message, cause);
     }
 
+    public MioBizException(int code, String message) {
+        super(code, message);
+    }
+
+    public MioBizException(int code, String message, Throwable cause) {
+        super(code, message, cause);
+    }
+
 }
