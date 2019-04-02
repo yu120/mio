@@ -1,6 +1,6 @@
 package io.mio.transport;
 
-import io.mio.support.CallbackListener;
+import io.mio.model.CallbackListener;
 import io.mio.model.ResponseFuture;
 import io.mio.model.Request;
 import io.mio.model.Response;
