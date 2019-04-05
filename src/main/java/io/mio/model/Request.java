@@ -9,6 +9,8 @@ import java.io.Serializable;
 @ToString
 public class Request implements Serializable {
 
+    private String serviceId;
     private String module;
+    private Object data;
 
 }

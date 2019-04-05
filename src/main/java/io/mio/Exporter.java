@@ -8,6 +8,7 @@ import io.mio.config.RegistryConfig;
 import io.mio.config.ServiceConfig;
 import io.mio.exception.MioFrameException;
 import io.mio.model.IProcessor;
+import io.mio.model.Request;
 import io.mio.model.Response;
 
 import javax.annotation.Resource;
@@ -26,9 +27,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Resource
 public class Exporter {
 
+    private static Map<String, IProcessor> serviceProcessorMap = new ConcurrentHashMap<>();
     private static Map<String, ServiceConfig> serviceConfigMap = new ConcurrentHashMap<>();
     private static Map<String, Map<String, Method>> serviceMethodMap = new ConcurrentHashMap<>();
-    private static Map<String, IProcessor> serviceProcessorMap = new ConcurrentHashMap<>();
 
     /**
      * Publish service
@@ -82,25 +83,27 @@ public class Exporter {
         serviceConfigMap.put(serviceId, serviceConfig);
 
         // register service processor
-        serviceProcessorMap.put(serviceId, request -> {
-            Map<String, Method> tempMethodMap = serviceMethodMap.get(serviceId);
-            if (tempMethodMap == null || tempMethodMap.isEmpty() || !tempMethodMap.containsKey(request.getModule())) {
-                throw new MioFrameException("Service does not exist");
-            }
-            Method tempMethod = tempMethodMap.get(request.getModule());
+        serviceProcessorMap.put(serviceId, request -> doProcessor(serviceId, serviceObj, request));
+    }
 
-            Object returnObj;
-            try {
-                // TODO: 更换高性能的动态代理方式
-                returnObj = tempMethod.invoke(serviceObj);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                throw new MioFrameException("Service invoke exception", e);
-            }
+    private static Response doProcessor(String serviceId, Object serviceObj, Request request) {
+        Map<String, Method> tempMethodMap = serviceMethodMap.get(serviceId);
+        if (tempMethodMap == null || tempMethodMap.isEmpty() || !tempMethodMap.containsKey(request.getModule())) {
+            throw new MioFrameException("Service does not exist");
+        }
+        Method tempMethod = tempMethodMap.get(request.getModule());
 
-            Response response = new Response();
-            response.setData(returnObj);
-            return response;
-        });
+        Object returnObj;
+        try {
+            // TODO: 需更换高性能的动态代理方式
+            returnObj = tempMethod.invoke(serviceObj, request.getData());
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            throw new MioFrameException("Service invoke exception", e);
+        }
+
+        Response response = new Response();
+        response.setData(returnObj);
+        return response;
     }
 
     /**
