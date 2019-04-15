@@ -2,21 +2,29 @@ package io.mio.commons;
 
 import lombok.Getter;
 
+import java.lang.management.ManagementFactory;
+
 @Getter
 public enum URLParamType {
 
     // ===
 
-    VERSION("version", "1.0.0"),
+    CLUSTER("cluster", "default_cluster"),
     GROUP("group", "default_rpc"),
+    VERSION("version", "1.0.0"),
     APPLICATION("application", ""),
-    CPU_NUM("cpuNum", Runtime.getRuntime().availableProcessors());
+    WEIGHT("weight", 1.0d),
+    HEALTHY("healthy", true),
+    ENABLED("enabled", true),
+    CPU_NUM("cpuNum", Runtime.getRuntime().availableProcessors()),
+    PID("pid", ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
 
     private String name;
     private String value;
     private long longValue;
     private int intValue;
     private boolean boolValue;
+    private double doubleValue;
 
     URLParamType(String name, String value) {
         this.name = name;
@@ -39,6 +47,12 @@ public enum URLParamType {
         this.name = name;
         this.value = String.valueOf(boolValue);
         this.boolValue = boolValue;
+    }
+
+    URLParamType(String name, double doubleValue) {
+        this.name = name;
+        this.value = String.valueOf(doubleValue);
+        this.doubleValue = doubleValue;
     }
 
 }

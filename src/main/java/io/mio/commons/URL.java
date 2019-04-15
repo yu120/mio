@@ -140,6 +140,22 @@ public class URL {
         return getParameter(URLParamType.APPLICATION.getName(), URLParamType.APPLICATION.getValue());
     }
 
+    public double getWeight() {
+        return getParameter(URLParamType.WEIGHT.getName(), URLParamType.WEIGHT.getDoubleValue());
+    }
+
+    public String getCluster() {
+        return getParameter(URLParamType.CLUSTER.getName(), URLParamType.CLUSTER.getValue());
+    }
+
+    public boolean getHealthy() {
+        return getParameter(URLParamType.HEALTHY.getName(), URLParamType.HEALTHY.isBoolValue());
+    }
+
+    public boolean getEnabled() {
+        return getParameter(URLParamType.ENABLED.getName(), URLParamType.ENABLED.isBoolValue());
+    }
+
     public void addParameters(Map<String, String> params) {
         parameters.putAll(params);
     }
@@ -215,6 +231,20 @@ public class URL {
             return defaultValue;
         }
         long l = Long.parseLong(value);
+        getNumbers().put(name, l);
+        return l;
+    }
+
+    public Double getParameter(String name, double defaultValue) {
+        Number n = getNumbers().get(name);
+        if (n != null) {
+            return n.doubleValue();
+        }
+        String value = parameters.get(name);
+        if (value == null || value.length() == 0) {
+            return defaultValue;
+        }
+        double l = Double.parseDouble(value);
         getNumbers().put(name, l);
         return l;
     }
@@ -314,6 +344,14 @@ public class URL {
 
     public String getIdentity() {
         return protocol + "://" + host + ":" + port +
+                "/" + getParameter(URLParamType.CLUSTER.getName(), URLParamType.CLUSTER.getValue()) +
+                "/" + getParameter(URLParamType.GROUP.getName(), URLParamType.GROUP.getValue()) +
+                "/" + getPath() +
+                "/" + getParameter(URLParamType.VERSION.getName(), URLParamType.VERSION.getValue());
+    }
+
+    public String getServiceName() {
+        return getParameter(URLParamType.CLUSTER.getName(), URLParamType.CLUSTER.getValue()) +
                 "/" + getParameter(URLParamType.GROUP.getName(), URLParamType.GROUP.getValue()) +
                 "/" + getPath() +
                 "/" + getParameter(URLParamType.VERSION.getName(), URLParamType.VERSION.getValue());
