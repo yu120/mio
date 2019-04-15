@@ -24,7 +24,7 @@ public class ClassUtils {
      * @param packageName package name
      * @return Class list
      */
-    public static Set<Class<?>> getClasses(String packageName) {
+    public static Set<Class<?>> getClasses(final String packageName) {
         Set<Class<?>> classes = new LinkedHashSet<>();
         String tempPackageName = packageName;
         String packageDirName = tempPackageName.replace('.', '/');

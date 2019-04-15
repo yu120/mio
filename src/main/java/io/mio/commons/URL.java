@@ -1,8 +1,6 @@
 package io.mio.commons;
 
-import io.mio.exception.MioFrameException;
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,8 +40,8 @@ public class URL {
     }
 
     public static URL valueOf(String url) {
-        if (StringUtils.isBlank(url)) {
-            throw new MioFrameException("url is null");
+        if (Assert.isBlank(url)) {
+            throw new IllegalArgumentException("url is null");
         }
         String protocol = null;
         String host = null;
@@ -102,23 +100,6 @@ public class URL {
         return new URL(protocol, host, port, path, parameters);
     }
 
-    private static String buildHostPortStr(String host, int defaultPort) {
-        if (defaultPort <= 0) {
-            return host;
-        }
-
-        int idx = host.indexOf(":");
-        if (idx < 0) {
-            return host + ":" + defaultPort;
-        }
-
-        int port = Integer.parseInt(host.substring(idx + 1));
-        if (port <= 0) {
-            return host.substring(0, idx + 1) + defaultPort;
-        }
-        return host;
-    }
-
     public URL createCopy() {
         Map<String, String> params = new HashMap<>();
         if (this.parameters != null) {
@@ -127,6 +108,8 @@ public class URL {
 
         return new URL(protocol, host, port, path, params);
     }
+
+    // ==== get parameter start
 
     public String getVersion() {
         return getParameter(URLParamType.VERSION.getName(), URLParamType.VERSION.getValue());
@@ -156,22 +139,24 @@ public class URL {
         return getParameter(URLParamType.ENABLED.getName(), URLParamType.ENABLED.isBoolValue());
     }
 
-    public String buildServerAddr() {
-        StringBuilder serverAddrBuilder = new StringBuilder(host).append(":").append(port);
+    public String buildServerAddress() {
+        StringBuilder buildServerAddressBuilder = new StringBuilder(host).append(":").append(port);
         String backup = this.getParameter(URL.BACKUP_KEY);
         if (backup != null) {
-            serverAddrBuilder.append(",").append(backup);
+            buildServerAddressBuilder.append(",").append(backup);
         }
 
-        return serverAddrBuilder.toString();
+        return buildServerAddressBuilder.toString();
     }
+
+    // ==== get parameter end
 
     public void addParameters(Map<String, String> params) {
         parameters.putAll(params);
     }
 
     public void addParameter(String name, String value) {
-        if (StringUtils.isEmpty(name) || StringUtils.isEmpty(value)) {
+        if (Assert.isEmpty(name) || Assert.isEmpty(value)) {
             return;
         }
         parameters.put(name, value);
@@ -378,7 +363,7 @@ public class URL {
     }
 
     public boolean hasParameter(String key) {
-        return StringUtils.isNotBlank(getParameter(key));
+        return Assert.isNotBlank(getParameter(key));
     }
 
     private Map<String, Number> getNumbers() {

@@ -23,11 +23,11 @@ public class ConcurrentHashSet<E> extends AbstractSet<E> implements Set<E>, Seri
     private final ConcurrentMap<E, Object> map;
 
     public ConcurrentHashSet() {
-        map = new ConcurrentHashMap<E, Object>();
+        map = new ConcurrentHashMap<>();
     }
 
     public ConcurrentHashSet(int initialCapacity) {
-        map = new ConcurrentHashMap<E, Object>(initialCapacity);
+        map = new ConcurrentHashMap<>(initialCapacity);
     }
 
     /**
