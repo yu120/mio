@@ -156,6 +156,16 @@ public class URL {
         return getParameter(URLParamType.ENABLED.getName(), URLParamType.ENABLED.isBoolValue());
     }
 
+    public String buildServerAddr() {
+        StringBuilder serverAddrBuilder = new StringBuilder(host).append(":").append(port);
+        String backup = this.getParameter(URL.BACKUP_KEY);
+        if (backup != null) {
+            serverAddrBuilder.append(",").append(backup);
+        }
+
+        return serverAddrBuilder.toString();
+    }
+
     public void addParameters(Map<String, String> params) {
         parameters.putAll(params);
     }
