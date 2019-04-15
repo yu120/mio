@@ -2,6 +2,7 @@ package io.mio.commons;
 
 import lombok.Data;
 
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -147,6 +148,14 @@ public class URL {
         }
 
         return buildServerAddressBuilder.toString();
+    }
+
+    public String getServiceName() {
+        return getPath();
+    }
+
+    public String getServiceNameIdentity() {
+        return getGroup() + "@" + getPath() + ":" + getVersion();
     }
 
     // ==== get parameter end
@@ -340,13 +349,6 @@ public class URL {
     public String getIdentity() {
         return protocol + "://" + host + ":" + port +
                 "/" + getParameter(URLParamType.CLUSTER.getName(), URLParamType.CLUSTER.getValue()) +
-                "/" + getParameter(URLParamType.GROUP.getName(), URLParamType.GROUP.getValue()) +
-                "/" + getPath() +
-                "/" + getParameter(URLParamType.VERSION.getName(), URLParamType.VERSION.getValue());
-    }
-
-    public String getServiceName() {
-        return getParameter(URLParamType.CLUSTER.getName(), URLParamType.CLUSTER.getValue()) +
                 "/" + getParameter(URLParamType.GROUP.getName(), URLParamType.GROUP.getValue()) +
                 "/" + getPath() +
                 "/" + getParameter(URLParamType.VERSION.getName(), URLParamType.VERSION.getValue());

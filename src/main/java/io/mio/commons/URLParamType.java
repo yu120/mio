@@ -9,8 +9,9 @@ public enum URLParamType {
 
     // ===
 
-    CLUSTER("cluster", "default_cluster"),
-    GROUP("group", "default_rpc"),
+    CLUSTER("cluster", "default-cluster"),
+    PROTOCOL("protocol", "mio"),
+    GROUP("group", "default_group"),
     VERSION("version", "1.0.0"),
     APPLICATION("application", ""),
     WEIGHT("weight", 1.0d),
