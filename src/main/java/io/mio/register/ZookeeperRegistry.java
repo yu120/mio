@@ -29,7 +29,7 @@ public class ZookeeperRegistry implements IRegistry {
     public void initialize(URL url) {
         try {
             this.curatorFramework = CuratorFrameworkFactory.builder()
-                    .connectString(url.buildServerAddr())
+                    .connectString(url.buildServerAddress())
                     .sessionTimeoutMs(url.getParameter(SESSION_KEY, 5000))
                     .connectionTimeoutMs(url.getParameter(TIMEOUT_KEY, 5000))
                     .retryPolicy(new ExponentialBackoffRetry(1000, 3)).build();

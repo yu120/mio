@@ -31,13 +31,7 @@ public class NacosRegistry implements IRegistry {
     @Override
     public void initialize(URL url) {
         Properties properties = new Properties();
-        StringBuilder serverAddrBuilder = new StringBuilder(url.getHost()).append(":").append(url.getPort());
-        String backup = url.getParameter(URL.BACKUP_KEY);
-        if (backup != null) {
-            serverAddrBuilder.append(",").append(backup);
-        }
-
-        properties.put(PropertyKeyConst.SERVER_ADDR, serverAddrBuilder.toString());
+        properties.put(PropertyKeyConst.SERVER_ADDR, url.buildServerAddress());
         if (url.getParameters().containsKey(PropertyKeyConst.NAMESPACE)) {
             properties.setProperty(PropertyKeyConst.NAMESPACE, url.getParameter(PropertyKeyConst.NAMESPACE));
         }
