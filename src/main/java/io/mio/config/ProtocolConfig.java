@@ -1,5 +1,6 @@
 package io.mio.config;
 
+import io.mio.commons.URLParamType;
 import io.mio.commons.utils.NetUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,12 +23,6 @@ import java.util.Random;
 @EqualsAndHashCode
 public class ProtocolConfig implements Serializable {
 
-    private static final int CPU_NUMBER;
-
-    static {
-        CPU_NUMBER = Runtime.getRuntime().availableProcessors();
-    }
-
     /**
      * Protocol name
      */
@@ -46,12 +41,12 @@ public class ProtocolConfig implements Serializable {
     /**
      * IO thread pool's size (fixed size)
      */
-    private Integer ioThreads = CPU_NUMBER * 2;
+    private Integer ioThreads = URLParamType.CPU_NUM.getIntValue() + 1;
 
     /**
      * Thread pool's core thread size (or fixed thread size)
      */
-    private Integer threads = CPU_NUMBER * 2;
+    private Integer threads = URLParamType.CPU_NUM.getIntValue() * 2;
 
     /**
      * Thread pool's queue length
