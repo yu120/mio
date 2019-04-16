@@ -1,5 +1,6 @@
 package io.mio.config;
 
+import io.mio.commons.URL;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -17,6 +18,9 @@ import java.util.Map;
 @ToString
 @EqualsAndHashCode
 public class ApplicationConfig implements Serializable {
+
+    public static String APPLICATION = "application";
+    public static String PARAMETERS = "parameters";
 
     /**
      * Application name
@@ -52,5 +56,13 @@ public class ApplicationConfig implements Serializable {
      * Customized parameters
      */
     private Map<String, Object> parameters = new HashMap<>();
+
+    public Map<String, String> buildMap() {
+        return ConfigSupport.buildParameters(APPLICATION, PARAMETERS, this);
+    }
+
+    public static ApplicationConfig parseURL(URL url) {
+        return null;
+    }
 
 }
