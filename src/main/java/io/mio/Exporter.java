@@ -89,19 +89,13 @@ public class Exporter {
         serviceConfig.setGroup(mioService.group());
         serviceConfig.setVersion(mioService.version());
         serviceConfig.setModules(modules);
+        // service registry
+        serviceConfig.setRegistry(RegistryConfig.build(clz.getAnnotation(MioRegistry.class)));
+        // service protocol
+        serviceConfig.setProtocol(ProtocolConfig.build(clz.getAnnotation(MioProtocol.class)));
         serviceConfigMap.put(serviceId, serviceConfig);
 
-        // service registry
-        MioRegistry mioRegistry = clz.getAnnotation(MioRegistry.class);
-        if (mioRegistry != null) {
-            serviceConfig.setRegistry(RegistryConfig.build(mioRegistry));
-        }
-        // service registry
-        MioProtocol mioProtocol = clz.getAnnotation(MioProtocol.class);
-        if (mioProtocol != null) {
-            serviceConfig.setProtocol(ProtocolConfig.build(mioProtocol));
-        }
-
+        
         // register service processor
         serviceProcessorMap.put(serviceId, request -> doProcessor(serviceId, serviceObj, request));
     }

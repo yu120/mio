@@ -70,7 +70,12 @@ public class RegistryConfig implements Serializable {
     private Map<String, String> parameters = new HashMap<>();
 
     public static RegistryConfig build(MioRegistry mioRegistry) {
-        return null;
+        if (mioRegistry == null) {
+            return null;
+        }
+
+        RegistryConfig registryConfig = new RegistryConfig();
+        return registryConfig;
     }
 
 }

@@ -5,8 +5,8 @@
     <groupId>io.mio</groupId>
     <artifactId>mio</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <name>The Micro I/O</name>
-    <description>The Micro I/O</description>
+    <name>The Micro IO</name>
+    <description>The Micro IO</description>
 
     <properties>
         <guava.version>27.1-jre</guava.version>
@@ -75,15 +75,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.curator</groupId>
-            <artifactId>curator-framework</artifactId>
-            <version>4.1.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.alibaba.nacos</groupId>
             <artifactId>nacos-client</artifactId>
             <version>${nacos.version}</version>
-            <!--<scope>provided</scope>-->
         </dependency>
 
         <dependency>

@@ -100,7 +100,12 @@ public class ProtocolConfig implements Serializable {
     }
 
     public static ProtocolConfig build(MioProtocol mioProtocol) {
-        return null;
+        if (mioProtocol == null) {
+            return null;
+        }
+
+        ProtocolConfig protocolConfig = new ProtocolConfig();
+        return protocolConfig;
     }
 
 }
