@@ -1,5 +1,6 @@
 package io.mio.config;
 
+import io.mio.commons.URL;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -66,5 +67,13 @@ public class ServiceConfig implements Serializable {
      * The registry center config
      */
     private RegistryConfig registry;
+
+    public URL buildURL() {
+        return null;
+    }
+
+    public static ServiceConfig parseURL(URL url) {
+        return null;
+    }
 
 }

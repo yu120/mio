@@ -9,7 +9,7 @@ import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import io.mio.commons.URL;
 import io.mio.commons.URLParamType;
-import lombok.Getter;
+import io.mio.commons.extension.Extension;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -22,21 +22,12 @@ import java.util.concurrent.ConcurrentMap;
  * @author lry
  */
 @Slf4j
-@Getter
+@Extension("nacos")
 public class NacosRegistry implements IRegistry {
 
     private NamingService namingService;
     private ConcurrentMap<String, EventListener> eventListeners = new ConcurrentHashMap<>();
     private ConcurrentMap<String, ConcurrentMap<String, List<SubscribeListener>>> subscribeListeners = new ConcurrentHashMap<>();
-
-    public static void main(String[] args) throws Exception {
-        URL url = URL.valueOf("nacos://127.0.0.1:8848");
-        NacosRegistry nacosRegistry = new NacosRegistry();
-        nacosRegistry.initialize(url);
-        System.out.println(nacosRegistry.getNamingService().getServerStatus());
-        nacosRegistry.register(URL.valueOf("mio://127.0.0.1:8080/cn.test.DemoService?a=1&b=2"));
-        Thread.sleep(1000 * 100);
-    }
 
     @Override
     public void initialize(URL url) {
@@ -91,53 +82,84 @@ public class NacosRegistry implements IRegistry {
         // first notify
         subscribeListener.notify(this.selectHealthyInstances(url));
 
+        // event listener already exist
+        ConcurrentMap<String, List<SubscribeListener>> subscribeListenerMap = subscribeListeners.get(url.getServiceName());
         EventListener eventListener = eventListeners.get(url.getServiceName());
-        final ConcurrentMap<String, List<SubscribeListener>> subscribeListenerMap = subscribeListeners.get(url.getServiceName());
-        if (eventListener == null || subscribeListenerMap == null) {
-            // cache subscribe listener
-            subscribeListeners.put(url.getServiceName(), subscribeListenerMap = new ConcurrentHashMap<>());
+        if (subscribeListenerMap != null && eventListener != null) {
             subscribeListenerMap.computeIfAbsent(url.getServiceNameIdentity(), e -> new ArrayList<>()).add(subscribeListener);
+            return;
+        }
 
-            // cache event listener
-            eventListeners.put(url.getServiceName(), eventListener = event -> {
-                if (event instanceof NamingEvent) {
-                    Map<String, List<URL>> tempGroupUrlMap = this.selectGroupHealthyInstances(url.getServiceName());
-                    for (Map.Entry<String, List<URL>> entry : tempGroupUrlMap.entrySet()) {
-                        try {
-                            List<SubscribeListener> subscribeListeners = subscribeListenerMap.get(entry.getKey());
-                            for (SubscribeListener tempSubscribeListener : subscribeListeners) {
+        // cache subscribe listener
+        subscribeListeners.put(url.getServiceName(), subscribeListenerMap = new ConcurrentHashMap<>());
+        subscribeListenerMap.computeIfAbsent(url.getServiceNameIdentity(), e -> new ArrayList<>()).add(subscribeListener);
+
+        // cache event listener
+        eventListeners.put(url.getServiceName(), eventListener = event -> {
+            if (event instanceof NamingEvent) {
+                // Map<serviceName Identity, List < URL>>
+                Map<String, List<URL>> tempGroupUrlMap = this.selectGroupHealthyInstances(url.getServiceName());
+                log.debug("Subscribe event listener is notify:{}", tempGroupUrlMap);
+                for (Map.Entry<String, List<URL>> entry : tempGroupUrlMap.entrySet()) {
+                    try {
+                        List<SubscribeListener> tempSubscribeListeners = subscribeListeners.get(url.getServiceNameIdentity()).get(entry.getKey());
+                        for (SubscribeListener tempSubscribeListener : tempSubscribeListeners) {
+                            try {
                                 tempSubscribeListener.notify(entry.getValue());
+                            } catch (Exception e) {
+                                log.error("The notify[" + tempSubscribeListener.getClass().getName() + "] is fail", e);
                             }
-                        } catch (Exception e) {
-                            log.error(e.getMessage(), e);
                         }
+                    } catch (Exception e) {
+                        log.error("The notifies[" + entry.getKey() + "->" + entry.getValue() + "] is fail", e);
                     }
                 }
-            });
-
-            try {
-                // subscribe service
-                namingService.subscribe(url.getServiceName(), eventListener);
-            } catch (NacosException e) {
-                log.error(e.getMessage(), e);
             }
-        } else {
-            subscribeListenerMap.computeIfAbsent(url.getServiceNameIdentity(), e -> new ArrayList<>()).add(subscribeListener);
+        });
+
+        try {
+            // subscribe service
+            namingService.subscribe(url.getServiceName(), eventListener);
+        } catch (NacosException e) {
+            log.error(e.getMessage(), e);
         }
     }
 
     @Override
-    public void unSubscribe(URL url) {
-        EventListener eventListener = eventListeners.get(url.getServiceName());
-        if (eventListener == null) {
+    public void unSubscribe(URL url, SubscribeListener subscribeListener) {
+        ConcurrentMap<String, List<SubscribeListener>> subscribeListenerMap = subscribeListeners.get(url.getServiceName());
+        if (subscribeListenerMap == null) {
             return;
         }
 
-        try {
-            namingService.unsubscribe(url.getServiceName(), eventListener);
+        List<SubscribeListener> subscribeListenerList = subscribeListenerMap.get(url.getServiceNameIdentity());
+        if (subscribeListenerList == null) {
+            return;
+        }
+
+        // cancel subscribe all listener
+        if (subscribeListener == null) {
+            subscribeListenerMap.clear();
+            subscribeListeners.remove(url.getServiceName());
             eventListeners.remove(url.getServiceName());
-        } catch (NacosException e) {
-            log.error(e.getMessage(), e);
+            return;
+        }
+
+        subscribeListenerList.remove(subscribeListener);
+        if (subscribeListenerMap.isEmpty()) {
+            EventListener eventListener = eventListeners.get(url.getServiceName());
+            if (eventListener == null) {
+                return;
+            }
+
+            subscribeListeners.remove(url.getServiceName());
+            eventListeners.remove(url.getServiceName());
+
+            try {
+                namingService.unsubscribe(url.getServiceName(), eventListener);
+            } catch (NacosException e) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -148,9 +170,20 @@ public class NacosRegistry implements IRegistry {
 
     @Override
     public void destroy() {
-
+        if (subscribeListeners != null) {
+            subscribeListeners.clear();
+        }
+        if (eventListeners != null) {
+            eventListeners.clear();
+        }
     }
 
+    /**
+     * Select healthy instances
+     *
+     * @param url {@link URL}
+     * @return {@link List<URL>}
+     */
     private List<URL> selectHealthyInstances(URL url) {
         String selectServiceNameIdentity = url.getServiceNameIdentity();
 
@@ -176,6 +209,12 @@ public class NacosRegistry implements IRegistry {
         return Collections.emptyList();
     }
 
+    /**
+     * Select group healthy instances
+     *
+     * @param serviceName service name
+     * @return Map<serviceName Identity, List < URL>>
+     */
     private Map<String, List<URL>> selectGroupHealthyInstances(String serviceName) {
 
         try {
@@ -198,6 +237,12 @@ public class NacosRegistry implements IRegistry {
         return Collections.emptyMap();
     }
 
+    /**
+     * Build instances
+     *
+     * @param urls {@link List<URL>}
+     * @return {@link List<Instance>}
+     */
     private List<Instance> buildInstances(List<URL> urls) {
         if (urls == null || urls.isEmpty()) {
             return Collections.emptyList();
@@ -211,6 +256,12 @@ public class NacosRegistry implements IRegistry {
         return instances;
     }
 
+    /**
+     * Build instance
+     *
+     * @param url {@link URL}
+     * @return {@link Instance}
+     */
     private Instance buildInstance(URL url) {
         Map<String, String> metadata = new HashMap<>(url.getParameters());
         metadata.put(URLParamType.PROTOCOL.getName(), url.getProtocol());
@@ -229,6 +280,12 @@ public class NacosRegistry implements IRegistry {
         return instance;
     }
 
+    /**
+     * Parse instances
+     *
+     * @param instances {@link List<Instance>}
+     * @return {@link List<URL>}
+     */
     private List<URL> parseInstances(List<Instance> instances) {
         if (instances == null || instances.isEmpty()) {
             return Collections.emptyList();
@@ -242,6 +299,12 @@ public class NacosRegistry implements IRegistry {
         return urls;
     }
 
+    /**
+     * Parse instance
+     *
+     * @param instance {@link Instance}
+     * @return {@link URL}
+     */
     private URL parseInstance(Instance instance) {
         Map<String, String> metadata = new HashMap<>(instance.getMetadata());
         String protocol = metadata.get(URLParamType.PROTOCOL.getName());

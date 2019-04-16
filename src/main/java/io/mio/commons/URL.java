@@ -346,24 +346,6 @@ public class URL {
         return protocol + "://" + host + ":" + port + "/" + path;
     }
 
-    public String getIdentity() {
-        return protocol + "://" + host + ":" + port +
-                "/" + getParameter(URLParamType.CLUSTER.getName(), URLParamType.CLUSTER.getValue()) +
-                "/" + getParameter(URLParamType.GROUP.getName(), URLParamType.GROUP.getValue()) +
-                "/" + getPath() +
-                "/" + getParameter(URLParamType.VERSION.getName(), URLParamType.VERSION.getValue());
-    }
-
-    public String toFullStr() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(getUri()).append("?");
-        for (Map.Entry<String, String> entry : parameters.entrySet()) {
-            builder.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
-        }
-
-        return builder.toString();
-    }
-
     public boolean hasParameter(String key) {
         return Assert.isNotBlank(getParameter(key));
     }
@@ -412,7 +394,13 @@ public class URL {
 
     @Override
     public String toString() {
-        return getUri() + "?group=" + getGroup();
+        StringBuilder builder = new StringBuilder();
+        builder.append(getUri()).append("?");
+        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+            builder.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
+        }
+
+        return builder.toString();
     }
 
 }

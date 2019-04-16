@@ -1,6 +1,7 @@
 package io.mio.register;
 
 import io.mio.commons.URL;
+import io.mio.commons.extension.SPI;
 
 import java.util.List;
 
@@ -9,6 +10,7 @@ import java.util.List;
  *
  * @author lry
  */
+@SPI("nacos")
 public interface IRegistry {
 
     /**
@@ -43,9 +45,10 @@ public interface IRegistry {
     /**
      * Cancel subscribe service
      *
-     * @param url {@link URL}
+     * @param url               {@link URL}
+     * @param subscribeListener {@link SubscribeListener}
      */
-    void unSubscribe(URL url);
+    void unSubscribe(URL url, SubscribeListener subscribeListener);
 
     /**
      * Select service list
