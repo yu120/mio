@@ -20,19 +20,19 @@ import java.util.Map;
 public class RegistryConfig implements Serializable {
 
     /**
-     * Register center address
-     */
-    private String address;
-
-    /**
      * Protocol for register center
      */
     private String protocol;
 
     /**
+     * Register center host
+     */
+    private String host;
+
+    /**
      * Default port for register center
      */
-    private Integer port;
+    private int port;
 
     /**
      * Username to login register center
@@ -50,24 +50,19 @@ public class RegistryConfig implements Serializable {
     private String group;
 
     /**
-     * The version the services registry in
-     */
-    private String version = "1.0.0";
-
-    /**
      * Request timeout in milliseconds for register center
      */
-    private Long timeout = 10000L;
+    private long timeout = 10000L;
 
     /**
      * Session timeout in milliseconds for register center
      */
-    private Long session = 5000L;
+    private long session = 5000L;
 
     /**
      * The customized parameters
      */
-    private Map<String, String> parameters = new HashMap<>();
+    private Map<String, Object> parameters = new HashMap<>();
 
     public static RegistryConfig build(MioRegistry mioRegistry) {
         if (mioRegistry == null) {
@@ -75,6 +70,9 @@ public class RegistryConfig implements Serializable {
         }
 
         RegistryConfig registryConfig = new RegistryConfig();
+        registryConfig.setProtocol(mioRegistry.protocol());
+        registryConfig.setHost(mioRegistry.host());
+        registryConfig.setPort(mioRegistry.port());
         return registryConfig;
     }
 

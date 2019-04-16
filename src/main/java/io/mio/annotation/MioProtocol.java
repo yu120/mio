@@ -8,10 +8,8 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MioProtocol {
 
-    String name() default "";
+    String protocol() default "";
 
-    String group() default "mio";
-
-    String version() default "1.0.0";
+    int port();
 
 }

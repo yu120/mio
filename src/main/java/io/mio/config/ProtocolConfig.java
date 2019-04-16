@@ -1,7 +1,6 @@
 package io.mio.config;
 
 import io.mio.annotation.MioProtocol;
-import io.mio.annotation.MioRegistry;
 import io.mio.commons.URLParamType;
 import io.mio.commons.utils.NetUtils;
 import lombok.Data;
@@ -28,7 +27,7 @@ public class ProtocolConfig implements Serializable {
     /**
      * Protocol name
      */
-    private String name = "mio";
+    private String protocol = "mio";
 
     /**
      * Service ip address (when there are multiple network cards available)
@@ -38,34 +37,34 @@ public class ProtocolConfig implements Serializable {
     /**
      * Service port
      */
-    private Integer port = 30000 + new Random(System.currentTimeMillis()).nextInt(10000);
+    private int port = 30000 + new Random(System.currentTimeMillis()).nextInt(10000);
 
     /**
      * IO thread pool's size (fixed size)
      */
-    private Integer ioThreads = URLParamType.CPU_NUM.getIntValue() + 1;
+    private int ioThreads = URLParamType.CPU_NUM.getIntValue() + 1;
 
     /**
      * Thread pool's core thread size (or fixed thread size)
      */
-    private Integer threads = URLParamType.CPU_NUM.getIntValue() * 2;
+    private int threads = URLParamType.CPU_NUM.getIntValue() * 2;
 
     /**
      * Thread pool's queue length
      * <p>
      * queueCapacity = (coreSizePool/taskCostAvgTime)*maxResponseTime
      */
-    private Integer queues = (int) ((threads / 0.1) * 1);
+    private int queues = (int) ((threads / 0.1) * 1);
 
     /**
      * Thread pool's max thread size
      */
-    private Integer maxThreads = threads * 10;
+    private int maxThreads = threads * 10;
 
     /**
      * Max acceptable connections
      */
-    private Integer accepts = 20000;
+    private int accepts = 20000;
 
     /**
      * Serialize
@@ -75,17 +74,17 @@ public class ProtocolConfig implements Serializable {
     /**
      * Heartbeat interval(ms)
      */
-    private Long heartbeat = 5000L;
+    private long heartbeat = 5000L;
 
     /**
-     * Status check,e.g: active、inactive
+     * Status check,e.g: ACTIVE、INACTIVE
      */
-    private String status = "active";
+    private String status = "ACTIVE";
 
     /**
      * The customized parameters
      */
-    private Map<String, String> parameters = new HashMap<>();
+    private Map<String, Object> parameters = new HashMap<>();
 
     /**
      * minTasks/maxTasks ：每秒的任务数（基线），假设为500(minTasks)~1000(maxTasks)
@@ -105,6 +104,8 @@ public class ProtocolConfig implements Serializable {
         }
 
         ProtocolConfig protocolConfig = new ProtocolConfig();
+        protocolConfig.setProtocol(mioProtocol.protocol());
+        protocolConfig.setPort(mioProtocol.port());
         return protocolConfig;
     }
 

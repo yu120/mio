@@ -6,7 +6,9 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service Config
@@ -46,12 +48,18 @@ public class ServiceConfig implements Serializable {
     /**
      * The service weight
      */
-    protected Integer weight = 100;
+    protected int weight = 100;
 
     /**
      * Document center
      */
     protected String document;
+
+    /**
+     * The customized parameters
+     */
+    private Map<String, Object> parameters = new HashMap<>();
+
 
     /**
      * The application config
@@ -69,8 +77,9 @@ public class ServiceConfig implements Serializable {
     private RegistryConfig registry;
 
     public URL buildURL() {
-        URL url = new URL(protocol.getName(), protocol.getHost(), protocol.getPort(), name);
-        return url;
+        Map<String, String> parameters = new HashMap<>();
+
+        return new URL(protocol.getProtocol(), protocol.getHost(), protocol.getPort(), name, parameters);
     }
 
     public static ServiceConfig parseURL(URL url) {

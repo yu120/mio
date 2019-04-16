@@ -51,6 +51,6 @@ public class ApplicationConfig implements Serializable {
     /**
      * Customized parameters
      */
-    private Map<String, String> parameters = new HashMap<>();
+    private Map<String, Object> parameters = new HashMap<>();
 
 }
