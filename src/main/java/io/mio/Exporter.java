@@ -1,5 +1,7 @@
 package io.mio;
 
+import io.mio.annotation.MioProtocol;
+import io.mio.annotation.MioRegistry;
 import io.mio.annotation.MioService;
 import io.mio.commons.Assert;
 import io.mio.commons.URL;
@@ -44,6 +46,7 @@ public class Exporter {
     public static void publishService(Object serviceObj) {
         Class<?> clz = serviceObj.getClass();
 
+
         // get @MioService Annotation
         if (!clz.isAnnotationPresent(MioService.class)) {
             throw new MioFrameException("The service class must have @" + clz.getSimpleName());
@@ -55,7 +58,6 @@ public class Exporter {
         if (Assert.isBlank(mioService.version())) {
             throw new MioFrameException("The service version cannot be empty or empty strings");
         }
-
         // calculation service name
         String serviceName = Assert.isNotBlank(mioService.name()) ? mioService.name() : serviceObj.getClass().getName();
         String serviceId = serviceName + "@" + mioService.group() + "@" + mioService.version();
@@ -63,13 +65,14 @@ public class Exporter {
             throw new MioFrameException("The service already exist.");
         }
 
+
         // get all method names
+        List<String> modules = new ArrayList<>();
+        Map<String, Method> tempServiceMethodMap = new ConcurrentHashMap<>();
         Method[] methods = clz.getDeclaredMethods();
         if (methods == null || methods.length == 0) {
             throw new MioFrameException("The service version cannot be empty or empty strings");
         }
-        List<String> modules = new ArrayList<>();
-        Map<String, Method> tempServiceMethodMap = new ConcurrentHashMap<>();
         for (Method method : methods) {
             if (tempServiceMethodMap.containsKey(method.getName())) {
                 throw new MioFrameException("There can be no method with the same method name in a single service");
@@ -79,6 +82,7 @@ public class Exporter {
         }
         serviceMethodMap.put(serviceId, tempServiceMethodMap);
 
+
         // register service config
         ServiceConfig serviceConfig = new ServiceConfig();
         serviceConfig.setName(serviceName);
@@ -87,6 +91,17 @@ public class Exporter {
         serviceConfig.setModules(modules);
         serviceConfigMap.put(serviceId, serviceConfig);
 
+        // service registry
+        MioRegistry mioRegistry = clz.getAnnotation(MioRegistry.class);
+        if (mioRegistry != null) {
+            serviceConfig.setRegistry(RegistryConfig.build(mioRegistry));
+        }
+        // service registry
+        MioProtocol mioProtocol = clz.getAnnotation(MioProtocol.class);
+        if (mioProtocol != null) {
+            serviceConfig.setProtocol(ProtocolConfig.build(mioProtocol));
+        }
+
         // register service processor
         serviceProcessorMap.put(serviceId, request -> doProcessor(serviceId, serviceObj, request));
     }
@@ -94,9 +109,12 @@ public class Exporter {
     /**
      * Export server
      *
+     * @param applicationConfig {@link ApplicationConfig}
+     * @param registryConfig    {@link RegistryConfig}
+     * @param protocolConfig    {@link ProtocolConfig}
      * @return successful return to true
      */
-    public static boolean export() {
+    public static boolean export(ApplicationConfig applicationConfig, RegistryConfig registryConfig, ProtocolConfig protocolConfig) {
         if (serviceConfigMap.isEmpty() || serviceProcessorMap.isEmpty()) {
             throw new MioFrameException("No service can be export.");
         }
@@ -105,16 +123,17 @@ public class Exporter {
         log.debug("Loader registry instance:{}", registry);
 
 
-        ApplicationConfig applicationConfig = new ApplicationConfig();
-        ProtocolConfig protocolConfig = new ProtocolConfig();
-        RegistryConfig registryConfig = new RegistryConfig();
         for (Map.Entry<String, ServiceConfig> entry : serviceConfigMap.entrySet()) {
             ServiceConfig serviceConfig = entry.getValue();
             serviceConfig.setApplication(applicationConfig);
-            serviceConfig.setProtocol(protocolConfig);
-            serviceConfig.setRegistry(registryConfig);
+            if (serviceConfig.getRegistry() == null) {
+                serviceConfig.setRegistry(registryConfig);
+            }
+            if (serviceConfig.getProtocol() == null) {
+                serviceConfig.setProtocol(protocolConfig);
+            }
 
-            URL registryURL = serviceConfig.buildURL();
+            URL registryURL = entry.getValue().buildURL();
             registerURLs.add(registryURL);
             registry.register(registryURL);
             log.debug("Registry service url:{}", registryURL.toString());

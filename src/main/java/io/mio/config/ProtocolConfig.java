@@ -1,5 +1,7 @@
 package io.mio.config;
 
+import io.mio.annotation.MioProtocol;
+import io.mio.annotation.MioRegistry;
 import io.mio.commons.URLParamType;
 import io.mio.commons.utils.NetUtils;
 import lombok.Data;
@@ -95,6 +97,10 @@ public class ProtocolConfig implements Serializable {
         this.threads = (int) (actualThreads * taskCostAvgTimeSec);
         this.queues = (int) (((double) threads / taskCostAvgTimeSec) * maxResponseTimeSec);
         this.maxThreads = (int) ((maxTasks - queues) * taskCostAvgTimeSec);
+    }
+
+    public static ProtocolConfig build(MioProtocol mioProtocol) {
+        return null;
     }
 
 }

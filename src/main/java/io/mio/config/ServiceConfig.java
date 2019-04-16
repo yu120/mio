@@ -69,7 +69,8 @@ public class ServiceConfig implements Serializable {
     private RegistryConfig registry;
 
     public URL buildURL() {
-        return null;
+        URL url = new URL(protocol.getName(), protocol.getHost(), protocol.getPort(), name);
+        return url;
     }
 
     public static ServiceConfig parseURL(URL url) {

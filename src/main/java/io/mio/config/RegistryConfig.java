@@ -1,5 +1,6 @@
 package io.mio.config;
 
+import io.mio.annotation.MioRegistry;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -67,5 +68,9 @@ public class RegistryConfig implements Serializable {
      * The customized parameters
      */
     private Map<String, String> parameters = new HashMap<>();
+
+    public static RegistryConfig build(MioRegistry mioRegistry) {
+        return null;
+    }
 
 }
