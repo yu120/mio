@@ -12,7 +12,7 @@ public class ConfigSupport {
     public static Map<String, String> buildParameters(String prefixKey, String parametersKey, Object object) {
         Map<String, String> parameters = new HashMap<>();
 
-        Map<String, Object> dataMap = JSON.parseObject(JSON.toJSONString(object), new TypeReference<>());
+        Map<String, Object> dataMap = null;//JSON.parseObject(JSON.toJSONString(object), new TypeReference<>());
         for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
             if (entry.getKey().equals(parametersKey)) {
                 continue;

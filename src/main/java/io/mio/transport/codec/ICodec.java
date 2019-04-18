@@ -5,5 +5,10 @@ package io.mio.transport.codec;
  *
  * @author lry
  */
-public interface ICodec {
+public interface ICodec<T> {
+
+    T decode();
+
+    T encode();
+
 }
