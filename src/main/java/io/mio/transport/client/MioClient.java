@@ -1,6 +1,7 @@
 package io.mio.transport.client;
 
 import io.mio.transport.codec.ICodec;
+import io.mio.transport.codec.MioHttpCodec;
 import io.mio.transport.codec.MioTcpCodec;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -19,7 +20,7 @@ public class MioClient {
      * @throws Exception
      */
     public void connect(int port, String host) throws Exception {
-        ICodec<ChannelHandler> codec = new MioTcpCodec();
+        ICodec<ChannelHandler> codec = new MioHttpCodec();
 
         // 配置客户端NIO线程组
         EventLoopGroup group = new NioEventLoopGroup();

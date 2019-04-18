@@ -2,6 +2,7 @@ package io.mio.transport.server;
 
 import io.mio.commons.URL;
 import io.mio.transport.codec.ICodec;
+import io.mio.transport.codec.MioHttpCodec;
 import io.mio.transport.codec.MioTcpCodec;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -34,7 +35,7 @@ public class MioServer {
     }
 
     public void initialize(URL url) {
-        ICodec<ChannelHandler> codec = new MioTcpCodec();
+        ICodec<ChannelHandler> codec = new MioHttpCodec();
 
         try {
             bossGroup = new NioEventLoopGroup();
