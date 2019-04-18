@@ -31,8 +31,8 @@ public class MioClient {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
                             // 添加自定义协议的编解码工具
-                            ch.pipeline().addLast(codec.encode());
-                            ch.pipeline().addLast(codec.decode());
+                            ch.pipeline().addLast(codec.encoder());
+                            ch.pipeline().addLast(codec.decoder());
                             // 处理网络IO
                             ch.pipeline().addLast(new MioClientHandler());
                         }

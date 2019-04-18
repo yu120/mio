@@ -7,8 +7,18 @@ package io.mio.transport.codec;
  */
 public interface ICodec<T> {
 
-    T decode();
+    /**
+     * ByteBuf decoder
+     *
+     * @return decoder
+     */
+    T decoder();
 
-    T encode();
+    /**
+     * Object encoder
+     *
+     * @return encoder
+     */
+    T encoder();
 
 }

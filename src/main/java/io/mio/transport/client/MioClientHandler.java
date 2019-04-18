@@ -10,9 +10,11 @@ public class MioClientHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         String headerStr = "这是请求头内容";
-        String contentStr = "这是请求体内容";
+        String contentStr = "这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是" +
+                "请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请" +
+                "求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体" +
+                "内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容";
         MioTcpProtocol protocol = new MioTcpProtocol(headerStr.getBytes(), contentStr.getBytes());
-
         ctx.writeAndFlush(protocol);
     }
 

@@ -40,14 +40,14 @@ public class MioServer {
             serverBootstrap = new ServerBootstrap()
                     .group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .childOption(ChannelOption.SO_BACKLOG, 1024)
+                    .option(ChannelOption.SO_BACKLOG, 1024)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(codec.encode());
-                            ch.pipeline().addLast(codec.decode());
+                            ch.pipeline().addLast(codec.encoder());
+                            ch.pipeline().addLast(codec.decoder());
                             ch.pipeline().addLast(new MioServerHandler());
                         }
                     });
