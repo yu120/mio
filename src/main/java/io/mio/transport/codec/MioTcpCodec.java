@@ -18,15 +18,17 @@ import java.util.List;
 public class MioTcpCodec implements ICodec<ChannelHandler> {
 
     /**
-     * 1.协议开始的标准headData，int类型，占据4个字节.
-     * 2.表示数据的长度contentLength，int类型，占据4个字节.
+     * 1.headData占据4个字节
+     * 2.headerLength占据4个字节
+     * 3.contentLength占据4个字节
      */
-    public final int BASE_LENGTH = 4 + 4;
-    public final int MAX_LENGTH = 2048;
+    public static final int BASE_LENGTH = 4 + 4 + 4;
+    public static final int MAX_LENGTH = 2048;
 
     @Override
     public ByteToMessageDecoder decode() {
         return new ByteToMessageDecoder() {
+
             @Override
             protected void decode(ChannelHandlerContext ctx, ByteBuf buffer, List<Object> out) throws Exception {
                 // 可读长度必须大于基本长度
@@ -63,34 +65,42 @@ public class MioTcpCodec implements ICodec<ChannelHandler> {
                         }
                     }
 
-                    // 消息的长度
-                    int length = buffer.readInt();
+                    // 读取请求头长度
+                    int headerLength = buffer.readInt();
+                    // 读取请求体长度
+                    int contentLength = buffer.readInt();
+
                     // 判断请求数据包数据是否到齐
-                    if (buffer.readableBytes() < length) {
-                        // 还原读指针
+                    if (buffer.readableBytes() < headerLength + contentLength) {
                         buffer.readerIndex(beginReader);
                         return;
                     }
 
-                    // 读取data数据
-                    byte[] data = new byte[length];
-                    buffer.readBytes(data);
-                    out.add(new MioTcpProtocol(data.length, data));
+                    // 读取Header
+                    byte[] header = new byte[headerLength];
+                    buffer.readBytes(header, beginReader, beginReader + headerLength);
+
+                    // 读取Content
+                    byte[] content = new byte[contentLength];
+                    buffer.readBytes(content);
+
+                    out.add(new MioTcpProtocol(header, content));
                 }
             }
+
         };
     }
 
     @Override
     public MessageToByteEncoder encode() {
         return new MessageToByteEncoder<MioTcpProtocol>() {
+
             @Override
             protected void encode(ChannelHandlerContext tcx, MioTcpProtocol msg, ByteBuf out) throws Exception {
-                // 1.写入消息的开头的信息标志(int类型)
                 out.writeInt(msg.getHeadData());
-                // 2.写入消息的长度(int 类型)
+                out.writeInt(msg.getHeaderLength());
                 out.writeInt(msg.getContentLength());
-                // 3.写入消息的内容(byte[]类型)
+                out.writeBytes(msg.getHeader());
                 out.writeBytes(msg.getContent());
             }
 

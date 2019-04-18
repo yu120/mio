@@ -9,15 +9,9 @@ public class MioClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        // 发送SmartCar协议的消息
-        // 要发送的信息
-        String data = "I am client ...";
-        // 获得要发送信息的字节数组
-        byte[] content = data.getBytes();
-        // 要发送信息的长度
-        int contentLength = content.length;
-
-        MioTcpProtocol protocol = new MioTcpProtocol(contentLength, content);
+        String headerStr = "这是请求头内容";
+        String contentStr = "这是请求体内容";
+        MioTcpProtocol protocol = new MioTcpProtocol(headerStr.getBytes(), contentStr.getBytes());
 
         ctx.writeAndFlush(protocol);
     }
@@ -25,7 +19,6 @@ public class MioClientHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         try {
-            // 用于获取客户端发来的数据信息
             MioTcpProtocol body = (MioTcpProtocol) msg;
             System.out.println("Client接受的客户端的信息 :" + body.toString());
         } finally {
