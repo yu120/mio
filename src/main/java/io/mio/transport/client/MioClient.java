@@ -8,6 +8,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
+import java.util.List;
+
 public class MioClient {
     /**
      * 连接服务器
@@ -30,10 +32,10 @@ public class MioClient {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            // 添加自定义协议的编解码工具
-                            ch.pipeline().addLast(codec.encoder());
-                            ch.pipeline().addLast(codec.decoder());
-                            // 处理网络IO
+                            List<ChannelHandler> channelHandlerList = codec.encodeDecode();
+                            for (ChannelHandler channelHandler : channelHandlerList) {
+                                ch.pipeline().addLast(channelHandler);
+                            }
                             ch.pipeline().addLast(new MioClientHandler());
                         }
                     });

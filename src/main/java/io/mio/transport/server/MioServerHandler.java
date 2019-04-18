@@ -8,7 +8,6 @@ public class MioServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        // 用于获取客户端发来的数据信息
         MioTcpProtocol body = (MioTcpProtocol) msg;
         System.out.println("Server接受的客户端的信息 :" + body.toString());
 
@@ -43,13 +42,7 @@ public class MioServerHandler extends ChannelInboundHandlerAdapter {
                 "这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容" +
                 "这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容";
         MioTcpProtocol response = new MioTcpProtocol(headerStr.getBytes(), contentStr.getBytes());
-
-        // 当服务端完成写操作后，关闭与客户端的连接
         ctx.writeAndFlush(response);
-        // .addListener(ChannelFutureListener.CLOSE);
-
-        // 当有写操作时，不需要手动释放msg的引用
-        // 当只有读操作时，才需要手动释放msg的引用
     }
 
     @Override

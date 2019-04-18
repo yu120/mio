@@ -12,6 +12,8 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 /**
  * MIO Server
  *
@@ -46,8 +48,10 @@ public class MioServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(codec.encoder());
-                            ch.pipeline().addLast(codec.decoder());
+                            List<ChannelHandler> channelHandlerList = codec.decodeEncode();
+                            for (ChannelHandler channelHandler : channelHandlerList) {
+                                ch.pipeline().addLast(channelHandler);
+                            }
                             ch.pipeline().addLast(new MioServerHandler());
                         }
                     });

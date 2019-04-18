@@ -1,24 +1,28 @@
 package io.mio.transport.codec;
 
+import io.netty.channel.ChannelHandler;
+
+import java.util.List;
+
 /**
- * 编解码器
+ * Codec
  *
  * @author lry
  */
 public interface ICodec<T> {
 
     /**
-     * ByteBuf decoder
+     * Server decode -> encode
      *
-     * @return decoder
+     * @return
      */
-    T decoder();
+    List<ChannelHandler> decodeEncode();
 
     /**
-     * Object encoder
+     * Client encode -> decode
      *
-     * @return encoder
+     * @return
      */
-    T encoder();
+    List<ChannelHandler> encodeDecode();
 
 }
