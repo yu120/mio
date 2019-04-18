@@ -2,11 +2,11 @@ package io.mio.transport.codec;
 
 import io.netty.channel.ChannelHandler;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 编解码器
+ * MioTCP Codec
  *
  * @author lry
  */
@@ -14,12 +14,18 @@ public class MioTcpCodec implements ICodec<ChannelHandler> {
 
     @Override
     public List<ChannelHandler> decodeEncode() {
-        return Arrays.asList(new MioTcpDecoder(), new MioTcpEncoder());
+        List<ChannelHandler> channelHandlerList = new ArrayList<>();
+        channelHandlerList.add(new MioTcpDecoder());
+        channelHandlerList.add(new MioTcpEncoder());
+        return channelHandlerList;
     }
 
     @Override
     public List<ChannelHandler> encodeDecode() {
-        return Arrays.asList(new MioTcpEncoder(), new MioTcpDecoder());
+        List<ChannelHandler> channelHandlerList = new ArrayList<>();
+        channelHandlerList.add(new MioTcpEncoder());
+        channelHandlerList.add(new MioTcpDecoder());
+        return channelHandlerList;
     }
 
 }

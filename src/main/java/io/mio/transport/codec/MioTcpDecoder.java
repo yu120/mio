@@ -8,6 +8,11 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 
 import java.util.List;
 
+/**
+ * Mio TCP Decoder
+ *
+ * @author lry
+ */
 public class MioTcpDecoder extends ByteToMessageDecoder {
 
     /**
