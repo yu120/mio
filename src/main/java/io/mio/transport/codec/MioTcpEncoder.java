@@ -1,6 +1,5 @@
 package io.mio.transport.codec;
 
-import io.mio.transport.protocol.MioTcpProtocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -10,10 +9,10 @@ import io.netty.handler.codec.MessageToByteEncoder;
  *
  * @author lry
  */
-public class MioTcpEncoder extends MessageToByteEncoder<MioTcpProtocol> {
+public class MioTcpEncoder extends MessageToByteEncoder<MioTcpMessage> {
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, MioTcpProtocol msg, ByteBuf out) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, MioTcpMessage msg, ByteBuf out) throws Exception {
         out.writeInt(msg.getHeadData());
         out.writeInt(msg.getHeaderLength());
         out.writeInt(msg.getContentLength());

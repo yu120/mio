@@ -1,7 +1,6 @@
 package io.mio.transport.codec;
 
 import io.mio.commons.Constants;
-import io.mio.transport.protocol.MioTcpProtocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -52,7 +51,7 @@ public class MioTcpDecoder extends ByteToMessageDecoder {
             byte[] content = new byte[contentLength];
             buffer.readBytes(content);
 
-            out.add(new MioTcpProtocol(header, content));
+            out.add(new MioTcpMessage(header, content));
         }
     }
 }

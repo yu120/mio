@@ -1,6 +1,6 @@
 package io.mio.transport.client;
 
-import io.mio.transport.protocol.MioTcpProtocol;
+import io.mio.transport.codec.MioTcpMessage;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
@@ -14,14 +14,14 @@ public class MioClientHandler extends ChannelInboundHandlerAdapter {
                 "请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请" +
                 "求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体" +
                 "内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容这是请求体内容";
-        MioTcpProtocol protocol = new MioTcpProtocol(headerStr.getBytes(), contentStr.getBytes());
+        MioTcpMessage protocol = new MioTcpMessage(headerStr.getBytes(), contentStr.getBytes());
         ctx.writeAndFlush(protocol);
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         try {
-            MioTcpProtocol body = (MioTcpProtocol) msg;
+            MioTcpMessage body = (MioTcpMessage) msg;
             System.out.println("Client接受的客户端的信息 :" + body.toString());
         } finally {
             ReferenceCountUtil.release(msg);

@@ -1,6 +1,6 @@
 package io.mio.transport.server;
 
-import io.mio.transport.protocol.MioTcpProtocol;
+import io.mio.transport.codec.MioTcpMessage;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -8,7 +8,7 @@ public class MioServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        MioTcpProtocol body = (MioTcpProtocol) msg;
+        MioTcpMessage body = (MioTcpMessage) msg;
         System.out.println("Server接受的客户端的信息 :" + body.toString());
 
         // 会写数据给客户端
@@ -41,7 +41,7 @@ public class MioServerHandler extends ChannelInboundHandlerAdapter {
                 "这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容" +
                 "这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容" +
                 "这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容这是响应体内容";
-        MioTcpProtocol response = new MioTcpProtocol(headerStr.getBytes(), contentStr.getBytes());
+        MioTcpMessage response = new MioTcpMessage(headerStr.getBytes(), contentStr.getBytes());
         ctx.writeAndFlush(response);
     }
 

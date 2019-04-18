@@ -1,4 +1,4 @@
-package io.mio.transport.protocol;
+package io.mio.transport.codec;
 
 import io.mio.commons.Constants;
 import lombok.Data;
@@ -18,7 +18,7 @@ import java.util.Arrays;
  * </pre>
  */
 @Data
-public class MioTcpProtocol {
+public class MioTcpMessage {
     /**
      * 消息的开头的信息标志
      */
@@ -41,12 +41,12 @@ public class MioTcpProtocol {
     private byte[] content;
 
     /**
-     * 用于初始化，MioTcpProtocol
+     * 用于初始化，MioTcpMessage
      *
      * @param header  协议里面，消息的数据
      * @param content 协议里面，消息的数据
      */
-    public MioTcpProtocol(byte[] header, byte[] content) {
+    public MioTcpMessage(byte[] header, byte[] content) {
         this.headerLength = header.length;
         this.contentLength = content.length;
         this.header = header;
@@ -55,7 +55,7 @@ public class MioTcpProtocol {
 
     @Override
     public String toString() {
-        return "MioTcpProtocol [headData=" + headData + ", headerLength=" + headerLength + ", contentLength="
+        return "MioTcpMessage [headData=" + headData + ", headerLength=" + headerLength + ", contentLength="
                 + contentLength + ", header=" + new String(header) + ", content=" + new String(content) + "]";
     }
 
