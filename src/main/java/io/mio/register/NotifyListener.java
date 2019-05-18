@@ -4,17 +4,12 @@ import io.mio.commons.URL;
 
 import java.util.List;
 
-/**
- * Subscribe Listener
- *
- * @author lry
- */
-public interface SubscribeListener {
+public interface NotifyListener {
 
     /**
-     * Notify service list
+     * 当收到服务变更通知时触发
      *
-     * @param urls
+     * @param urls 已注册信息列表，总不为空
      */
     void notify(List<URL> urls);
 

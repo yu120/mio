@@ -21,6 +21,8 @@ public class URL {
     public static final String GROUP_KEY = "group";
     public static final String APPLICATION_KEY = "application";
 
+    private String username;
+    private String password;
     private String protocol;
     private String host;
     private int port;
@@ -112,6 +114,18 @@ public class URL {
 
     // ==== get parameter start
 
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return username;
+    }
+
+    public String getAddress() {
+        return port <= 0 ? host : host + ":" + port;
+    }
+
     public String getVersion() {
         return getParameter(URLParamType.VERSION.getName(), URLParamType.VERSION.getValue());
     }
@@ -150,6 +164,32 @@ public class URL {
         return buildServerAddressBuilder.toString();
     }
 
+    /**
+     * The format of return value is '{group}/{interfaceName}:{version}'
+     *
+     * @return
+     */
+    public String getServiceKey() {
+        String inf = getServiceInterface();
+        if (inf == null) {
+            return null;
+        }
+        return buildKey(inf, getParameter(GROUP_KEY), getParameter(VERSION_KEY));
+    }
+
+    private static String buildKey(String path, String group, String version) {
+        StringBuilder buf = new StringBuilder();
+        if (group != null && group.length() > 0) {
+            buf.append(group).append("/");
+        }
+        buf.append(path);
+        if (version != null && version.length() > 0) {
+            buf.append(":").append(version);
+        }
+        return buf.toString();
+    }
+
+
     public String getServiceName() {
         return getPath();
     }
@@ -164,11 +204,13 @@ public class URL {
         parameters.putAll(params);
     }
 
-    public void addParameter(String name, String value) {
+    public URL addParameter(String name, String value) {
         if (Assert.isEmpty(name) || Assert.isEmpty(value)) {
-            return;
+            return this;
         }
+
         parameters.put(name, value);
+        return this;
     }
 
     public void addParameterIfAbsent(String name, String value) {
@@ -356,6 +398,10 @@ public class URL {
         }
 
         return numbers;
+    }
+
+    public String getServiceInterface() {
+        return getParameter("interface", path);
     }
 
     @Override

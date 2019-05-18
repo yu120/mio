@@ -14,7 +14,6 @@ import io.mio.exception.MioFrameException;
 import io.mio.model.IProcessor;
 import io.mio.model.Request;
 import io.mio.model.Response;
-import io.mio.register.IRegistry;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
