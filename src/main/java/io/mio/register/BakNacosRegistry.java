@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 @Slf4j
 @Extension("nacos")
-public class NacosRegistry implements IRegistry {
+public class BakNacosRegistry implements IRegistry {
 
     private NamingService namingService;
     private ConcurrentMap<String, EventListener> eventListeners = new ConcurrentHashMap<>();
