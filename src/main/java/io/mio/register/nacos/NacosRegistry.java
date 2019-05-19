@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package io.mio.register.nacos;
 
 import com.alibaba.nacos.api.exception.NacosException;
@@ -28,74 +12,33 @@ import io.mio.register.NotifyListener;
 import io.mio.register.Constants;
 import io.mio.register.UrlUtils;
 import io.mio.register.support.FailbackRegistry;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 
-/**
- * @see #SERVICE_NAME_SEPARATOR
- * @see #PAGINATION_SIZE
- * @see #LOOKUP_INTERVAL
- * @since 2.6.5
- */
+@Slf4j
 public class NacosRegistry extends FailbackRegistry {
 
-    /**
-     * All supported categories
-     */
-    private static final String[] ALL_SUPPORTED_CATEGORIES = of(
+    private static final String[] ALL_SUPPORTED_CATEGORIES = new String[]{
             Constants.PROVIDERS_CATEGORY,
             Constants.CONSUMERS_CATEGORY,
             Constants.ROUTERS_CATEGORY,
             Constants.CONFIGURATORS_CATEGORY
-    );
+    };
 
     private static final int CATEGORY_INDEX = 0;
-
     private static final int SERVICE_INTERFACE_INDEX = 1;
-
     private static final int SERVICE_VERSION_INDEX = 2;
-
     private static final int SERVICE_GROUP_INDEX = 3;
-
     private static final String WILDCARD = "*";
-
-    /**
-     * The separator for service name
-     * Change a constant to be configurable, it's designed for Windows file name that is compatible with old
-     * Nacos binary release(< 0.6.1)
-     */
-    private static final String SERVICE_NAME_SEPARATOR = System.getProperty("nacos.service.name.separator", ":");
-
-    /**
-     * The pagination size of query for Nacos service names(only for Dubbo-OPS)
-     */
-    private static final int PAGINATION_SIZE = Integer.getInteger("nacos.service.names.pagination.size", 100);
-
-    /**
-     * The interval in second of lookup Nacos service names(only for Dubbo-OPS)
-     */
-    private static final long LOOKUP_INTERVAL = Long.getLong("nacos.service.names.lookup.interval", 30);
-
-    /**
-     * {@link ScheduledExecutorService} lookup Nacos service names(only for Dubbo-OPS)
-     */
+    private static final String SERVICE_NAME_SEPARATOR = ":";
+    private static final int PAGINATION_SIZE = 100;
+    private static final long LOOKUP_INTERVAL = 30;
     private volatile ScheduledExecutorService scheduledExecutorService;
-
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-
     private final NamingService namingService;
-
     private final ConcurrentMap<String, EventListener> nacosListeners;
 
     public NacosRegistry(URL url, NamingService namingService) {
@@ -104,6 +47,7 @@ public class NacosRegistry extends FailbackRegistry {
         this.nacosListeners = new ConcurrentHashMap<>();
     }
 
+    @Override
     public boolean isAvailable() {
         return "UP".equals(namingService.getServerStatus());
     }
@@ -155,7 +99,7 @@ public class NacosRegistry extends FailbackRegistry {
 
     @Override
     public void doUnsubscribe(URL url, NotifyListener listener) {
-        if (isAdminProtocol(url)) {
+        if (Constants.ADMIN_PROTOCOL.equals(url.getProtocol())) {
             shutdownServiceNamesLookup();
         }
     }
@@ -174,16 +118,12 @@ public class NacosRegistry extends FailbackRegistry {
      * @return non-null
      */
     private List<String> getServiceNames(URL url, NotifyListener listener) {
-        if (isAdminProtocol(url)) {
+        if (Constants.ADMIN_PROTOCOL.equals(url.getProtocol())) {
             scheduleServiceNamesLookup(url, listener);
             return getServiceNamesForOps(url);
         } else {
             return doGetServiceNames(url);
         }
-    }
-
-    private boolean isAdminProtocol(URL url) {
-        return Constants.ADMIN_PROTOCOL.equals(url.getProtocol());
     }
 
     private void scheduleServiceNamesLookup(final URL url, final NotifyListener listener) {
@@ -221,11 +161,8 @@ public class NacosRegistry extends FailbackRegistry {
     }
 
     private List<String> getAllServiceNames() {
-
         final List<String> serviceNames = new LinkedList<>();
-
         execute(namingService -> {
-
             int pageIndex = 1;
             ListView<String> listView = namingService.getServicesOfServer(pageIndex, PAGINATION_SIZE);
             // First page data
@@ -246,22 +183,16 @@ public class NacosRegistry extends FailbackRegistry {
                 listView = namingService.getServicesOfServer(++pageIndex, PAGINATION_SIZE);
                 serviceNames.addAll(listView.getData());
             }
-
         });
 
         return serviceNames;
     }
 
     private void filterServiceNames(List<String> serviceNames, URL url) {
-
         final String[] categories = getCategories(url);
-
         final String targetServiceInterface = url.getServiceInterface();
-
         final String targetVersion = url.getParameter(Constants.VERSION_KEY);
-
         final String targetGroup = url.getParameter(Constants.GROUP_KEY);
-
         filterData(serviceNames, serviceName -> {
             // split service name to segments
             // (required) segments[0] = category
@@ -368,7 +299,7 @@ public class NacosRegistry extends FailbackRegistry {
      */
     private String[] getCategories(URL url) {
         return Constants.ANY_VALUE.equals(url.getServiceInterface()) ?
-                ALL_SUPPORTED_CATEGORIES : of(Constants.DEFAULT_CATEGORY);
+                ALL_SUPPORTED_CATEGORIES : new String[]{Constants.DEFAULT_CATEGORY};
     }
 
     private URL buildURL(Instance instance) {
@@ -421,8 +352,8 @@ public class NacosRegistry extends FailbackRegistry {
         try {
             callback.callback(namingService);
         } catch (NacosException e) {
-            if (logger.isErrorEnabled()) {
-                logger.error(e.getErrMsg(), e);
+            if (log.isErrorEnabled()) {
+                log.error(e.getErrMsg(), e);
             }
         }
     }
@@ -431,16 +362,8 @@ public class NacosRegistry extends FailbackRegistry {
         filterData(instances, Instance::isEnabled);
     }
 
-    @SafeVarargs
-    private static <T> T[] of(T... values) {
-        return values;
-    }
-
-
     /**
      * A filter for Nacos data
-     *
-     * @since 2.6.5
      */
     private interface NacosDataFilter<T> {
 
@@ -457,8 +380,6 @@ public class NacosRegistry extends FailbackRegistry {
 
     /**
      * {@link NamingService} Callback
-     *
-     * @since 2.6.5
      */
     interface NamingServiceCallback {
 
@@ -466,7 +387,6 @@ public class NacosRegistry extends FailbackRegistry {
          * Callback
          *
          * @param namingService {@link NamingService}
-         * @throws NacosException
          */
         void callback(NamingService namingService) throws NacosException;
 

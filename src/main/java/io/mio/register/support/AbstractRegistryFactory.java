@@ -10,8 +10,7 @@ import io.mio.commons.URL;
 import io.mio.register.Registry;
 import io.mio.register.RegistryFactory;
 import io.mio.register.Constants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 
 /**
@@ -19,12 +18,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author lry
  */
+@Slf4j
 public abstract class AbstractRegistryFactory implements RegistryFactory {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractRegistryFactory.class);
     private static final ReentrantLock LOCK = new ReentrantLock();
-    // 注册中心集合 Map<RegistryAddress, Registry>
-    private static final Map<String, Registry> REGISTRIES = new ConcurrentHashMap<String, Registry>();
+    /**
+     * 注册中心集合 Map<RegistryAddress, Registry>
+     */
+    private static final Map<String, Registry> REGISTRIES = new ConcurrentHashMap<>();
 
     /**
      * 获取所有注册中心
@@ -39,9 +40,7 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
      * 关闭所有已创建注册中心
      */
     public static void destroyAll() {
-        if (logger.isInfoEnabled()) {
-            logger.info("Close all registries " + getRegistries());
-        }
+        log.info("Close all registries " + getRegistries());
         // 锁定注册中心关闭过程
         LOCK.lock();
         try {
@@ -49,7 +48,7 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
                 try {
                     registry.destroy();
                 } catch (Throwable e) {
-                    logger.error(e.getMessage(), e);
+                    log.error(e.getMessage(), e);
                 }
             }
             REGISTRIES.clear();

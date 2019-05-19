@@ -1,4 +1,6 @@
-package io.mio.register.support;
+package io.mio.register;
+
+import io.mio.register.support.FailbackRegistry;
 
 /**
  * Wrapper异常，用于指示 {@link FailbackRegistry}跳过Failback。
@@ -7,11 +9,11 @@ package io.mio.register.support;
  *
  * @author lry
  */
-public class SkipFailbackWrapperException extends RuntimeException {
+public class SkipFailbackException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public SkipFailbackWrapperException(Throwable cause) {
+	public SkipFailbackException(Throwable cause) {
         super(cause);
     }
 

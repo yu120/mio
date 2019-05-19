@@ -36,5 +36,9 @@ public interface Registry {
      */
     List<URL> lookup(URL url);
 
+    boolean isAvailable();
+
+    URL getUrl();
+
     void destroy();
 }
