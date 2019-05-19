@@ -1,20 +1,16 @@
 package io.mio.register.support;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.*;
-
 import io.mio.commons.ConcurrentHashSet;
 import io.mio.commons.URL;
 import io.mio.commons.thread.NamedThreadFactory;
-import io.mio.register.NotifyListener;
 import io.mio.register.Constants;
+import io.mio.register.NotifyListener;
 import io.mio.register.SkipFailbackException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * Fail back Registry
@@ -23,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Getter
-public abstract class FailbackRegistry extends AbstractRegistry {
+public abstract class AbstractFailbackRegistry extends AbstractFaillocalRegistry {
 
     private final ScheduledFuture<?> retryFuture;
 
@@ -36,7 +32,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
     private final ScheduledExecutorService retryExecutor = new ScheduledThreadPoolExecutor(
             1, new NamedThreadFactory("registry-failed-retry-timer", true));
 
-    public FailbackRegistry(URL url) {
+    public AbstractFailbackRegistry(URL url) {
         super(url);
         int retryPeriod = url.getParameter(Constants.REGISTRY_RETRY_PERIOD_KEY, Constants.DEFAULT_REGISTRY_RETRY_PERIOD);
         this.retryFuture = retryExecutor.scheduleWithFixedDelay(new Runnable() {

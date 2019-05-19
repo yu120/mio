@@ -11,7 +11,7 @@ import io.mio.commons.thread.NamedThreadFactory;
 import io.mio.register.NotifyListener;
 import io.mio.register.Constants;
 import io.mio.register.UrlUtils;
-import io.mio.register.support.FailbackRegistry;
+import io.mio.register.support.AbstractFailbackRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 @Slf4j
-public class NacosRegistry extends FailbackRegistry {
+public class NacosRegistry extends AbstractFailbackRegistry {
 
     private static final String[] ALL_SUPPORTED_CATEGORIES = new String[]{
             Constants.PROVIDERS_CATEGORY,

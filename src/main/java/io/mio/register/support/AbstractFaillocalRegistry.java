@@ -1,34 +1,23 @@
 package io.mio.register.support;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-
 import io.mio.commons.ConcurrentHashSet;
 import io.mio.commons.URL;
 import io.mio.commons.thread.NamedThreadFactory;
+import io.mio.register.Constants;
 import io.mio.register.NotifyListener;
 import io.mio.register.Registry;
-import io.mio.register.Constants;
 import io.mio.register.UrlUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
+import java.io.*;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * AbstractRegistry. (SPI, Prototype, ThreadSafe)
@@ -37,7 +26,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 @Slf4j
 @Getter
-public abstract class AbstractRegistry implements Registry {
+public abstract class AbstractFaillocalRegistry implements Registry {
 
     private static final char URL_SEPARATOR = ' ';
     private static final String URL_SPLIT = "\\s+";
@@ -55,7 +44,7 @@ public abstract class AbstractRegistry implements Registry {
             new LinkedBlockingQueue<Runnable>(), new NamedThreadFactory("save-registry-cache", true));
 
 
-    public AbstractRegistry(URL url) {
+    public AbstractFaillocalRegistry(URL url) {
         if (url == null) {
             throw new IllegalArgumentException("registry url == null");
         }
