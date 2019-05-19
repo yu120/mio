@@ -7,10 +7,10 @@ import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.alibaba.nacos.api.naming.pojo.ListView;
 import io.mio.commons.URL;
+import io.mio.commons.extension.Extension;
 import io.mio.commons.thread.NamedThreadFactory;
 import io.mio.register.NotifyListener;
 import io.mio.register.Constants;
-import io.mio.register.UrlUtils;
 import io.mio.register.support.AbstractFailbackRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
@@ -20,6 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 @Slf4j
+@Extension("fastjson")
 public class NacosRegistry extends AbstractFailbackRegistry {
 
     private static final String[] ALL_SUPPORTED_CATEGORIES = new String[]{
@@ -255,7 +256,7 @@ public class NacosRegistry extends AbstractFailbackRegistry {
         List<URL> urls = new LinkedList<>();
         for (Instance instance : instances) {
             URL url = buildURL(instance);
-            if (UrlUtils.isMatch(consumerURL, url)) {
+            if (isMatch(consumerURL, url)) {
                 urls.add(url);
             }
         }

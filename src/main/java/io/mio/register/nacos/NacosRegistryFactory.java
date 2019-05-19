@@ -4,6 +4,7 @@ import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.client.naming.utils.StringUtils;
 import io.mio.commons.URL;
+import io.mio.commons.extension.Extension;
 import io.mio.register.Registry;
 import io.mio.register.Constants;
 import io.mio.register.support.AbstractRegistryFactory;
@@ -20,6 +21,7 @@ import static com.alibaba.nacos.api.PropertyKeyConst.SERVER_ADDR;
 import static com.alibaba.nacos.client.naming.utils.UtilAndComs.NACOS_NAMING_LOG_NAME;
 
 @Slf4j
+@Extension("fastjson")
 public class NacosRegistryFactory extends AbstractRegistryFactory {
 
     @Override

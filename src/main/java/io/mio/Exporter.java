@@ -14,6 +14,7 @@ import io.mio.exception.MioFrameException;
 import io.mio.model.IProcessor;
 import io.mio.model.Request;
 import io.mio.model.Response;
+import io.mio.register.Registry;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
@@ -35,7 +36,7 @@ public class Exporter {
     private static Map<String, IProcessor> serviceProcessorMap = new ConcurrentHashMap<>();
     private static Map<String, ServiceConfig> serviceConfigMap = new ConcurrentHashMap<>();
     private static Map<String, Map<String, Method>> serviceMethodMap = new ConcurrentHashMap<>();
-    private static IRegistry registry;
+    private static Registry registry;
 
     /**
      * Publish service
@@ -112,7 +113,7 @@ public class Exporter {
             throw new MioFrameException("No service can be export.");
         }
 
-        registry = ExtensionLoader.getLoader(IRegistry.class).getExtension();
+        registry = ExtensionLoader.getLoader(Registry.class).getExtension();
         log.debug("Loader registry instance:{}", registry);
 
 
