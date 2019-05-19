@@ -23,8 +23,8 @@ import com.alibaba.nacos.client.naming.utils.StringUtils;
 import io.mio.commons.URL;
 import io.mio.register.Registry;
 import io.mio.register.Constants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.mio.register.support.AbstractRegistryFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Properties;
 
@@ -36,10 +36,10 @@ import static com.alibaba.nacos.api.PropertyKeyConst.SECRET_KEY;
 import static com.alibaba.nacos.api.PropertyKeyConst.SERVER_ADDR;
 import static com.alibaba.nacos.client.naming.utils.UtilAndComs.NACOS_NAMING_LOG_NAME;
 
-public class NacosRegistryFactory  {
+@Slf4j
+public class NacosRegistryFactory extends AbstractRegistryFactory {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-
+    @Override
     protected Registry createRegistry(URL url) {
         return new NacosRegistry(url, buildNamingService(url));
     }
@@ -50,9 +50,7 @@ public class NacosRegistryFactory  {
         try {
             namingService = NacosFactory.createNamingService(nacosProperties);
         } catch (NacosException e) {
-            if (logger.isErrorEnabled()) {
-                logger.error(e.getErrMsg(), e);
-            }
+            log.error(e.getErrMsg(), e);
             throw new IllegalStateException(e);
         }
         return namingService;
@@ -66,10 +64,7 @@ public class NacosRegistryFactory  {
     }
 
     private void setServerAddr(URL url, Properties properties) {
-        StringBuilder serverAddrBuilder =
-                new StringBuilder(url.getHost())
-                        .append(":")
-                        .append(url.getPort());
+        StringBuilder serverAddrBuilder = new StringBuilder(url.getHost()).append(":").append(url.getPort());
 
         // Append backup parameter as other servers
         String backup = url.getParameter(Constants.BACKUP_KEY);
@@ -96,4 +91,5 @@ public class NacosRegistryFactory  {
             properties.setProperty(propertyName, propertyValue);
         }
     }
+
 }

@@ -15,10 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -40,48 +37,35 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractRegistry implements Registry {
 
-    // 日志输出
     private static final Logger logger = LoggerFactory.getLogger(AbstractRegistry.class);
 
-    // EURL地址分隔符，用于文件缓存中，服务提供者EURL分隔
     private static final char EURL_SEPARATOR = ' ';
-
-    // EURL地址分隔正则表达式，用于解析文件缓存中服务提供者EURL列表
     private static final String EURL_SPLIT = "\\s+";
-
     private URL registryUrl;
-
-    // 本地磁盘缓存文件
     private File file;
-
-    // 本地磁盘缓存，其中特殊的key值.registies记录注册中心列表，其它均为notified服务提供者列表
     private final Properties properties = new Properties();
-
-    // 文件缓存定时写入
-    private final ExecutorService registryCacheExecutor = Executors.newFixedThreadPool(1, new NamedThreadFactory("MsSaveRegistryCache", true));
-
-    //是否是同步保存文件
+    private final ExecutorService registryCacheExecutor = new ThreadPoolExecutor(
+            1, 1, 0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<Runnable>(), new NamedThreadFactory("MsSaveRegistryCache", true));
     private final boolean syncSaveFile;
-
     private final AtomicLong lastCacheChanged = new AtomicLong();
-
     private final Set<URL> registered = new ConcurrentHashSet<>();
-
     private final ConcurrentMap<URL, Set<NotifyListener>> subscribed = new ConcurrentHashMap<URL, Set<NotifyListener>>();
-
     private final ConcurrentMap<URL, Map<String, List<URL>>> notified = new ConcurrentHashMap<URL, Map<String, List<URL>>>();
 
     public AbstractRegistry(URL url) {
         setUrl(url);
         // 启动文件保存定时器
         syncSaveFile = url.getParameter(Constants.REGISTRY_FILESAVE_SYNC_KEY, false);
-        String filename = url.getParameter(Constants.FILE_KEY, System.getProperty("user.home") + "/.ms/ms-registry-" + url.getHost() + ".cache");
+        String filename = url.getParameter(Constants.FILE_KEY,
+                System.getProperty("user.home") + "/.ms/ms-registry-" + url.getHost() + ".cache");
         File file = null;
         if (!StringUtils.isEmpty(filename)) {
             file = new File(filename);
             if (!file.exists() && file.getParentFile() != null && !file.getParentFile().exists()) {
                 if (!file.getParentFile().mkdirs()) {
-                    throw new IllegalArgumentException("Invalid registry store file " + file + ", cause: Failed to create directory " + file.getParentFile() + "!");
+                    throw new IllegalArgumentException("Invalid registry store file " +
+                            file + ", cause: Failed to create directory " + file.getParentFile() + "!");
                 }
             }
         }
@@ -397,12 +381,7 @@ public abstract class AbstractRegistry implements Registry {
         for (URL u : urls) {
             if (UrlUtils.isMatch(url, u)) {
                 String category = u.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY);
-                List<URL> categoryList = result.get(category);
-                if (categoryList == null) {
-                    categoryList = new ArrayList<URL>();
-                    result.put(category, categoryList);
-                }
-                categoryList.add(u);
+                result.computeIfAbsent(category, k -> new ArrayList<URL>()).add(u);
             }
         }
         if (result.size() == 0) {

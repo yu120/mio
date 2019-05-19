@@ -9,7 +9,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import io.mio.commons.URL;
 import io.mio.register.Registry;
 import io.mio.register.RegistryFactory;
-import io.mio.register.RegistryService;
 import io.mio.register.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,8 +61,8 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
 
     @Override
     public Registry getRegistry(URL url) {
-        url.setPath(RegistryService.class.getName());
-        url = url.addParameter(Constants.INTERFACE_KEY, RegistryService.class.getName());
+        url.setPath(Registry.class.getName());
+        url = url.addParameter(Constants.INTERFACE_KEY, Registry.class.getName());
         String key = url.getServiceKey();
         // 锁定注册中心获取过程，保证注册中心单一实例
         LOCK.lock();
