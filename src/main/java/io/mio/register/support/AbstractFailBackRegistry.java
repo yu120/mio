@@ -19,7 +19,7 @@ import java.util.concurrent.*;
  */
 @Slf4j
 @Getter
-public abstract class AbstractFailbackRegistry extends AbstractFaillocalRegistry {
+public abstract class AbstractFailBackRegistry extends AbstractFailLocalRegistry {
 
     private final ScheduledFuture<?> retryFuture;
     private final ScheduledExecutorService retryExecutor = new ScheduledThreadPoolExecutor(
@@ -31,7 +31,7 @@ public abstract class AbstractFailbackRegistry extends AbstractFaillocalRegistry
     private final ConcurrentMap<URL, Set<NotifyListener>> failedUnsubscribed = new ConcurrentHashMap<>();
     private final ConcurrentMap<URL, Map<NotifyListener, List<URL>>> failedNotified = new ConcurrentHashMap<>();
 
-    public AbstractFailbackRegistry(URL url) {
+    public AbstractFailBackRegistry(URL url) {
         super(url);
         int retryPeriod = url.getParameter(Constants.REGISTRY_RETRY_PERIOD_KEY, Constants.DEFAULT_REGISTRY_RETRY_PERIOD);
         this.retryFuture = retryExecutor.scheduleWithFixedDelay(() -> {
@@ -145,11 +145,8 @@ public abstract class AbstractFailbackRegistry extends AbstractFaillocalRegistry
             Throwable t = e;
             List<URL> urls = super.getCacheUrls(url);
             if (urls != null && urls.size() > 0) {
-                notify(url, listener, urls);
-                log.error("Failed to subscribe " + url + ", Using cached list: " + urls
-                        + " from cache file: " + getUrl().getParameter(Constants.FILE_KEY,
-                        System.getProperty("user.home") + "/mio-registry-" +
-                                url.getHost() + ".cache") + ", cause: " + t.getMessage(), t);
+                this.notify(url, listener, urls);
+                log.error("Failed to subscribe " + url + ", Using cached list: " + urls + ", cause: " + t.getMessage(), t);
             } else {
                 // 如果开启了启动时检测，则直接抛出异常
                 boolean check = getUrl().getParameter(Constants.CHECK_KEY, true)

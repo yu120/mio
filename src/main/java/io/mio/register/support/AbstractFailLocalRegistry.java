@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 @Getter
-public abstract class AbstractFaillocalRegistry implements Registry {
+public abstract class AbstractFailLocalRegistry implements Registry {
 
     // === 分隔符
 
@@ -47,7 +47,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
     private final ConcurrentMap<URL, Set<NotifyListener>> subscribed = new ConcurrentHashMap<>();
     private final ConcurrentMap<URL, Map<String, List<URL>>> notified = new ConcurrentHashMap<>();
 
-    public AbstractFaillocalRegistry(URL url) {
+    public AbstractFailLocalRegistry(URL url) {
         if (url == null) {
             throw new IllegalArgumentException("registry url == null");
         }
@@ -55,10 +55,10 @@ public abstract class AbstractFaillocalRegistry implements Registry {
 
         // 启动文件保存定时器
         this.syncSaveFile = url.getParameter(Constants.REGISTRY_FILE_SAVE_SYNC_KEY, false);
-        String filename = url.getParameter(Constants.FILE_KEY,
-                System.getProperty("user.home") + "/.mio/mio-registry-" + url.getHost() + ".cache");
-        if (!StringUtils.isEmpty(filename)) {
-            this.file = new File(filename);
+        String defaultFileName = System.getProperty("user.home") + "/.mio/registry-" + url.getHost() + ".cache";
+        String fileName = url.getParameter(Constants.FILE_KEY, defaultFileName);
+        if (!StringUtils.isEmpty(fileName)) {
+            this.file = new File(fileName);
             if (!file.exists() && file.getParentFile() != null && !file.getParentFile().exists()) {
                 if (!file.getParentFile().mkdirs()) {
                     throw new IllegalArgumentException("Invalid registry store file " +

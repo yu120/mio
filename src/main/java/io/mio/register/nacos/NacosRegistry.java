@@ -11,7 +11,7 @@ import io.mio.commons.extension.Extension;
 import io.mio.commons.thread.NamedThreadFactory;
 import io.mio.register.NotifyListener;
 import io.mio.register.Constants;
-import io.mio.register.support.AbstractFailbackRegistry;
+import io.mio.register.support.AbstractFailBackRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +21,7 @@ import java.util.concurrent.*;
 
 @Slf4j
 @Extension("fastjson")
-public class NacosRegistry extends AbstractFailbackRegistry {
+public class NacosRegistry extends AbstractFailBackRegistry {
 
     private static final String[] ALL_SUPPORTED_CATEGORIES = new String[]{
             Constants.PROVIDERS_CATEGORY,

@@ -1,7 +1,9 @@
 package io.mio.register;
 
+import io.mio.register.support.AbstractFailBackRegistry;
+
 /**
- * Wrapper异常，用于指示 {@link io.mio.register.support.AbstractFailbackRegistry}跳过Failback。
+ * Wrapper异常，用于指示 {@link AbstractFailBackRegistry}跳过Failback。
  * <p>
  * NOTE: 期望找到其它更常规的指示方式。
  *
