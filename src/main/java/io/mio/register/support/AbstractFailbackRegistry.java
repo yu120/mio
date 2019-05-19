@@ -22,15 +22,14 @@ import java.util.concurrent.*;
 public abstract class AbstractFailbackRegistry extends AbstractFaillocalRegistry {
 
     private final ScheduledFuture<?> retryFuture;
+    private final ScheduledExecutorService retryExecutor = new ScheduledThreadPoolExecutor(
+            1, new NamedThreadFactory("registry-failed-retry-timer", true));
 
     private final Set<URL> failedRegistered = new ConcurrentHashSet<>();
     private final Set<URL> failedUnregistered = new ConcurrentHashSet<>();
     private final ConcurrentMap<URL, Set<NotifyListener>> failedSubscribed = new ConcurrentHashMap<>();
     private final ConcurrentMap<URL, Set<NotifyListener>> failedUnsubscribed = new ConcurrentHashMap<>();
     private final ConcurrentMap<URL, Map<NotifyListener, List<URL>>> failedNotified = new ConcurrentHashMap<>();
-
-    private final ScheduledExecutorService retryExecutor = new ScheduledThreadPoolExecutor(
-            1, new NamedThreadFactory("registry-failed-retry-timer", true));
 
     public AbstractFailbackRegistry(URL url) {
         super(url);

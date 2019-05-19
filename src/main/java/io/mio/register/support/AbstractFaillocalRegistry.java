@@ -37,13 +37,13 @@ public abstract class AbstractFaillocalRegistry implements Registry {
     private final boolean syncSaveFile;
     private final Properties properties = new Properties();
     private final AtomicLong lastCacheChanged = new AtomicLong();
-    private final Set<URL> registered = new ConcurrentHashSet<>();
-    private final ConcurrentMap<URL, Set<NotifyListener>> subscribed = new ConcurrentHashMap<>();
-    private final ConcurrentMap<URL, Map<String, List<URL>>> notified = new ConcurrentHashMap<>();
     private final ExecutorService registryCacheExecutor = new ThreadPoolExecutor(
             1, 1, 0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<Runnable>(), new NamedThreadFactory("save-registry-cache", true));
 
+    private final Set<URL> registered = new ConcurrentHashSet<>();
+    private final ConcurrentMap<URL, Set<NotifyListener>> subscribed = new ConcurrentHashMap<>();
+    private final ConcurrentMap<URL, Map<String, List<URL>>> notified = new ConcurrentHashMap<>();
 
     public AbstractFaillocalRegistry(URL url) {
         if (url == null) {
@@ -91,23 +91,14 @@ public abstract class AbstractFaillocalRegistry implements Registry {
         }
         Properties newProperties = new Properties();
         // 保存之前先读取一遍，防止多个注册中心之间冲突
-        InputStream in = null;
-        try {
-            if (file.exists()) {
-                in = new FileInputStream(file);
+        if (file.exists()) {
+            try (InputStream in = new FileInputStream(file)) {
                 newProperties.load(in);
-            }
-        } catch (Throwable e) {
-            log.warn("Failed to load registry store file, cause: " + e.getMessage(), e);
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    log.warn(e.getMessage(), e);
-                }
+            } catch (Exception e) {
+                log.warn("Failed to load registry store file, cause: " + e.getMessage(), e);
             }
         }
+
         // 保存
         try {
             newProperties.putAll(properties);
@@ -122,21 +113,20 @@ public abstract class AbstractFaillocalRegistry implements Registry {
                 try (FileChannel channel = raf.getChannel()) {
                     FileLock lock = channel.tryLock();
                     if (lock == null) {
-                        throw new IOException("Can not lock the registry cache file " + file.getAbsolutePath() +
-                                ", ignore and retry later, maybe multi java process use the file, " +
-                                "please config: registry.file=xxx.properties");
+                        throw new IOException("Can not lock the registry cache file " + file.getAbsolutePath());
                     }
 
                     // === 保存
+                    if (!file.exists()) {
+                        if (!file.createNewFile()) {
+                            throw new RuntimeException("Create file fail");
+                        }
+                    }
 
                     try {
-                        if (!file.exists()) {
-                            if (!file.createNewFile()) {
-                                throw new RuntimeException("Create file fail");
-                            }
-                        }
                         try (FileOutputStream outputFile = new FileOutputStream(file)) {
-                            newProperties.store(outputFile, "Ms Registry Cache");
+                            newProperties.store(outputFile, "Mio Registry Cache");
+                            newProperties.store(outputFile, "Mi Registry Cache");
                         }
                     } finally {
                         lock.release();
@@ -179,6 +169,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
                 return urls;
             }
         }
+
         return null;
     }
 
