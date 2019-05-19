@@ -294,7 +294,7 @@ public class NacosRegistry extends AbstractFailBackRegistry {
      */
     private String[] getCategories(URL url) {
         return Constants.ANY_VALUE.equals(url.getServiceInterface()) ?
-                ALL_SUPPORTED_CATEGORIES : new String[]{Constants.DEFAULT_CATEGORY};
+                ALL_SUPPORTED_CATEGORIES : new String[]{Constants.PROVIDERS_CATEGORY};
     }
 
     private URL buildURL(Instance instance) {
@@ -306,7 +306,7 @@ public class NacosRegistry extends AbstractFailBackRegistry {
 
     private Instance createInstance(URL url) {
         // Append default category if absent
-        String category = url.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY);
+        String category = url.getParameter(Constants.CATEGORY_KEY, Constants.PROVIDERS_CATEGORY);
         URL newURL = url.addParameter(Constants.CATEGORY_KEY, category);
         newURL = newURL.addParameter(Constants.PROTOCOL_KEY, url.getProtocol());
         newURL = newURL.addParameter(Constants.PATH_KEY, url.getPath());
@@ -320,7 +320,7 @@ public class NacosRegistry extends AbstractFailBackRegistry {
     }
 
     private String getServiceName(URL url) {
-        String category = url.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY);
+        String category = url.getParameter(Constants.CATEGORY_KEY, Constants.PROVIDERS_CATEGORY);
         return this.getServiceName(url, category);
     }
 

@@ -353,7 +353,7 @@ public abstract class AbstractFailLocalRegistry implements Registry {
         Map<String, List<URL>> result = new HashMap<>();
         for (URL u : urls) {
             if (isMatch(url, u)) {
-                String category = u.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY);
+                String category = u.getParameter(Constants.CATEGORY_KEY, Constants.PROVIDERS_CATEGORY);
                 result.computeIfAbsent(category, k -> new ArrayList<>()).add(u);
             }
         }
@@ -456,8 +456,8 @@ public abstract class AbstractFailLocalRegistry implements Registry {
             return false;
         }
 
-        if (!this.isMatchCategory(providerUrl.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY),
-                consumerUrl.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY))) {
+        if (!this.isMatchCategory(providerUrl.getParameter(Constants.CATEGORY_KEY, Constants.PROVIDERS_CATEGORY),
+                consumerUrl.getParameter(Constants.CATEGORY_KEY, Constants.PROVIDERS_CATEGORY))) {
             return false;
         }
         if (!providerUrl.getParameter(Constants.ENABLED_KEY, true)
@@ -484,7 +484,7 @@ public abstract class AbstractFailLocalRegistry implements Registry {
 
     private boolean isMatchCategory(String category, String categories) {
         if (categories == null || categories.length() == 0) {
-            return Constants.DEFAULT_CATEGORY.equals(category);
+            return Constants.PROVIDERS_CATEGORY.equals(category);
         } else if (categories.contains(Constants.ANY_VALUE)) {
             return true;
         } else if (categories.contains(Constants.REMOVE_VALUE_PREFIX)) {
