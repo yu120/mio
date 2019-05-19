@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 @Slf4j
-@Extension("fastjson")
+@Extension("nacos")
 public class NacosRegistry extends AbstractFailBackRegistry {
 
     private static final String[] ALL_SUPPORTED_CATEGORIES = new String[]{

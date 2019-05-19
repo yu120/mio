@@ -14,7 +14,7 @@ import java.util.Properties;
 import com.alibaba.nacos.api.PropertyKeyConst;
 import com.alibaba.nacos.client.naming.utils.UtilAndComs;
 
-@Extension("fastjson")
+@Extension("nacos")
 public class NacosRegistryFactory extends AbstractRegistryFactory {
 
     @Override
