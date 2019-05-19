@@ -67,7 +67,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
         }
         this.file = file;
         loadProperties();
-        //notify(url.getBackupUrls());
+        notify(url.getBackupUrls());
     }
 
     private class SaveProperties implements Runnable {
@@ -301,6 +301,28 @@ public abstract class AbstractFaillocalRegistry implements Registry {
         }
     }
 
+    private void notify(List<URL> urls) {
+        if (urls == null || urls.isEmpty()) {
+            return;
+        }
+
+        for (Map.Entry<URL, Set<NotifyListener>> entry : getSubscribed().entrySet()) {
+            if (!UrlUtils.isMatch(entry.getKey(), urls.get(0))) {
+                continue;
+            }
+            Set<NotifyListener> listeners = entry.getValue();
+            if (listeners != null) {
+                for (NotifyListener listener : listeners) {
+                    try {
+                        notify(entry.getKey(), listener, filterEmpty(entry.getKey(), urls));
+                    } catch (Throwable t) {
+                        log.error("Failed to notify registry event, urls: " + urls + ", cause: " + t.getMessage(), t);
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * 过滤不为空的 {@link URL}
      *
@@ -308,7 +330,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
      * @param urls url list
      * @return not empty url list
      */
-    protected static List<URL> filterEmpty(URL url, List<URL> urls) {
+    private static List<URL> filterEmpty(URL url, List<URL> urls) {
         if (urls == null || urls.size() == 0) {
             List<URL> result = new ArrayList<>(1);
             url.setProtocol(Constants.EMPTY_PROTOCOL);

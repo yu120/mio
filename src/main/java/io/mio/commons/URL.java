@@ -1,12 +1,11 @@
 package io.mio.commons;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 /**
  * Uniform Resource Location
@@ -20,6 +19,7 @@ public class URL {
     public static final String VERSION_KEY = "version";
     public static final String GROUP_KEY = "group";
     public static final String APPLICATION_KEY = "application";
+    public static final Pattern COMMA_SPLIT_PATTERN = Pattern.compile("\\s*[,]+\\s*");
 
     private String username;
     private String password;
@@ -40,6 +40,29 @@ public class URL {
         this.port = port;
         this.path = path;
         this.parameters = parameters;
+    }
+
+    public URL(String protocol, String username, String password, String host, int port, String path, Map<String, String> parameters) {
+        if (StringUtils.isEmpty(username) && StringUtils.isNotEmpty(password)) {
+            throw new IllegalArgumentException("Invalid url, password without username!");
+        }
+
+        this.protocol = protocol;
+        this.username = username;
+        this.password = password;
+        this.host = host;
+        this.port = (port < 0 ? 0 : port);
+        // trim the beginning "/"
+        while (path != null && path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        this.path = path;
+        if (parameters == null) {
+            parameters = new HashMap<>();
+        } else {
+            parameters = new HashMap<>(parameters);
+        }
+        this.parameters = Collections.unmodifiableMap(parameters);
     }
 
     public static URL valueOf(String url) {
@@ -112,6 +135,20 @@ public class URL {
         return new URL(protocol, host, port, path, params);
     }
 
+    public URL setAddress(String address) {
+        int i = address.lastIndexOf(':');
+        String host;
+        int port = this.port;
+        if (i >= 0) {
+            host = address.substring(0, i);
+            port = Integer.parseInt(address.substring(i + 1));
+        } else {
+            host = address;
+        }
+        return new URL(protocol, username, password, host, port, path, getParameters());
+    }
+
+
     // ==== get parameter start
 
     public String getUsername() {
@@ -164,10 +201,21 @@ public class URL {
         return buildServerAddressBuilder.toString();
     }
 
+    public List<URL> getBackupUrls() {
+        List<URL> urls = new ArrayList<>();
+        urls.add(this);
+        String[] backups = getParameter(BACKUP_KEY, new String[0]);
+        if (backups != null && backups.length > 0) {
+            for (String backup : backups) {
+                urls.add(this.setAddress(backup));
+            }
+        }
+
+        return urls;
+    }
+
     /**
      * The format of return value is '{group}/{interfaceName}:{version}'
-     *
-     * @return
      */
     public String getServiceKey() {
         String inf = getServiceInterface();
@@ -307,6 +355,23 @@ public class URL {
         float f = Float.parseFloat(value);
         getNumbers().put(name, f);
         return f;
+    }
+
+    public String[] getParameter(String key, String[] defaultValue) {
+        String value = getParameter(key);
+        if (StringUtils.isEmpty(value)) {
+            return defaultValue;
+        }
+        return COMMA_SPLIT_PATTERN.split(value);
+    }
+
+    public List<String> getParameter(String key, List<String> defaultValue) {
+        String value = getParameter(key);
+        if (value == null || value.length() == 0) {
+            return defaultValue;
+        }
+        String[] strArray = COMMA_SPLIT_PATTERN.split(value);
+        return Arrays.asList(strArray);
     }
 
     // ==== get parameter end
