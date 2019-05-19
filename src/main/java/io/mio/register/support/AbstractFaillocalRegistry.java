@@ -20,13 +20,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * AbstractRegistry. (SPI, Prototype, ThreadSafe)
+ * Abstract Fail Local Registry
  *
  * @author lry
  */
 @Slf4j
 @Getter
 public abstract class AbstractFaillocalRegistry implements Registry {
+
+    // === 分隔符
 
     private static final char URL_SEPARATOR = ' ';
     private static final String URL_SPLIT = "\\s+";
@@ -65,7 +67,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
         }
         this.file = file;
         loadProperties();
-        // notify(url.getBackupUrls());
+        //notify(url.getBackupUrls());
     }
 
     private class SaveProperties implements Runnable {
@@ -163,7 +165,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
         }
     }
 
-    public List<URL> getCacheUrls(URL url) {
+    List<URL> getCacheUrls(URL url) {
         for (Map.Entry<Object, Object> entry : properties.entrySet()) {
             String key = (String) entry.getKey();
             String value = (String) entry.getValue();
@@ -194,15 +196,9 @@ public abstract class AbstractFaillocalRegistry implements Registry {
                 }
             }
         } else {
-            final AtomicReference<List<URL>> reference = new AtomicReference<List<URL>>();
-            NotifyListener listener = new NotifyListener() {
-                @Override
-                public void notify(List<URL> urls) {
-                    reference.set(urls);
-                }
-            };
+            final AtomicReference<List<URL>> reference = new AtomicReference<>();
             // 订阅逻辑保证第一次notify后再返回
-            subscribe(url, listener);
+            subscribe(url, reference::set);
             List<URL> urls = reference.get();
             if (urls != null && urls.size() > 0) {
                 for (URL u : urls) {
@@ -250,7 +246,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
         }
         Set<NotifyListener> listeners = subscribed.get(url);
         if (listeners == null) {
-            subscribed.putIfAbsent(url, new ConcurrentHashSet<NotifyListener>());
+            subscribed.putIfAbsent(url, new ConcurrentHashSet<>());
             listeners = subscribed.get(url);
         }
         listeners.add(listener);
@@ -314,7 +310,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
      */
     protected static List<URL> filterEmpty(URL url, List<URL> urls) {
         if (urls == null || urls.size() == 0) {
-            List<URL> result = new ArrayList<URL>(1);
+            List<URL> result = new ArrayList<>(1);
             url.setProtocol(Constants.EMPTY_PROTOCOL);
             result.add(url);
             return result;

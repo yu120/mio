@@ -2,7 +2,6 @@ package io.mio.register.nacos;
 
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.exception.NacosException;
-import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.client.naming.utils.StringUtils;
 import io.mio.commons.URL;
 import io.mio.register.Registry;
@@ -25,54 +24,38 @@ public class NacosRegistryFactory extends AbstractRegistryFactory {
 
     @Override
     protected Registry createRegistry(URL url) {
-        return new NacosRegistry(url, buildNamingService(url));
-    }
+        Properties properties = new Properties();
+        StringBuilder sb = new StringBuilder(url.getHost()).append(":").append(url.getPort());
+        String backup = url.getParameter(Constants.BACKUP_KEY);
+        if (backup != null) {
+            sb.append(",").append(backup);
+        }
 
-    private NamingService buildNamingService(URL url) {
-        Properties nacosProperties = buildNacosProperties(url);
-        NamingService namingService;
+        properties.put(SERVER_ADDR, sb.toString());
+        if (StringUtils.isNotEmpty(url.getParameter(NAMESPACE))) {
+            properties.setProperty(NAMESPACE, url.getParameter(NAMESPACE));
+        }
+        if (StringUtils.isNotEmpty(url.getParameter(NACOS_NAMING_LOG_NAME))) {
+            properties.setProperty(NACOS_NAMING_LOG_NAME, url.getParameter(NACOS_NAMING_LOG_NAME));
+        }
+        if (StringUtils.isNotEmpty(url.getParameter(ENDPOINT))) {
+            properties.setProperty(ENDPOINT, url.getParameter(ENDPOINT));
+        }
+        if (StringUtils.isNotEmpty(url.getParameter(ACCESS_KEY))) {
+            properties.setProperty(ACCESS_KEY, url.getParameter(ACCESS_KEY));
+        }
+        if (StringUtils.isNotEmpty(url.getParameter(SECRET_KEY))) {
+            properties.setProperty(SECRET_KEY, url.getParameter(SECRET_KEY));
+        }
+        if (StringUtils.isNotEmpty(url.getParameter(CLUSTER_NAME))) {
+            properties.setProperty(CLUSTER_NAME, url.getParameter(CLUSTER_NAME));
+        }
+
         try {
-            namingService = NacosFactory.createNamingService(nacosProperties);
+            return new NacosRegistry(url, NacosFactory.createNamingService(properties));
         } catch (NacosException e) {
             log.error(e.getErrMsg(), e);
             throw new IllegalStateException(e);
-        }
-        return namingService;
-    }
-
-    private Properties buildNacosProperties(URL url) {
-        Properties properties = new Properties();
-        setServerAddr(url, properties);
-        setProperties(url, properties);
-        return properties;
-    }
-
-    private void setServerAddr(URL url, Properties properties) {
-        StringBuilder serverAddrBuilder = new StringBuilder(url.getHost()).append(":").append(url.getPort());
-
-        // Append backup parameter as other servers
-        String backup = url.getParameter(Constants.BACKUP_KEY);
-        if (backup != null) {
-            serverAddrBuilder.append(",").append(backup);
-        }
-
-        String serverAddr = serverAddrBuilder.toString();
-        properties.put(SERVER_ADDR, serverAddr);
-    }
-
-    private void setProperties(URL url, Properties properties) {
-        putPropertyIfAbsent(url, properties, NAMESPACE);
-        putPropertyIfAbsent(url, properties, NACOS_NAMING_LOG_NAME);
-        putPropertyIfAbsent(url, properties, ENDPOINT);
-        putPropertyIfAbsent(url, properties, ACCESS_KEY);
-        putPropertyIfAbsent(url, properties, SECRET_KEY);
-        putPropertyIfAbsent(url, properties, CLUSTER_NAME);
-    }
-
-    private void putPropertyIfAbsent(URL url, Properties properties, String propertyName) {
-        String propertyValue = url.getParameter(propertyName);
-        if (StringUtils.isNotEmpty(propertyValue)) {
-            properties.setProperty(propertyName, propertyValue);
         }
     }
 

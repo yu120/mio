@@ -39,12 +39,11 @@ public class NacosRegistry extends AbstractFailbackRegistry {
     private static final long LOOKUP_INTERVAL = 30;
     private volatile ScheduledExecutorService scheduledExecutorService;
     private final NamingService namingService;
-    private final ConcurrentMap<String, EventListener> nacosListeners;
+    private final ConcurrentMap<String, EventListener> nacosListeners = new ConcurrentHashMap<>();
 
     public NacosRegistry(URL url, NamingService namingService) {
         super(url);
         this.namingService = namingService;
-        this.nacosListeners = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -55,13 +54,14 @@ public class NacosRegistry extends AbstractFailbackRegistry {
     @Override
     public List<URL> lookup(final URL url) {
         final List<URL> urls = new LinkedList<>();
-        execute(namingService -> {
+        this.execute(namingService -> {
             List<String> serviceNames = getServiceNames(url, null);
             for (String serviceName : serviceNames) {
                 List<Instance> instances = namingService.getAllInstances(serviceName);
                 urls.addAll(buildURLs(url, instances));
             }
         });
+
         return urls;
     }
 
@@ -69,12 +69,12 @@ public class NacosRegistry extends AbstractFailbackRegistry {
     public void doRegister(URL url) {
         final String serviceName = getServiceName(url);
         final Instance instance = createInstance(url);
-        execute(namingService -> namingService.registerInstance(serviceName, instance));
+        this.execute(namingService -> namingService.registerInstance(serviceName, instance));
     }
 
     @Override
     public void doUnregister(final URL url) {
-        execute(namingService -> {
+        this.execute(namingService -> {
             String serviceName = getServiceName(url);
             Instance instance = createInstance(url);
             namingService.deregisterInstance(serviceName, instance.getIp(), instance.getPort());
@@ -88,7 +88,7 @@ public class NacosRegistry extends AbstractFailbackRegistry {
     }
 
     private void doSubscribe(final URL url, final NotifyListener listener, final List<String> serviceNames) {
-        execute(namingService -> {
+        this.execute(namingService -> {
             for (String serviceName : serviceNames) {
                 List<Instance> instances = namingService.getAllInstances(serviceName);
                 notifySubscriber(url, listener, instances);
@@ -162,7 +162,7 @@ public class NacosRegistry extends AbstractFailbackRegistry {
 
     private List<String> getAllServiceNames() {
         final List<String> serviceNames = new LinkedList<>();
-        execute(namingService -> {
+        this.execute(namingService -> {
             int pageIndex = 1;
             ListView<String> listView = namingService.getServicesOfServer(pageIndex, PAGINATION_SIZE);
             // First page data

@@ -149,7 +149,7 @@ public abstract class AbstractFailbackRegistry extends AbstractFaillocalRegistry
                 notify(url, listener, urls);
                 log.error("Failed to subscribe " + url + ", Using cached list: " + urls
                         + " from cache file: " + getUrl().getParameter(Constants.FILE_KEY,
-                        System.getProperty("user.home") + "/dubbo-registry-" +
+                        System.getProperty("user.home") + "/mio-registry-" +
                                 url.getHost() + ".cache") + ", cause: " + t.getMessage(), t);
             } else {
                 // 如果开启了启动时检测，则直接抛出异常
