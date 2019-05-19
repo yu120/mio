@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 
 /**
  * Abstract Fail Local Registry
@@ -31,6 +32,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
 
     private static final char URL_SEPARATOR = ' ';
     private static final String URL_SPLIT = "\\s+";
+    public static final Pattern COMMA_SPLIT_PATTERN = Pattern.compile("\\s*[,]+\\s*");
 
     private URL url;
     private File file;
@@ -52,7 +54,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
         this.url = url;
 
         // 启动文件保存定时器
-        this.syncSaveFile = url.getParameter(Constants.REGISTRY_FILESAVE_SYNC_KEY, false);
+        this.syncSaveFile = url.getParameter(Constants.REGISTRY_FILE_SAVE_SYNC_KEY, false);
         String filename = url.getParameter(Constants.FILE_KEY,
                 System.getProperty("user.home") + "/.mio/mio-registry-" + url.getHost() + ".cache");
         if (!StringUtils.isEmpty(filename)) {
@@ -496,7 +498,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
         if (values == null || values.length() == 0) {
             return false;
         }
-        String[] tempValues = Constants.COMMA_SPLIT_PATTERN.split(values);
+        String[] tempValues = COMMA_SPLIT_PATTERN.split(values);
         if (value != null && value.length() > 0 && tempValues != null && tempValues.length > 0) {
             for (String v : tempValues) {
                 if (value.equals(v)) {
