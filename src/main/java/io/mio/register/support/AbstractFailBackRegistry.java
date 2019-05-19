@@ -207,13 +207,13 @@ public abstract class AbstractFailBackRegistry extends AbstractFailLocalRegistry
         // register
         Set<URL> recoverRegistered = new HashSet<>(this.getRegistered());
         if (!recoverRegistered.isEmpty()) {
-            log.info("Recover register url " + recoverRegistered);
+            log.info("Recover register url: {}", recoverRegistered);
             failedRegistered.addAll(recoverRegistered);
         }
         // subscribe
         Map<URL, Set<NotifyListener>> recoverSubscribed = new HashMap<>(this.getSubscribed());
         if (!recoverSubscribed.isEmpty()) {
-            log.info("Recover subscribe url " + recoverSubscribed.keySet());
+            log.info("Recover subscribe url: {}", recoverSubscribed.keySet());
             for (Map.Entry<URL, Set<NotifyListener>> entry : recoverSubscribed.entrySet()) {
                 URL url = entry.getKey();
                 for (NotifyListener listener : entry.getValue()) {
@@ -237,7 +237,7 @@ public abstract class AbstractFailBackRegistry extends AbstractFailLocalRegistry
         if (!failedRegistered.isEmpty()) {
             Set<URL> failed = new HashSet<>(failedRegistered);
             if (failed.size() > 0) {
-                log.info("Retry register " + failed);
+                log.info("Retry register: {}", failed);
                 try {
                     for (URL url : failed) {
                         try {
@@ -259,7 +259,7 @@ public abstract class AbstractFailBackRegistry extends AbstractFailLocalRegistry
         if (!failedUnregistered.isEmpty()) {
             Set<URL> failed = new HashSet<>(failedUnregistered);
             if (failed.size() > 0) {
-                log.info("Retry unregister " + failed);
+                log.info("Retry unregister: {}", failed);
                 try {
                     for (URL url : failed) {
                         try {
@@ -286,7 +286,7 @@ public abstract class AbstractFailBackRegistry extends AbstractFailLocalRegistry
                 }
             }
             if (failed.size() > 0) {
-                log.info("Retry subscribe " + failed);
+                log.info("Retry subscribe: {}", failed);
                 try {
                     for (Map.Entry<URL, Set<NotifyListener>> entry : failed.entrySet()) {
                         URL url = entry.getKey();
@@ -317,7 +317,7 @@ public abstract class AbstractFailBackRegistry extends AbstractFailLocalRegistry
                 }
             }
             if (failed.size() > 0) {
-                log.info("Retry unsubscribe " + failed);
+                log.info("Retry unsubscribe: {}", failed);
                 try {
                     for (Map.Entry<URL, Set<NotifyListener>> entry : failed.entrySet()) {
                         URL url = entry.getKey();
@@ -348,7 +348,7 @@ public abstract class AbstractFailBackRegistry extends AbstractFailLocalRegistry
                 }
             }
             if (failed.size() > 0) {
-                log.info("Retry notify " + failed);
+                log.info("Retry notify: {}", failed);
                 try {
                     for (Map<NotifyListener, List<URL>> values : failed.values()) {
                         for (Map.Entry<NotifyListener, List<URL>> entry : values.entrySet()) {
@@ -375,6 +375,7 @@ public abstract class AbstractFailBackRegistry extends AbstractFailLocalRegistry
     public void destroy() {
         super.destroy();
         try {
+            retryExecutor.shutdown();
             retryFuture.cancel(true);
         } catch (Throwable t) {
             log.warn(t.getMessage(), t);
@@ -383,12 +384,34 @@ public abstract class AbstractFailBackRegistry extends AbstractFailLocalRegistry
 
     // ==== 模板方法 ====
 
+    /**
+     * Handler register
+     *
+     * @param url {@link URL}
+     */
     protected abstract void doRegister(URL url);
 
+    /**
+     * Handler cancel register
+     *
+     * @param url {@link URL}
+     */
     protected abstract void doUnregister(URL url);
 
+    /**
+     * Handler subscribe
+     *
+     * @param url      {@link URL}
+     * @param listener {@link NotifyListener}
+     */
     protected abstract void doSubscribe(URL url, NotifyListener listener);
 
+    /**
+     * Handler cancel subscribe
+     *
+     * @param url      {@link URL}
+     * @param listener {@link NotifyListener}
+     */
     protected abstract void doUnsubscribe(URL url, NotifyListener listener);
 
 }

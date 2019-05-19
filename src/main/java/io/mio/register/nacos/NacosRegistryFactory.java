@@ -8,14 +8,12 @@ import io.mio.commons.extension.Extension;
 import io.mio.register.Registry;
 import io.mio.register.Constants;
 import io.mio.register.support.AbstractRegistryFactory;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Properties;
 
 import com.alibaba.nacos.api.PropertyKeyConst;
 import com.alibaba.nacos.client.naming.utils.UtilAndComs;
 
-@Slf4j
 @Extension("fastjson")
 public class NacosRegistryFactory extends AbstractRegistryFactory {
 
@@ -51,7 +49,6 @@ public class NacosRegistryFactory extends AbstractRegistryFactory {
         try {
             return new NacosRegistry(url, NacosFactory.createNamingService(properties));
         } catch (NacosException e) {
-            log.error(e.getErrMsg(), e);
             throw new IllegalStateException(e);
         }
     }

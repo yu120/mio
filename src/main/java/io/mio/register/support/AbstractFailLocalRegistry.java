@@ -41,7 +41,7 @@ public abstract class AbstractFailLocalRegistry implements Registry {
     private final AtomicLong lastCacheChanged = new AtomicLong();
     private final ExecutorService registryCacheExecutor = new ThreadPoolExecutor(
             1, 1, 0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<Runnable>(), new NamedThreadFactory("save-registry-cache", true));
+            new LinkedBlockingQueue<Runnable>(), new NamedThreadFactory("store-registry-cache", true));
 
     private final Set<URL> registered = new ConcurrentHashSet<>();
     private final ConcurrentMap<URL, Set<NotifyListener>> subscribed = new ConcurrentHashMap<>();
@@ -62,7 +62,7 @@ public abstract class AbstractFailLocalRegistry implements Registry {
             if (!file.exists() && file.getParentFile() != null && !file.getParentFile().exists()) {
                 if (!file.getParentFile().mkdirs()) {
                     throw new IllegalArgumentException("Invalid registry store file " +
-                            file + ", cause: Failed to create directory " + file.getParentFile() + "!");
+                            file + ", cause: Failed to create directory " + file.getParentFile());
                 }
             }
         }
@@ -127,7 +127,6 @@ public abstract class AbstractFailLocalRegistry implements Registry {
                     try {
                         try (FileOutputStream outputFile = new FileOutputStream(file)) {
                             newProperties.store(outputFile, "Mio Registry Cache");
-                            newProperties.store(outputFile, "Mi Registry Cache");
                         }
                     } finally {
                         lock.release();
@@ -138,7 +137,6 @@ public abstract class AbstractFailLocalRegistry implements Registry {
             if (version < lastCacheChanged.get()) {
                 return;
             }
-
             registryCacheExecutor.execute(new SaveProperties(lastCacheChanged.incrementAndGet()));
             log.warn("Failed to save registry store file, cause: " + e.getMessage(), e);
         }
@@ -148,9 +146,9 @@ public abstract class AbstractFailLocalRegistry implements Registry {
         if (file != null && file.exists()) {
             try (InputStream in = new FileInputStream(file)) {
                 properties.load(in);
-                log.info("Load registry store file " + file + ", data: " + properties);
+                log.info("Load registry store file {}, data: {}", file, properties);
             } catch (Throwable e) {
-                log.warn("Failed to load registry store file " + file, e);
+                log.warn("Failed to load registry store file: " + file, e);
             }
         }
     }
@@ -208,7 +206,7 @@ public abstract class AbstractFailLocalRegistry implements Registry {
             throw new IllegalArgumentException("register url == null");
         }
         if (log.isInfoEnabled()) {
-            log.info("Register: " + url);
+            log.info("Register: {}", url);
         }
         registered.add(url);
     }
@@ -219,7 +217,7 @@ public abstract class AbstractFailLocalRegistry implements Registry {
             throw new IllegalArgumentException("unregister url == null");
         }
         if (log.isInfoEnabled()) {
-            log.info("Unregister: " + url);
+            log.info("Unregister: {}", url);
         }
         registered.remove(url);
     }
@@ -233,7 +231,7 @@ public abstract class AbstractFailLocalRegistry implements Registry {
             throw new IllegalArgumentException("subscribe listener == null");
         }
         if (log.isInfoEnabled()) {
-            log.info("Subscribe: " + url);
+            log.info("Subscribe: {}", url);
         }
         Set<NotifyListener> listeners = subscribed.get(url);
         if (listeners == null) {
@@ -252,7 +250,7 @@ public abstract class AbstractFailLocalRegistry implements Registry {
             throw new IllegalArgumentException("unsubscribe listener == null");
         }
         if (log.isInfoEnabled()) {
-            log.info("Unsubscribe: " + url);
+            log.info("Unsubscribe: {}", url);
         }
         Set<NotifyListener> listeners = subscribed.get(url);
         if (listeners != null) {
@@ -270,7 +268,7 @@ public abstract class AbstractFailLocalRegistry implements Registry {
         Set<URL> recoverRegistered = new HashSet<>(this.getRegistered());
         if (!recoverRegistered.isEmpty()) {
             if (log.isInfoEnabled()) {
-                log.info("Recover register url " + recoverRegistered);
+                log.info("Recover register url: {}", recoverRegistered);
             }
             for (URL url : recoverRegistered) {
                 register(url);
@@ -281,7 +279,7 @@ public abstract class AbstractFailLocalRegistry implements Registry {
         Map<URL, Set<NotifyListener>> recoverSubscribed = new HashMap<>(this.getSubscribed());
         if (!recoverSubscribed.isEmpty()) {
             if (log.isInfoEnabled()) {
-                log.info("Recover subscribe url " + recoverSubscribed.keySet());
+                log.info("Recover subscribe url: {}", recoverSubscribed.keySet());
             }
             for (Map.Entry<URL, Set<NotifyListener>> entry : recoverSubscribed.entrySet()) {
                 URL url = entry.getKey();
@@ -347,11 +345,11 @@ public abstract class AbstractFailLocalRegistry implements Registry {
         }
         if (urls == null || urls.size() == 0
                 || !Constants.ANY_VALUE.equals(url.getServiceInterface())) {
-            log.warn("Ignore empty notify urls for subscribe url " + url);
+            log.warn("Ignore empty notify urls for subscribe url: " + url);
             return;
         }
 
-        log.info("Notify urls for subscribe url " + url + ", urls: " + urls);
+        log.info("Notify urls for subscribe url {}, urls: {}", url, urls);
         Map<String, List<URL>> result = new HashMap<>();
         for (URL u : urls) {
             if (isMatch(url, u)) {
@@ -408,7 +406,9 @@ public abstract class AbstractFailLocalRegistry implements Registry {
 
     @Override
     public void destroy() {
-        log.info("Destroy registry:" + getUrl());
+        log.info("Destroy registry: {}", getUrl());
+        registryCacheExecutor.shutdown();
+
         // destroy registered
         Set<URL> destroyRegistered = new HashSet<>(this.getRegistered());
         if (!destroyRegistered.isEmpty()) {
@@ -419,7 +419,7 @@ public abstract class AbstractFailLocalRegistry implements Registry {
 
                 try {
                     this.unregister(url);
-                    log.info("Destroy unregister url " + url);
+                    log.info("Destroy unregister url: {}", url);
                 } catch (Throwable t) {
                     log.warn("Failed to unregister url " + url + " to registry " +
                             getUrl() + " on destroy, cause: " + t.getMessage(), t);
@@ -434,10 +434,10 @@ public abstract class AbstractFailLocalRegistry implements Registry {
                 for (NotifyListener listener : entry.getValue()) {
                     try {
                         this.unsubscribe(entry.getKey(), listener);
-                        log.info("Destroy unsubscribe url " + entry.getKey());
+                        log.info("Destroy unsubscribe url {}", entry.getKey());
                     } catch (Throwable t) {
-                        log.warn("Failed to unsubscribe url " + entry.getKey() + " to registry " +
-                                getUrl() + " on destroy, cause: " + t.getMessage(), t);
+                        log.warn("Failed to unsubscribe url {} to registry {} on destroy, cause: {}",
+                                entry.getKey(), getUrl(), t.getMessage(), t);
                     }
                 }
             }
