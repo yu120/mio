@@ -5,7 +5,6 @@ import io.mio.commons.URL;
 import io.mio.commons.thread.NamedThreadFactory;
 import io.mio.register.Constants;
 import io.mio.register.NotifyListener;
-import io.mio.register.SkipFailbackException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -79,21 +78,14 @@ public abstract class AbstractFailBackRegistry extends AbstractFailLocalRegistry
             // 向服务器端发送注册请求
             this.doRegister(url);
         } catch (Exception e) {
-            Throwable t = e;
-
             // 如果开启了启动时检测，则直接抛出异常
-            boolean check = getUrl().getParameter(Constants.CHECK_KEY, true)
+            if (getUrl().getParameter(Constants.CHECK_KEY, true)
                     && url.getParameter(Constants.CHECK_KEY, true)
-                    && !Constants.CONSUMER_PROTOCOL.equals(url.getProtocol());
-            boolean skipFailback = t instanceof SkipFailbackException;
-            if (check || skipFailback) {
-                if (skipFailback) {
-                    t = t.getCause();
-                }
+                    && !Constants.CONSUMER_PROTOCOL.equals(url.getProtocol())) {
                 throw new IllegalStateException("Failed to register " + url + " to registry "
-                        + getUrl().getAddress() + ", cause: " + t.getMessage(), t);
+                        + getUrl().getAddress() + ", cause: " + e.getMessage(), e);
             } else {
-                log.error("Failed to register " + url + ", waiting for retry, cause: " + t.getMessage(), t);
+                log.error("Failed to register " + url + ", waiting for retry, cause: " + e.getMessage(), e);
             }
 
             // 将失败的注册请求记录到失败列表，定时重试
@@ -111,21 +103,14 @@ public abstract class AbstractFailBackRegistry extends AbstractFailLocalRegistry
             // 向服务器端发送取消注册请求
             this.doUnregister(url);
         } catch (Exception e) {
-            Throwable t = e;
-
             // 如果开启了启动时检测，则直接抛出异常
-            boolean check = getUrl().getParameter(Constants.CHECK_KEY, true)
+            if (getUrl().getParameter(Constants.CHECK_KEY, true)
                     && url.getParameter(Constants.CHECK_KEY, true)
-                    && !Constants.CONSUMER_PROTOCOL.equals(url.getProtocol());
-            boolean skipFailback = t instanceof SkipFailbackException;
-            if (check || skipFailback) {
-                if (skipFailback) {
-                    t = t.getCause();
-                }
+                    && !Constants.CONSUMER_PROTOCOL.equals(url.getProtocol())) {
                 throw new IllegalStateException("Failed to unregister " + url + " to registry "
-                        + getUrl().getAddress() + ", cause: " + t.getMessage(), t);
+                        + getUrl().getAddress() + ", cause: " + e.getMessage(), e);
             } else {
-                log.error("Failed to uregister " + url + ", waiting for retry, cause: " + t.getMessage(), t);
+                log.error("Failed to uregister " + url + ", waiting for retry, cause: " + e.getMessage(), e);
             }
 
             // 将失败的取消注册请求记录到失败列表，定时重试
@@ -142,23 +127,17 @@ public abstract class AbstractFailBackRegistry extends AbstractFailLocalRegistry
             // 向服务器端发送订阅请求
             this.doSubscribe(url, listener);
         } catch (Exception e) {
-            Throwable t = e;
             List<URL> urls = super.getCacheUrls(url);
             if (urls != null && urls.size() > 0) {
                 this.notify(url, listener, urls);
-                log.error("Failed to subscribe " + url + ", Using cached list: " + urls + ", cause: " + t.getMessage(), t);
+                log.error("Failed to subscribe " + url + ", Using cached list: " + urls + ", cause: " + e.getMessage(), e);
             } else {
                 // 如果开启了启动时检测，则直接抛出异常
-                boolean check = getUrl().getParameter(Constants.CHECK_KEY, true)
-                        && url.getParameter(Constants.CHECK_KEY, true);
-                boolean skipFailback = t instanceof SkipFailbackException;
-                if (check || skipFailback) {
-                    if (skipFailback) {
-                        t = t.getCause();
-                    }
-                    throw new IllegalStateException("Failed to subscribe " + url + ", cause: " + t.getMessage(), t);
+                if (getUrl().getParameter(Constants.CHECK_KEY, true)
+                        && url.getParameter(Constants.CHECK_KEY, true)) {
+                    throw new IllegalStateException("Failed to subscribe " + url + ", cause: " + e.getMessage(), e);
                 } else {
-                    log.error("Failed to subscribe " + url + ", waiting for retry, cause: " + t.getMessage(), t);
+                    log.error("Failed to subscribe " + url + ", waiting for retry, cause: " + e.getMessage(), e);
                 }
             }
 
@@ -176,20 +155,13 @@ public abstract class AbstractFailBackRegistry extends AbstractFailLocalRegistry
             // 向服务器端发送取消订阅请求
             this.doUnsubscribe(url, listener);
         } catch (Exception e) {
-            Throwable t = e;
-
             // 如果开启了启动时检测，则直接抛出异常
-            boolean check = getUrl().getParameter(Constants.CHECK_KEY, true)
-                    && url.getParameter(Constants.CHECK_KEY, true);
-            boolean skipFailback = t instanceof SkipFailbackException;
-            if (check || skipFailback) {
-                if (skipFailback) {
-                    t = t.getCause();
-                }
+            if (getUrl().getParameter(Constants.CHECK_KEY, true)
+                    && url.getParameter(Constants.CHECK_KEY, true)) {
                 throw new IllegalStateException("Failed to unsubscribe " + url + " to registry "
-                        + getUrl().getAddress() + ", cause: " + t.getMessage(), t);
+                        + getUrl().getAddress() + ", cause: " + e.getMessage(), e);
             } else {
-                log.error("Failed to unsubscribe " + url + ", waiting for retry, cause: " + t.getMessage(), t);
+                log.error("Failed to unsubscribe " + url + ", waiting for retry, cause: " + e.getMessage(), e);
             }
 
             // 将失败的取消订阅请求记录到失败列表，定时重试
