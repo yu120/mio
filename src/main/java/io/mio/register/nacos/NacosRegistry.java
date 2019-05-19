@@ -38,8 +38,8 @@ public class NacosRegistry extends AbstractFailbackRegistry {
     private static final String SERVICE_NAME_SEPARATOR = ":";
     private static final int PAGINATION_SIZE = 100;
     private static final long LOOKUP_INTERVAL = 30;
-    private volatile ScheduledExecutorService scheduledExecutorService;
     private final NamingService namingService;
+    private volatile ScheduledExecutorService scheduledExecutorService;
     private final ConcurrentMap<String, EventListener> nacosListeners = new ConcurrentHashMap<>();
 
     public NacosRegistry(URL url, NamingService namingService) {

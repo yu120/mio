@@ -63,6 +63,7 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
         url.setPath(Registry.class.getName());
         url = url.addParameter(Constants.INTERFACE_KEY, Registry.class.getName());
         String key = url.getServiceKey();
+
         // 锁定注册中心获取过程，保证注册中心单一实例
         LOCK.lock();
         try {
@@ -70,7 +71,7 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
             if (registry != null) {
                 return registry;
             }
-            registry = createRegistry(url);
+            registry = this.createRegistry(url);
             if (registry == null) {
                 throw new IllegalStateException("Can not create registry " + url);
             }
@@ -82,6 +83,12 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
         }
     }
 
+    /**
+     * Create registry
+     *
+     * @param url {@link URL}
+     * @return {@link Registry}
+     */
     protected abstract Registry createRegistry(URL url);
 
 }

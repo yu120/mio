@@ -34,16 +34,13 @@ public abstract class AbstractFailbackRegistry extends AbstractFaillocalRegistry
     public AbstractFailbackRegistry(URL url) {
         super(url);
         int retryPeriod = url.getParameter(Constants.REGISTRY_RETRY_PERIOD_KEY, Constants.DEFAULT_REGISTRY_RETRY_PERIOD);
-        this.retryFuture = retryExecutor.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    // 检测并连接注册中心
-                    doFailRetry();
-                } catch (Throwable t) {
-                    // 防御性容错
-                    log.error("Unexpected error occur at failed retry, cause: " + t.getMessage(), t);
-                }
+        this.retryFuture = retryExecutor.scheduleWithFixedDelay(() -> {
+            try {
+                // 检测并连接注册中心
+                this.doFailRetry();
+            } catch (Throwable t) {
+                // 防御性容错
+                log.error("Unexpected error occur at failed retry, cause: " + t.getMessage(), t);
             }
         }, retryPeriod, retryPeriod, TimeUnit.MILLISECONDS);
     }
@@ -77,9 +74,10 @@ public abstract class AbstractFailbackRegistry extends AbstractFaillocalRegistry
         super.register(url);
         failedRegistered.remove(url);
         failedUnregistered.remove(url);
+
         try {
             // 向服务器端发送注册请求
-            doRegister(url);
+            this.doRegister(url);
         } catch (Exception e) {
             Throwable t = e;
 
@@ -108,9 +106,10 @@ public abstract class AbstractFailbackRegistry extends AbstractFaillocalRegistry
         super.unregister(url);
         failedRegistered.remove(url);
         failedUnregistered.remove(url);
+
         try {
             // 向服务器端发送取消注册请求
-            doUnregister(url);
+            this.doUnregister(url);
         } catch (Exception e) {
             Throwable t = e;
 
@@ -137,13 +136,14 @@ public abstract class AbstractFailbackRegistry extends AbstractFaillocalRegistry
     @Override
     public void subscribe(URL url, NotifyListener listener) {
         super.subscribe(url, listener);
-        removeFailedSubscribed(url, listener);
+        this.removeFailedSubscribed(url, listener);
+
         try {
             // 向服务器端发送订阅请求
-            doSubscribe(url, listener);
+            this.doSubscribe(url, listener);
         } catch (Exception e) {
             Throwable t = e;
-            List<URL> urls = getCacheUrls(url);
+            List<URL> urls = super.getCacheUrls(url);
             if (urls != null && urls.size() > 0) {
                 notify(url, listener, urls);
                 log.error("Failed to subscribe " + url + ", Using cached list: " + urls
@@ -166,17 +166,18 @@ public abstract class AbstractFailbackRegistry extends AbstractFaillocalRegistry
             }
 
             // 将失败的订阅请求记录到失败列表，定时重试
-            addFailedSubscribed(url, listener);
+            this.addFailedSubscribed(url, listener);
         }
     }
 
     @Override
     public void unsubscribe(URL url, NotifyListener listener) {
         super.unsubscribe(url, listener);
-        removeFailedSubscribed(url, listener);
+        this.removeFailedSubscribed(url, listener);
+
         try {
             // 向服务器端发送取消订阅请求
-            doUnsubscribe(url, listener);
+            this.doUnsubscribe(url, listener);
         } catch (Exception e) {
             Throwable t = e;
 
@@ -213,7 +214,7 @@ public abstract class AbstractFailbackRegistry extends AbstractFaillocalRegistry
             throw new IllegalArgumentException("notify listener == null");
         }
         try {
-            doNotify(url, listener, urls);
+            this.doNotify(url, listener, urls);
         } catch (Exception t) {
             // 将失败的通知请求记录到失败列表，定时重试
             Map<NotifyListener, List<URL>> listeners = failedNotified.get(url);
@@ -235,19 +236,19 @@ public abstract class AbstractFailbackRegistry extends AbstractFaillocalRegistry
         super.recover();
 
         // register
-        Set<URL> recoverRegistered = new HashSet<>(getRegistered());
+        Set<URL> recoverRegistered = new HashSet<>(this.getRegistered());
         if (!recoverRegistered.isEmpty()) {
             log.info("Recover register url " + recoverRegistered);
             failedRegistered.addAll(recoverRegistered);
         }
         // subscribe
-        Map<URL, Set<NotifyListener>> recoverSubscribed = new HashMap<>(getSubscribed());
+        Map<URL, Set<NotifyListener>> recoverSubscribed = new HashMap<>(this.getSubscribed());
         if (!recoverSubscribed.isEmpty()) {
             log.info("Recover subscribe url " + recoverSubscribed.keySet());
             for (Map.Entry<URL, Set<NotifyListener>> entry : recoverSubscribed.entrySet()) {
                 URL url = entry.getKey();
                 for (NotifyListener listener : entry.getValue()) {
-                    addFailedSubscribed(url, listener);
+                    this.addFailedSubscribed(url, listener);
                 }
             }
         }
@@ -271,7 +272,7 @@ public abstract class AbstractFailbackRegistry extends AbstractFaillocalRegistry
                 try {
                     for (URL url : failed) {
                         try {
-                            doRegister(url);
+                            this.doRegister(url);
                             failedRegistered.remove(url);
                         } catch (Throwable t) {
                             // 忽略所有异常，等待下次重试
@@ -293,7 +294,7 @@ public abstract class AbstractFailbackRegistry extends AbstractFaillocalRegistry
                 try {
                     for (URL url : failed) {
                         try {
-                            doUnregister(url);
+                            this.doUnregister(url);
                             failedUnregistered.remove(url);
                         } catch (Throwable t) {
                             // 忽略所有异常，等待下次重试
@@ -323,7 +324,7 @@ public abstract class AbstractFailbackRegistry extends AbstractFaillocalRegistry
                         Set<NotifyListener> listeners = entry.getValue();
                         for (NotifyListener listener : listeners) {
                             try {
-                                doSubscribe(url, listener);
+                                this.doSubscribe(url, listener);
                                 listeners.remove(listener);
                             } catch (Throwable t) {
                                 // 忽略所有异常，等待下次重试
@@ -354,7 +355,7 @@ public abstract class AbstractFailbackRegistry extends AbstractFaillocalRegistry
                         Set<NotifyListener> listeners = entry.getValue();
                         for (NotifyListener listener : listeners) {
                             try {
-                                doUnsubscribe(url, listener);
+                                this.doUnsubscribe(url, listener);
                                 listeners.remove(listener);
                             } catch (Throwable t) {
                                 // 忽略所有异常，等待下次重试

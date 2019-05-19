@@ -50,13 +50,13 @@ public abstract class AbstractFaillocalRegistry implements Registry {
             throw new IllegalArgumentException("registry url == null");
         }
         this.url = url;
+
         // 启动文件保存定时器
         this.syncSaveFile = url.getParameter(Constants.REGISTRY_FILESAVE_SYNC_KEY, false);
         String filename = url.getParameter(Constants.FILE_KEY,
                 System.getProperty("user.home") + "/.mio/mio-registry-" + url.getHost() + ".cache");
-        File file = null;
         if (!StringUtils.isEmpty(filename)) {
-            file = new File(filename);
+            this.file = new File(filename);
             if (!file.exists() && file.getParentFile() != null && !file.getParentFile().exists()) {
                 if (!file.getParentFile().mkdirs()) {
                     throw new IllegalArgumentException("Invalid registry store file " +
@@ -64,9 +64,8 @@ public abstract class AbstractFaillocalRegistry implements Registry {
                 }
             }
         }
-        this.file = file;
-        loadProperties();
-        notify(url.getBackupUrls());
+        this.loadProperties();
+        this.notify(url.getBackupUrls());
     }
 
     private class SaveProperties implements Runnable {
@@ -266,7 +265,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
      */
     protected void recover() throws Exception {
         // register
-        Set<URL> recoverRegistered = new HashSet<>(getRegistered());
+        Set<URL> recoverRegistered = new HashSet<>(this.getRegistered());
         if (!recoverRegistered.isEmpty()) {
             if (log.isInfoEnabled()) {
                 log.info("Recover register url " + recoverRegistered);
@@ -277,7 +276,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
         }
 
         // subscribe
-        Map<URL, Set<NotifyListener>> recoverSubscribed = new HashMap<>(getSubscribed());
+        Map<URL, Set<NotifyListener>> recoverSubscribed = new HashMap<>(this.getSubscribed());
         if (!recoverSubscribed.isEmpty()) {
             if (log.isInfoEnabled()) {
                 log.info("Recover subscribe url " + recoverSubscribed.keySet());
@@ -285,7 +284,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
             for (Map.Entry<URL, Set<NotifyListener>> entry : recoverSubscribed.entrySet()) {
                 URL url = entry.getKey();
                 for (NotifyListener listener : entry.getValue()) {
-                    subscribe(url, listener);
+                    this.subscribe(url, listener);
                 }
             }
         }
@@ -304,7 +303,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
             if (listeners != null) {
                 for (NotifyListener listener : listeners) {
                     try {
-                        notify(entry.getKey(), listener, filterEmpty(entry.getKey(), urls));
+                        this.notify(entry.getKey(), listener, filterEmpty(entry.getKey(), urls));
                     } catch (Throwable t) {
                         log.error("Failed to notify registry event, urls: " + urls + ", cause: " + t.getMessage(), t);
                     }
@@ -370,7 +369,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
             String category = entry.getKey();
             List<URL> categoryList = entry.getValue();
             categoryNotified.put(category, categoryList);
-            saveProperties(url);
+            this.saveProperties(url);
             listener.notify(categoryList);
         }
     }
@@ -396,7 +395,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
             properties.setProperty(url.getServiceKey(), buf.toString());
             long version = lastCacheChanged.incrementAndGet();
             if (syncSaveFile) {
-                doSaveProperties(version);
+                this.doSaveProperties(version);
             } else {
                 registryCacheExecutor.execute(new SaveProperties(version));
             }
@@ -409,15 +408,15 @@ public abstract class AbstractFaillocalRegistry implements Registry {
     public void destroy() {
         log.info("Destroy registry:" + getUrl());
         // destroy registered
-        Set<URL> destroyRegistered = new HashSet<>(getRegistered());
+        Set<URL> destroyRegistered = new HashSet<>(this.getRegistered());
         if (!destroyRegistered.isEmpty()) {
-            for (URL url : new HashSet<>(getRegistered())) {
+            for (URL url : new HashSet<>(this.getRegistered())) {
                 if (!url.getParameter(Constants.DYNAMIC_KEY, true)) {
                     continue;
                 }
 
                 try {
-                    unregister(url);
+                    this.unregister(url);
                     log.info("Destroy unregister url " + url);
                 } catch (Throwable t) {
                     log.warn("Failed to unregister url " + url + " to registry " +
@@ -427,12 +426,12 @@ public abstract class AbstractFaillocalRegistry implements Registry {
         }
 
         // destroy subscribed
-        Map<URL, Set<NotifyListener>> destroySubscribed = new HashMap<>(getSubscribed());
+        Map<URL, Set<NotifyListener>> destroySubscribed = new HashMap<>(this.getSubscribed());
         if (!destroySubscribed.isEmpty()) {
             for (Map.Entry<URL, Set<NotifyListener>> entry : destroySubscribed.entrySet()) {
                 for (NotifyListener listener : entry.getValue()) {
                     try {
-                        unsubscribe(entry.getKey(), listener);
+                        this.unsubscribe(entry.getKey(), listener);
                         log.info("Destroy unsubscribe url " + entry.getKey());
                     } catch (Throwable t) {
                         log.warn("Failed to unsubscribe url " + entry.getKey() + " to registry " +
@@ -448,14 +447,14 @@ public abstract class AbstractFaillocalRegistry implements Registry {
         return getUrl().toString();
     }
 
-    public static boolean isMatch(URL consumerUrl, URL providerUrl) {
+    public boolean isMatch(URL consumerUrl, URL providerUrl) {
         String consumerInterface = consumerUrl.getServiceInterface();
         String providerInterface = providerUrl.getServiceInterface();
         if (!(Constants.ANY_VALUE.equals(consumerInterface) || consumerInterface.equals(providerInterface))) {
             return false;
         }
 
-        if (!isMatchCategory(providerUrl.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY),
+        if (!this.isMatchCategory(providerUrl.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY),
                 consumerUrl.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY))) {
             return false;
         }
@@ -473,7 +472,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
         String providerClassifier = providerUrl.getParameter(Constants.CLASSIFIER_KEY, Constants.ANY_VALUE);
         return (Constants.ANY_VALUE.equals(consumerGroup) ||
                 consumerGroup.equals(providerGroup) ||
-                isContains(consumerGroup, providerGroup))
+                this.isContains(consumerGroup, providerGroup))
                 && (Constants.ANY_VALUE.equals(consumerVersion) ||
                 consumerVersion.equals(providerVersion))
                 && (consumerClassifier == null ||
@@ -481,7 +480,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
                 consumerClassifier.equals(providerClassifier));
     }
 
-    private static boolean isMatchCategory(String category, String categories) {
+    private boolean isMatchCategory(String category, String categories) {
         if (categories == null || categories.length() == 0) {
             return Constants.DEFAULT_CATEGORY.equals(category);
         } else if (categories.contains(Constants.ANY_VALUE)) {
@@ -493,7 +492,7 @@ public abstract class AbstractFaillocalRegistry implements Registry {
         }
     }
 
-    private static boolean isContains(String values, String value) {
+    private boolean isContains(String values, String value) {
         if (values == null || values.length() == 0) {
             return false;
         }
