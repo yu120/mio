@@ -56,7 +56,7 @@ public class NacosRegistry extends AbstractFailBackRegistry {
     public List<URL> lookup(final URL url) {
         final List<URL> urls = new LinkedList<>();
         this.execute(namingService -> {
-            List<String> serviceNames = getServiceNames(url, null);
+            List<String> serviceNames = this.getServiceNames(url, null);
             for (String serviceName : serviceNames) {
                 List<Instance> instances = namingService.getAllInstances(serviceName);
                 urls.addAll(buildURLs(url, instances));
@@ -68,32 +68,32 @@ public class NacosRegistry extends AbstractFailBackRegistry {
 
     @Override
     public void doRegister(URL url) {
-        final String serviceName = getServiceName(url);
-        final Instance instance = createInstance(url);
+        final String serviceName = this.getServiceName(url);
+        final Instance instance = this.createInstance(url);
         this.execute(namingService -> namingService.registerInstance(serviceName, instance));
     }
 
     @Override
     public void doUnregister(final URL url) {
         this.execute(namingService -> {
-            String serviceName = getServiceName(url);
-            Instance instance = createInstance(url);
+            String serviceName = this.getServiceName(url);
+            Instance instance = this.createInstance(url);
             namingService.deregisterInstance(serviceName, instance.getIp(), instance.getPort());
         });
     }
 
     @Override
     public void doSubscribe(final URL url, final NotifyListener listener) {
-        List<String> serviceNames = getServiceNames(url, listener);
-        doSubscribe(url, listener, serviceNames);
+        List<String> serviceNames = this.getServiceNames(url, listener);
+        this.doSubscribe(url, listener, serviceNames);
     }
 
     private void doSubscribe(final URL url, final NotifyListener listener, final List<String> serviceNames) {
         this.execute(namingService -> {
             for (String serviceName : serviceNames) {
                 List<Instance> instances = namingService.getAllInstances(serviceName);
-                notifySubscriber(url, listener, instances);
-                subscribeEventListener(serviceName, url, listener);
+                this.notifySubscriber(url, listener, instances);
+                this.subscribeEventListener(serviceName, url, listener);
             }
         });
     }
@@ -101,7 +101,7 @@ public class NacosRegistry extends AbstractFailBackRegistry {
     @Override
     public void doUnsubscribe(URL url, NotifyListener listener) {
         if (Constants.ADMIN_PROTOCOL.equals(url.getProtocol())) {
-            shutdownServiceNamesLookup();
+            this.shutdownServiceNamesLookup();
         }
     }
 
@@ -120,10 +120,10 @@ public class NacosRegistry extends AbstractFailBackRegistry {
      */
     private List<String> getServiceNames(URL url, NotifyListener listener) {
         if (Constants.ADMIN_PROTOCOL.equals(url.getProtocol())) {
-            scheduleServiceNamesLookup(url, listener);
-            return getServiceNamesForOps(url);
+            this.scheduleServiceNamesLookup(url, listener);
+            return this.getServiceNamesForOps(url);
         } else {
-            return doGetServiceNames(url);
+            return this.doGetServiceNames(url);
         }
     }
 
@@ -132,8 +132,8 @@ public class NacosRegistry extends AbstractFailBackRegistry {
             scheduledExecutorService = new ScheduledThreadPoolExecutor(1,
                     new NamedThreadFactory("nacos-registry-"));
             scheduledExecutorService.scheduleAtFixedRate(() -> {
-                List<String> serviceNames = getAllServiceNames();
-                filterData(serviceNames, serviceName -> {
+                List<String> serviceNames = this.getAllServiceNames();
+                this.filterData(serviceNames, serviceName -> {
                     boolean accepted = false;
                     for (String category : ALL_SUPPORTED_CATEGORIES) {
                         String prefix = category + SERVICE_NAME_SEPARATOR;
@@ -144,7 +144,7 @@ public class NacosRegistry extends AbstractFailBackRegistry {
                     }
                     return accepted;
                 });
-                doSubscribe(url, listener, serviceNames);
+                this.doSubscribe(url, listener, serviceNames);
             }, LOOKUP_INTERVAL, LOOKUP_INTERVAL, TimeUnit.SECONDS);
         }
     }
@@ -156,8 +156,8 @@ public class NacosRegistry extends AbstractFailBackRegistry {
      * @return non-null
      */
     private List<String> getServiceNamesForOps(URL url) {
-        List<String> serviceNames = getAllServiceNames();
-        filterServiceNames(serviceNames, url);
+        List<String> serviceNames = this.getAllServiceNames();
+        this.filterServiceNames(serviceNames, url);
         return serviceNames;
     }
 
@@ -214,23 +214,18 @@ public class NacosRegistry extends AbstractFailBackRegistry {
             }
 
             String serviceInterface = segments[SERVICE_INTERFACE_INDEX];
-            if (!WILDCARD.equals(targetServiceInterface) &&
-                    // no match service interface
-                    !StringUtils.equals(targetServiceInterface, serviceInterface)) {
+            if (!WILDCARD.equals(targetServiceInterface) && !StringUtils.equals(targetServiceInterface, serviceInterface)) {
                 return false;
             }
 
             String version = segments[SERVICE_VERSION_INDEX];
-            if (!WILDCARD.equals(targetVersion) &&
-                    // no match service version
-                    !StringUtils.equals(targetVersion, version)) {
+            if (!WILDCARD.equals(targetVersion) && !StringUtils.equals(targetVersion, version)) {
                 return false;
             }
 
             String group = length > 3 ? segments[SERVICE_GROUP_INDEX] : null;
             // no match service group
-            return group == null || WILDCARD.equals(targetGroup)
-                    || StringUtils.equals(targetGroup, group);
+            return group == null || WILDCARD.equals(targetGroup) || StringUtils.equals(targetGroup, group);
         });
     }
 
@@ -243,7 +238,7 @@ public class NacosRegistry extends AbstractFailBackRegistry {
         String[] categories = getCategories(url);
         List<String> serviceNames = new ArrayList<>(categories.length);
         for (String category : categories) {
-            final String serviceName = getServiceName(url, category);
+            final String serviceName = this.getServiceName(url, category);
             serviceNames.add(serviceName);
         }
         return serviceNames;
@@ -263,13 +258,12 @@ public class NacosRegistry extends AbstractFailBackRegistry {
         return urls;
     }
 
-    private void subscribeEventListener(String serviceName, final URL url, final NotifyListener listener)
-            throws NacosException {
+    private void subscribeEventListener(String serviceName, final URL url, final NotifyListener listener) throws NacosException {
         if (!nacosListeners.containsKey(serviceName)) {
             EventListener eventListener = event -> {
                 if (event instanceof NamingEvent) {
                     NamingEvent e = (NamingEvent) event;
-                    notifySubscriber(url, listener, e.getInstances());
+                    this.notifySubscriber(url, listener, e.getInstances());
                 }
             };
             namingService.subscribe(serviceName, eventListener);
@@ -287,9 +281,9 @@ public class NacosRegistry extends AbstractFailBackRegistry {
     private void notifySubscriber(URL url, NotifyListener listener, Collection<Instance> instances) {
         List<Instance> healthyInstances = new LinkedList<>(instances);
         // Healthy Instances
-        filterHealthyInstances(healthyInstances);
-        List<URL> urls = buildURLs(url, healthyInstances);
-        NacosRegistry.this.notify(url, listener, urls);
+        this.filterHealthyInstances(healthyInstances);
+        List<URL> urls = this.buildURLs(url, healthyInstances);
+        this.notify(url, listener, urls);
     }
 
     /**
@@ -307,11 +301,7 @@ public class NacosRegistry extends AbstractFailBackRegistry {
         Map<String, String> metadata = instance.getMetadata();
         String protocol = metadata.get(Constants.PROTOCOL_KEY);
         String path = metadata.get(Constants.PATH_KEY);
-        return new URL(protocol,
-                instance.getIp(),
-                instance.getPort(),
-                path,
-                instance.getMetadata());
+        return new URL(protocol, instance.getIp(), instance.getPort(), path, instance.getMetadata());
     }
 
     private Instance createInstance(URL url) {
@@ -331,7 +321,7 @@ public class NacosRegistry extends AbstractFailBackRegistry {
 
     private String getServiceName(URL url) {
         String category = url.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY);
-        return getServiceName(url, category);
+        return this.getServiceName(url, category);
     }
 
     private String getServiceName(URL url, String category) {
@@ -392,4 +382,5 @@ public class NacosRegistry extends AbstractFailBackRegistry {
         void callback(NamingService namingService) throws NacosException;
 
     }
+
 }
