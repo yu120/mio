@@ -27,7 +27,10 @@ public class MioProtocol implements Serializable {
      */
     public static final int BASE_LENGTH = 4 + 4;
     public static final int HEAD_DATA = 0x76;
-    public static final int MAX_LENGTH = 2048;
+    /**
+     * 最大10MB
+     */
+    public static final int MAX_LENGTH = 10 * 1024 * 1024;
 
     /**
      * 消息的开头的信息标志
