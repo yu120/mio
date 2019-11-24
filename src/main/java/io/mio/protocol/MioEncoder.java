@@ -22,7 +22,7 @@ public class MioEncoder extends MessageToByteEncoder<MioProtocol> {
 
     @Override
     protected void encode(ChannelHandlerContext tcx, MioProtocol msg, ByteBuf out) throws Exception {
-        // 写入消息SmartCar的具体内容
+        // 写入消息的具体内容
 
         // 1.写入消息的开头的信息标志(int类型)
         out.writeInt(msg.getHeadData());

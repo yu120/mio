@@ -22,7 +22,6 @@ import java.util.List;
  */
 public class MioDecoder extends ByteToMessageDecoder {
 
-
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf buffer, List<Object> out) throws Exception {
         System.out.println("================");
@@ -45,11 +44,11 @@ public class MioDecoder extends ByteToMessageDecoder {
                     break;
                 }
 
-                // 未读到包头，略过一个字节。每次略过，一个字节，去读取，包头信息的开始标记
+                // 未读到包头，则跳过一个字节。每次跳过一个字节去读取包头信息的开始标记
                 buffer.resetReaderIndex();
                 buffer.readByte();
 
-                // 当略过一个字节之后，数据包的长度又变得不满足。此时应该结束,等待后面的数据到达
+                // 当跳过一个字节之后，数据包的长度又变得不满足。此时应该结束,等待后面的数据到达
                 if (buffer.readableBytes() < MioProtocol.BASE_LENGTH) {
                     return;
                 }
