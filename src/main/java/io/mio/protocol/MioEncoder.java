@@ -22,13 +22,13 @@ public class MioEncoder extends MessageToByteEncoder<MioProtocol> {
 
     @Override
     protected void encode(ChannelHandlerContext tcx, MioProtocol msg, ByteBuf out) throws Exception {
-        // 写入消息的具体内容
+        // 将协议数据写入消息中
 
-        // 1.写入消息的开头的信息标志(int类型)
+        // Step 1：写入消息的开头的信息标志(int类型)
         out.writeInt(msg.getHeadData());
-        // 2.写入消息的长度(int 类型)
+        // Step 2：写入消息的长度(int 类型)
         out.writeInt(msg.getContentLength());
-        // 3.写入消息的内容(byte[]类型)
+        // Step 3：写入消息的内容(byte[]类型)
         out.writeBytes(msg.getContent());
     }
 
