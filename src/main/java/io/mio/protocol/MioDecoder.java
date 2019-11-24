@@ -37,15 +37,16 @@ public class MioDecoder extends ByteToMessageDecoder {
             while (true) {
                 // 获取包头开始的index
                 beginReader = buffer.readerIndex();
-                // 标记包头开始的index
+                // 标记包头开始的index（把当前读指针保存起来）
                 buffer.markReaderIndex();
                 // 读到了协议的开始标志，结束while循环
                 if (buffer.readInt() == MioProtocol.HEAD_DATA) {
                     break;
                 }
 
-                // 未读到包头，则跳过一个字节。每次跳过一个字节去读取包头信息的开始标记
+                // 把当前读指针恢复到之前保存的值
                 buffer.resetReaderIndex();
+                // 未读到包头，则跳过一个字节。每次跳过一个字节去读取包头信息的开始标记
                 buffer.readByte();
 
                 // 当跳过一个字节之后，数据包的长度又变得不满足。此时应该结束,等待后面的数据到达
