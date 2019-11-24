@@ -1,7 +1,7 @@
 package io.mio.client;
 
-import io.mio.protocol.SmartCarDecoder;
-import io.mio.protocol.SmartCarEncoder;
+import io.mio.protocol.MioDecoder;
+import io.mio.protocol.MioEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -35,8 +35,8 @@ public class Client {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new SmartCarEncoder());
-                            ch.pipeline().addLast(new SmartCarDecoder());
+                            ch.pipeline().addLast(new MioEncoder());
+                            ch.pipeline().addLast(new MioDecoder());
                             ch.pipeline().addLast(new ClientHandler());
                         }
                     });

@@ -1,6 +1,6 @@
 package io.mio.client;
 
-import io.mio.protocol.SmartCarProtocol;
+import io.mio.protocol.MioProtocol;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.ReferenceCountUtil;
@@ -10,7 +10,7 @@ import io.netty.util.ReferenceCountUtil;
  *
  * @author lry
  */
-public class ClientHandler extends SimpleChannelInboundHandler<SmartCarProtocol> {
+public class ClientHandler extends SimpleChannelInboundHandler<MioProtocol> {
 
     /**
      * 客户端与服务端，连接成功的售后
@@ -38,12 +38,12 @@ public class ClientHandler extends SimpleChannelInboundHandler<SmartCarProtocol>
                 "自动化打电话自动化打电话自动化打电话自动化打电话自动化打电话自动化打电话" +
                 "自动化打电话自动化打电话自动化打电话自动化打电话自动化打电话自动化打电话" +
                 "自动化打电话自动化打电话自动化打电话自动化打电话自动化打电话自动化打电话").getBytes();
-        SmartCarProtocol protocol = new SmartCarProtocol(content.length, content);
+        MioProtocol protocol = new MioProtocol(content.length, content);
         ctx.writeAndFlush(protocol);
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, SmartCarProtocol msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, MioProtocol msg) throws Exception {
         try {
             System.out.println("Client接受的客户端的信息 :" + msg.toString());
         } finally {

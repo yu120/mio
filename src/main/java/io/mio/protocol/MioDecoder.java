@@ -20,16 +20,16 @@ import java.util.List;
  *
  * @author lry
  */
-public class SmartCarDecoder extends ByteToMessageDecoder {
+public class MioDecoder extends ByteToMessageDecoder {
 
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf buffer, List<Object> out) throws Exception {
         System.out.println("================");
         // 可读长度必须大于基本长度
-        if (buffer.readableBytes() >= SmartCarProtocol.BASE_LENGTH) {
+        if (buffer.readableBytes() >= MioProtocol.BASE_LENGTH) {
             // 防止socket字节流攻击,防止，客户端传来的数据过大。因为，太大的数据，是不合理的
-            if (buffer.readableBytes() > SmartCarProtocol.MAX_LENGTH) {
+            if (buffer.readableBytes() > MioProtocol.MAX_LENGTH) {
                 buffer.skipBytes(buffer.readableBytes());
             }
 
@@ -41,7 +41,7 @@ public class SmartCarDecoder extends ByteToMessageDecoder {
                 // 标记包头开始的index
                 buffer.markReaderIndex();
                 // 读到了协议的开始标志，结束while循环
-                if (buffer.readInt() == SmartCarProtocol.HEAD_DATA) {
+                if (buffer.readInt() == MioProtocol.HEAD_DATA) {
                     break;
                 }
 
@@ -50,7 +50,7 @@ public class SmartCarDecoder extends ByteToMessageDecoder {
                 buffer.readByte();
 
                 // 当略过一个字节之后，数据包的长度，又变得不满足。此时，应该结束。等待后面的数据到达
-                if (buffer.readableBytes() < SmartCarProtocol.BASE_LENGTH) {
+                if (buffer.readableBytes() < MioProtocol.BASE_LENGTH) {
                     return;
                 }
             }
@@ -68,7 +68,7 @@ public class SmartCarDecoder extends ByteToMessageDecoder {
             byte[] data = new byte[length];
             buffer.readBytes(data);
 
-            SmartCarProtocol protocol = new SmartCarProtocol(data.length, data);
+            MioProtocol protocol = new MioProtocol(data.length, data);
             out.add(protocol);
         }
     }

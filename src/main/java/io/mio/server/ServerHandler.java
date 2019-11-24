@@ -1,10 +1,10 @@
 package io.mio.server;
 
-import io.mio.protocol.SmartCarProtocol;
+import io.mio.protocol.MioProtocol;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.SimpleChannelInboundHandler;
 
-public class ServerHandler extends ChannelInboundHandlerAdapter {
+public class ServerHandler extends SimpleChannelInboundHandler<MioProtocol> {
 
     /**
      * 用于获取客户端发送的信息
@@ -14,14 +14,13 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
      * @throws Exception
      */
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, MioProtocol msg) throws Exception {
         // 用于获取客户端发来的数据信息
-        SmartCarProtocol body = (SmartCarProtocol) msg;
-        System.out.println("Server接受的客户端的信息 :" + body.toString());
+        System.out.println("Server接受的客户端的信息 :" + msg.toString());
 
         // 会写数据给客户端
         String str = "Hi I am Server ...";
-        SmartCarProtocol response = new SmartCarProtocol(str.getBytes().length, str.getBytes());
+        MioProtocol response = new MioProtocol(str.getBytes().length, str.getBytes());
         // 当服务端完成写操作后，关闭与客户端的连接
         ctx.writeAndFlush(response);
         // .addListener(ChannelFutureListener.CLOSE);

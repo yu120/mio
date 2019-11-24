@@ -19,16 +19,13 @@ import java.io.Serializable;
  * @author lry
  */
 @Data
-public class SmartCarProtocol implements Serializable {
+public class MioProtocol implements Serializable {
+
     /**
      * 协议开始的标准head_data，int类型，占据4个字节.
      * 表示数据的长度contentLength，int类型，占据4个字节.
      */
     public static final int BASE_LENGTH = 4 + 4;
-
-    public static final int SOP_DATA = 0x5A;
-    public static final int END_DATA = 0xCA;
-
     public static final int HEAD_DATA = 0x76;
     public static final int MAX_LENGTH = 2048;
 
@@ -46,14 +43,23 @@ public class SmartCarProtocol implements Serializable {
     private byte[] content;
 
     /**
-     * 用于初始化，SmartCarProtocol
+     * 用于初始化，MioProtocol
      *
      * @param contentLength 协议里面，消息数据的长度
      * @param content       协议里面，消息的数据
      */
-    public SmartCarProtocol(int contentLength, byte[] content) {
+    public MioProtocol(int contentLength, byte[] content) {
         this.contentLength = contentLength;
         this.content = content;
+    }
+
+    @Override
+    public String toString() {
+        return "MioProtocol{" +
+                "headData=" + headData +
+                ", contentLength=" + contentLength +
+                ", content=" + new String(content) +
+                '}';
     }
 
 }
