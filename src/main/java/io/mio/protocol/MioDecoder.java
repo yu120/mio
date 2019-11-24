@@ -25,50 +25,54 @@ public class MioDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf buffer, List<Object> out) throws Exception {
         System.out.println("================");
-        // 可读长度必须大于基本长度
-        if (buffer.readableBytes() >= MioProtocol.BASE_LENGTH) {
-            // 防止socket字节流攻击,防止，客户端传来的数据过大。因为，太大的数据，是不合理的
-            if (buffer.readableBytes() > MioProtocol.MAX_LENGTH) {
-                buffer.skipBytes(buffer.readableBytes());
-            }
+        // Step 1：可读长度必须大于基本长度
+        if (buffer.readableBytes() < MioProtocol.BASE_LENGTH) {
+            return;
+        }
 
-            // 记录包头开始的index
-            int beginReader;
-            while (true) {
-                // 获取包头开始的index
-                beginReader = buffer.readerIndex();
+        // Step 2：防止socket字节流攻击,防止客户端传来的数据过大。而且太大的数据是不合理的
+        if (buffer.readableBytes() > MioProtocol.MAX_LENGTH) {
+            buffer.skipBytes(buffer.readableBytes());
+        }
 
-                // 标记包头开始的index（把当前读指针保存起来）
-                buffer.markReaderIndex();
+        // Step 3：记录读包头开始的索引位置（原理:循环查找满足读的数据包头索引位置进行读取）
+        int beginReaderIndex;
+        while (true) {
+            // Step 3.1：获取包头开始的index
+            beginReaderIndex = buffer.readerIndex();
+
+            // Step 3.2：标记包头开始的index（把当前读指针保存起来）
+            buffer.markReaderIndex();
+            if (buffer.readInt() == MioProtocol.HEAD_DATA) {
                 // 读到了协议的开始标志，则结束while循环
-                if (buffer.readInt() == MioProtocol.HEAD_DATA) {
-                    break;
-                }
-                // 把当前读指针恢复到之前保存的值
+                break;
+            } else {
+                // 把当前读指针恢复到之前保存的值(即还原上述buffer.readInt()操作)
                 buffer.resetReaderIndex();
-
-                // 未读到包头信息，则跳过一个字节后再去读取包头信息的开始标志(即逐一尝试去读取)
-                buffer.readByte();
-                // 当跳过一个字节之后，数据包的长度又变得不满足。此时应该结束,等待后面的数据到达
-                if (buffer.readableBytes() < MioProtocol.BASE_LENGTH) {
-                    return;
-                }
             }
 
-            // 消息的长度
-            int length = buffer.readInt();
-            // 判断请求数据包数据是否到齐
-            if (buffer.readableBytes() < length) {
-                // 还原读指针
-                buffer.readerIndex(beginReader);
+            // Step 3.3：未读到包头信息，则跳过一个字节后再去读取包头信息的开始标志(即逐一尝试去读取)
+            buffer.readByte();
+            if (buffer.readableBytes() < MioProtocol.BASE_LENGTH) {
+                // 当跳过一个字节之后，数据包的长度如果变得不满足，则应该结束,等待后面的数据到达
                 return;
             }
-
-            // 读取data数据
-            byte[] data = new byte[length];
-            buffer.readBytes(data);
-            out.add(new MioProtocol(data.length, data));
         }
+
+        // Step 4：读取消息的长度（循环中读取完包头）
+        int length = buffer.readInt();
+
+        // Step 5：判断请求数据包数据是否到齐
+        if (buffer.readableBytes() < length) {
+            // 还原读指针
+            buffer.readerIndex(beginReaderIndex);
+            return;
+        }
+
+        // Step 6：读取data数据
+        byte[] data = new byte[length];
+        buffer.readBytes(data);
+        out.add(new MioProtocol(length, data));
     }
 
 }
