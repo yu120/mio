@@ -34,3 +34,5 @@
 - **duplicate()**：把整个ByteBuf都截取出来,包括所有的数据,指针信息
  **注意**：slice()与duplicate()底层内存以及引用计数与原始的ByteBuf共享。即经过slice()或者duplicate()返回的ByteBuf调用write系列方法都会影响到原始的ByteBuf
 - **copy()**：直接从原始的ByteBuf中拷贝所有的信息,包括读写指针以及底层对应的数据,所以返回的ByteBuf中写数据不会影响到原始的ByteBuf
+
+- **skipBytes()**：当我们需要跳过某些不需要的字节的时候，可以调用skipBytes方法来跳过指定长度的字节来读取后面的数据
