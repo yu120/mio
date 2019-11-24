@@ -47,13 +47,9 @@ public class MioClientHandler extends SimpleChannelInboundHandler<MioProtocol> {
         try {
             System.out.println("Client接受的客户端的信息 :" + msg.toString());
         } finally {
+            // 只是读数据，没有写数据的话，需要自己手动的释放的消息
             ReferenceCountUtil.release(msg);
         }
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        ctx.close();
     }
 
 }

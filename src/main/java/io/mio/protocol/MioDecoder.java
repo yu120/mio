@@ -45,11 +45,11 @@ public class MioDecoder extends ByteToMessageDecoder {
                     break;
                 }
 
-                // 未读到包头，略过一个字节。次略过，一个字节，去读取，包头信息的开始标记
+                // 未读到包头，略过一个字节。每次略过，一个字节，去读取，包头信息的开始标记
                 buffer.resetReaderIndex();
                 buffer.readByte();
 
-                // 当略过一个字节之后，数据包的长度，又变得不满足。此时，应该结束。等待后面的数据到达
+                // 当略过一个字节之后，数据包的长度又变得不满足。此时应该结束,等待后面的数据到达
                 if (buffer.readableBytes() < MioProtocol.BASE_LENGTH) {
                     return;
                 }
@@ -67,9 +67,7 @@ public class MioDecoder extends ByteToMessageDecoder {
             // 读取data数据
             byte[] data = new byte[length];
             buffer.readBytes(data);
-
-            MioProtocol protocol = new MioProtocol(data.length, data);
-            out.add(protocol);
+            out.add(new MioProtocol(data.length, data));
         }
     }
 

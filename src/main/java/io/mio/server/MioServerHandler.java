@@ -29,10 +29,4 @@ public class MioServerHandler extends SimpleChannelInboundHandler<MioProtocol> {
         // 当只有读操作时，才需要手动释放msg的引用
     }
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
-        ctx.close();
-    }
-
 }
