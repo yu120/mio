@@ -22,10 +22,14 @@ import java.io.Serializable;
 public class MioProtocol implements Serializable {
 
     /**
-     * 协议开始的标准head_data，int类型，占据4个字节.
-     * 表示数据的长度contentLength，int类型，占据4个字节.
+     * 协议开始的标准head_data，int类型，占据4个字节
+     * 表示数据的长度contentLength，int类型，占据4个字节
      */
     public static final int BASE_LENGTH = 4 + 4;
+
+    /**
+     * 开始标记位,int类型，占据4个字节
+     */
     public static final int HEAD_DATA = 0x76;
     /**
      * 最大10MB
