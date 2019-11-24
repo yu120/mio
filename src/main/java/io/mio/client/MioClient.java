@@ -13,14 +13,14 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class Client {
+public class MioClient {
 
     private EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
     private ChannelFuture channelFuture;
 
     public static void main(String[] args) throws Exception {
-        Client client = new Client();
-        client.connect("0.0.0.0", 9999);
+        MioClient mioClient = new MioClient();
+        mioClient.connect("0.0.0.0", 9999);
         while (true) {
             Thread.sleep(100000);
         }
@@ -37,7 +37,7 @@ public class Client {
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ch.pipeline().addLast(new MioEncoder());
                             ch.pipeline().addLast(new MioDecoder());
-                            ch.pipeline().addLast(new ClientHandler());
+                            ch.pipeline().addLast(new MioClientHandler());
                         }
                     });
             channelFuture = bootstrap.connect(host, port).sync();

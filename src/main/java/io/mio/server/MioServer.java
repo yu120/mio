@@ -14,11 +14,11 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
 /**
- * Server
+ * MioServer
  *
  * @author lry
  */
-public class Server {
+public class MioServer {
 
     public static void main(String[] args) throws Exception {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -36,7 +36,7 @@ public class Server {
                             ch.pipeline().addLast(new MioEncoder());
                             ch.pipeline().addLast(new MioDecoder());
                             // 处理网络IO
-                            ch.pipeline().addLast(new ServerHandler());
+                            ch.pipeline().addLast(new MioServerHandler());
                         }
                     });
             ChannelFuture channelFuture = serverBootstrap.bind(9999).sync();

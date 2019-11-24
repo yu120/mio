@@ -1,0 +1,3 @@
+io.mio.commons.thread.ThreadPoolExecutorFactory.CachedThreadPool
+io.mio.commons.thread.ThreadPoolExecutorFactory.FixedThreadPool
+io.mio.commons.thread.ThreadPoolExecutorFactory.LimitedThreadPool

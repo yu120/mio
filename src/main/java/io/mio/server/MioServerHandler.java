@@ -4,7 +4,7 @@ import io.mio.protocol.MioProtocol;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-public class ServerHandler extends SimpleChannelInboundHandler<MioProtocol> {
+public class MioServerHandler extends SimpleChannelInboundHandler<MioProtocol> {
 
     /**
      * 用于获取客户端发送的信息
@@ -19,7 +19,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<MioProtocol> {
         System.out.println("Server接受的客户端的信息 :" + msg.toString());
 
         // 会写数据给客户端
-        String str = "Hi I am Server ...";
+        String str = "Hi I am MioServer ...";
         MioProtocol response = new MioProtocol(str.getBytes().length, str.getBytes());
         // 当服务端完成写操作后，关闭与客户端的连接
         ctx.writeAndFlush(response);

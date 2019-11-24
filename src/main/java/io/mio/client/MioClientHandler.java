@@ -10,7 +10,7 @@ import io.netty.util.ReferenceCountUtil;
  *
  * @author lry
  */
-public class ClientHandler extends SimpleChannelInboundHandler<MioProtocol> {
+public class MioClientHandler extends SimpleChannelInboundHandler<MioProtocol> {
 
     /**
      * 客户端与服务端，连接成功的售后
