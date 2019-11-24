@@ -36,3 +36,10 @@
 - **copy()**：直接从原始的ByteBuf中拷贝所有的信息,包括读写指针以及底层对应的数据,所以返回的ByteBuf中写数据不会影响到原始的ByteBuf
 
 - **skipBytes()**：当我们需要跳过某些不需要的字节的时候，可以调用skipBytes方法来跳过指定长度的字节来读取后面的数据
+
+- **isReadable()**：如果writerIndex>readerIndex，则返回true
+- **isWritable()**：如果capacity>writeIndex，则返回true
+- **readableBytes()**：返回可读字节容量(writerIndex-readerIndex)
+- **writableBytes()**：返回可写字节容量(capacity-writerIndex)
+- **discardReadBytes()**：将可丢弃字节删除，可读字节和可写字节前移（每次调用会有复制逻辑，频繁调用会掉性能）
+- **clear()**：设置readerIndex=writerIndex=0,由于写入会直接从writerIndex开始写，因此相当于逻辑删除
