@@ -47,7 +47,7 @@ public abstract class AbstractMessageProcessor<T> implements MessageProcessor<T>
         for (NetFilter<T> plugin : plugins) {
             accept = plugin.shouldAccept(channel);
             if (!accept) {
-                return accept;
+                return false;
             }
         }
         return true;
@@ -69,16 +69,16 @@ public abstract class AbstractMessageProcessor<T> implements MessageProcessor<T>
     /**
      * 处理接收到的消息
      *
-     * @param session
-     * @param msg
+     * @param session {@link TcpAioSession}
+     * @param msg     {@link T}
      * @see MessageProcessor#process(TcpAioSession, Object)
      */
     public abstract void process0(TcpAioSession<T> session, T msg);
 
     /**
-     * @param session          本次触发状态机的AioSession对象
+     * @param session    本次触发状态机的AioSession对象
      * @param eventState 状态枚举
-     * @param throwable        异常对象，如果存在的话
+     * @param throwable  异常对象，如果存在的话
      */
     @Override
     public final void stateEvent(TcpAioSession<T> session, EventState eventState, Throwable throwable) {
@@ -89,9 +89,11 @@ public abstract class AbstractMessageProcessor<T> implements MessageProcessor<T>
     }
 
     /**
-     * @param session
-     * @param eventState
-     * @param throwable
+     * The state event
+     *
+     * @param session    {@link TcpAioSession}
+     * @param eventState {@link EventState}
+     * @param throwable  {@link Throwable}
      * @see #stateEvent(TcpAioSession, EventState, Throwable)
      */
     public abstract void stateEvent0(TcpAioSession<T> session, EventState eventState, Throwable throwable);

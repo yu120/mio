@@ -22,7 +22,7 @@ public final class MonitorFilter<T> implements Runnable, NetFilter<T> {
 
     public static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE =
             new ScheduledThreadPoolExecutor(1, r -> {
-                Thread thread = new Thread(r, "Quick Timer");
+                Thread thread = new Thread(r, "Mio-Timer");
                 thread.setDaemon(true);
                 return thread;
             });

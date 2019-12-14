@@ -4,10 +4,8 @@ import io.mio.aio.support.TcpAioSession;
 
 /**
  * 消息处理器。
- *
  * <p>
  * 通过实现该接口，对完成解码的消息进行业务处理。
- * </p>
  *
  * @param <T> 消息对象实体类型
  * @author lry
@@ -25,9 +23,9 @@ public interface MessageProcessor<T> {
     /**
      * 状态机事件,当枚举事件发生时由框架触发该方法
      *
-     * @param session          本次触发状态机的AioSession对象
+     * @param session    本次触发状态机的AioSession对象
      * @param eventState 状态枚举
-     * @param throwable        异常对象，如果存在的话
+     * @param throwable  异常对象，如果存在的话
      * @see EventState
      */
     void stateEvent(TcpAioSession<T> session, EventState eventState, Throwable throwable);

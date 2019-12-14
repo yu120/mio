@@ -5,15 +5,10 @@ import io.mio.aio.support.TcpAioSession;
 import java.nio.ByteBuffer;
 
 /**
- * <p>
  * 消息传输采用的协议。
- * </p>
  * <p>
  * 根据通信双方约定的协议规范实现{@code Protocol}接口，使用时将该实现类注册至服务启动类{@link AioMioClient}、{@link AioMioServer}。
- * </p>
- * <b>
  * 注意：框架本身的所有Socket链路复用同一个Protocol，请勿在其实现类的成员变量中存储特定链路的数据。
- * </b>
  *
  * @param <T> 消息对象实体类型
  * @author lry
