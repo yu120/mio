@@ -4,7 +4,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.net.SocketOption;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -34,9 +34,13 @@ public class AioServerConfig implements Serializable {
     private int port = 8888;
 
     /**
-     * Socket 配置
+     * Socket的TCP参数配置
+     * <p>
+     * AIO服务端的有效可选范围为：
+     * 1. StandardSocketOptions.SO_RCVBUF
+     * 2. StandardSocketOptions.SO_REUSEADDR
      */
-    private Map<SocketOption<Object>, Object> socketOptions;
+    private Map<SocketOption<Object>, Object> socketOptions = new LinkedHashMap<>();
 
     /**
      * 线程数。设置服务工作线程数,设置数值必须大于等于2
@@ -71,26 +75,5 @@ public class AioServerConfig implements Serializable {
      * 客户端连接超时时间，单位:毫秒
      */
     private int connectTimeout;
-
-    public Map<SocketOption<Object>, Object> getSocketOptions() {
-        return socketOptions;
-    }
-
-    /**
-     * 设置Socket的TCP参数配置。
-     * <p>
-     * AIO服务端的有效可选范围为：
-     * 1. StandardSocketOptions.SO_RCVBUF
-     * 2. StandardSocketOptions.SO_REUSEADDR
-     *
-     * @param socketOption socketOption名称
-     * @param f            socketOption值
-     */
-    public void setOption(SocketOption socketOption, Object f) {
-        if (socketOptions == null) {
-            socketOptions = new HashMap<>(4);
-        }
-        socketOptions.put(socketOption, f);
-    }
 
 }
