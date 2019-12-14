@@ -6,7 +6,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -26,12 +28,12 @@ public class ExtensionLoader<T> {
     private Class<T> type;
     private ClassLoader classLoader;
     private volatile boolean init = false;
-    private static final String PREFIX_DEFAULT = "META-INF/";
-    private static final String PREFIX_NEURAL = PREFIX_DEFAULT + "mio/";
-    private static final String PREFIX_SERVICES = PREFIX_DEFAULT + "services/";
     private ConcurrentMap<String, T> singletonInstances = null;
     private ConcurrentMap<String, Class<T>> extensionClasses = null;
     private static ConcurrentMap<Class<?>, ExtensionLoader<?>> extensionLoaders = new ConcurrentHashMap<>();
+    private static final List<String> PREFIX_LIST = Arrays.asList("META-INF/", "META-INF/mio/", "META-INF/services/");
+    private static final String ORDER_KEY = "order";
+    private static final String CATEGORY_KEY = "category";
 
     private ExtensionLoader(Class<T> type, ClassLoader classLoader) {
         this.type = type;
@@ -140,15 +142,15 @@ public class ExtensionLoader<T> {
         if (init) {
             return;
         }
-
-        extensionClasses = this.loadExtensionClasses(PREFIX_DEFAULT);
-        ConcurrentMap<String, Class<T>> neuralExtensionClasses = this.loadExtensionClasses(PREFIX_NEURAL);
-        if (!neuralExtensionClasses.isEmpty()) {
-            extensionClasses.putAll(neuralExtensionClasses);
+        if (extensionClasses == null) {
+            extensionClasses = new ConcurrentHashMap<>();
         }
-        ConcurrentMap<String, Class<T>> serviceExtensionClasses = this.loadExtensionClasses(PREFIX_SERVICES);
-        if (!serviceExtensionClasses.isEmpty()) {
-            extensionClasses.putAll(serviceExtensionClasses);
+
+        for (String prefix : PREFIX_LIST) {
+            ConcurrentMap<String, Class<T>> tempExtensionClasses = this.loadExtensionClasses(prefix);
+            if (!tempExtensionClasses.isEmpty()) {
+                extensionClasses.putAll(tempExtensionClasses);
+            }
         }
 
         singletonInstances = new ConcurrentHashMap<>();
@@ -196,52 +198,73 @@ public class ExtensionLoader<T> {
         return this.getExtensions("");
     }
 
+    public List<T> getExtensions(String key) {
+        return getExtensions(key, Extension.class);
+    }
+
     /**
      * 有些地方需要spi的所有激活的instances，所以需要能返回一个列表的方法<br>
-     * <br>
-     * 注意：<br>
-     * 1 SpiMeta 中的active 为true<br>
-     * 2 按照spiMeta中的order进行排序 <br>
-     * <br>
-     * FIXME： 是否需要对singleton来区分对待，后面再考虑 fishermen
      */
-    public List<T> getExtensions(String key) {
+    public <A extends Annotation> List<T> getExtensions(String key, Class<A> annotationClass) {
         checkInit();
         if (extensionClasses.size() == 0) {
             return Collections.emptyList();
         }
 
         // 如果只有一个实现，直接返回
-        List<T> exts = new ArrayList<T>(extensionClasses.size());
+        List<T> extList = new ArrayList<T>(extensionClasses.size());
         // 多个实现，按优先级排序返回
         for (Map.Entry<String, Class<T>> entry : extensionClasses.entrySet()) {
-            Extension extension = entry.getValue().getAnnotation(Extension.class);
+            A extension = entry.getValue().getAnnotation(annotationClass);
             if (key == null || key.length() == 0) {
-                exts.add(getExtension(entry.getKey()));
+                extList.add(getExtension(entry.getKey()));
             } else if (extension != null) {
-                for (String k : extension.category()) {
-                    if (key.equals(k)) {
-                        exts.add(getExtension(entry.getKey()));
-                        break;
+                Object category;
+                try {
+                    category = annotationClass.getMethod(key).invoke("category");
+                } catch (Exception e) {
+                    throw new RuntimeException("Not found:" + key, e);
+                }
+
+                if (category instanceof String[]) {
+                    String[] categories = (String[]) category;
+                    for (String k : categories) {
+                        if (key.equals(k)) {
+                            extList.add(getExtension(entry.getKey()));
+                            break;
+                        }
                     }
                 }
             }
         }
 
         // order 大的排在后面,如果没有设置order的排到最前面
-        exts.sort((o1, o2) -> {
-            Extension p1 = o1.getClass().getAnnotation(Extension.class);
-            Extension p2 = o2.getClass().getAnnotation(Extension.class);
-            if (p1 == null) {
-                return 1;
-            } else if (p2 == null) {
-                return -1;
-            } else {
-                return p1.order() - p2.order();
+        try {
+            Method method = annotationClass.getMethod("order");
+            if (method != null) {
+                extList.sort((o1, o2) -> {
+                    A p1 = o1.getClass().getAnnotation(annotationClass);
+                    A p2 = o2.getClass().getAnnotation(annotationClass);
+                    if (p1 == null) {
+                        return 1;
+                    } else if (p2 == null) {
+                        return -1;
+                    } else {
+                        try {
+                            int p1Order = (int) method.invoke(p1);
+                            int p2Order = (int) method.invoke(p2);
+                            return p1Order - p2Order;
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
             }
-        });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
-        return exts;
+        return extList;
     }
 
     private void checkExtensionType(Class<T> clz) {
@@ -252,7 +275,7 @@ public class ExtensionLoader<T> {
 
         // 2) contain public constructor and has not-args constructor
         Constructor<?>[] constructors = clz.getConstructors();
-        if (constructors == null || constructors.length == 0) {
+        if (constructors.length == 0) {
             throw new RuntimeException(clz.getName() + ": Error has no public no-args constructor");
         }
 
