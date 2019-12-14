@@ -82,7 +82,10 @@ public class IoServerConfig<T> {
      * 设置内存池是否使用直接缓冲区。true:直接缓冲区,false:堆内缓冲区
      */
     private boolean bufferPoolDirect = true;
-
+    /**
+     * 客户端连接超时时间，单位:毫秒
+     */
+    private int connectTimeout;
 
     /**
      * @param processor 消息处理器
@@ -98,6 +101,19 @@ public class IoServerConfig<T> {
     }
 
     /**
+     * 设置Socket的TCP参数配置。
+     * <p>
+     * AIO客户端的有效可选范围为：
+     * 2. StandardSocketOptions.SO_RCVBUF
+     * 4. StandardSocketOptions.SO_REUSEADDR
+     * <p>
+     * AIO客户端的有效可选范围为：
+     * 1. StandardSocketOptions.SO_SNDBUF
+     * 2. StandardSocketOptions.SO_RCVBUF
+     * 3. StandardSocketOptions.SO_KEEPALIVE
+     * 4. StandardSocketOptions.SO_REUSEADDR
+     * 5. StandardSocketOptions.TCP_NODELAY
+     *
      * @param socketOption socketOption名称
      * @param f            socketOption值
      */

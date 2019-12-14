@@ -7,11 +7,10 @@ import io.mio.aio.support.WriteBuffer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.concurrent.ExecutionException;
 
 public class StringMutilClient {
 
-    public static void main(String[] args) throws InterruptedException, ExecutionException, IOException {
+    public static void main(String[] args) throws Exception {
         BufferPagePool bufferPagePool = new BufferPagePool(1024 * 1024 * 32, 10, true);
         MessageProcessor<String> processor = new MessageProcessor<String>() {
             @Override
@@ -28,8 +27,8 @@ public class StringMutilClient {
         };
 
         AioMioClient<String> client = new AioMioClient<>("localhost", 8888, new StringProtocol(), processor);
-        client.setBufferPagePool(bufferPagePool);
-        client.setWriteQueueCapacity(20);
+        client.setBufferPool(bufferPagePool);
+        client.getConfig().setWriteQueueCapacity(20);
         AioMioSession<String> session = client.start();
         for (int i = 0; i < 10; i++) {
             new Thread() {

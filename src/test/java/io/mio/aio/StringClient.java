@@ -8,7 +8,6 @@ import io.mio.aio.support.WriteBuffer;
 
 import java.io.IOException;
 import java.nio.channels.AsynchronousChannelGroup;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadFactory;
 
 public class StringClient {
@@ -50,11 +49,12 @@ public class StringClient {
         }
     }
 
-    public static void test(AsynchronousChannelGroup asynchronousChannelGroup, BufferPagePool bufferPagePool, MessageProcessor<String> processor) throws InterruptedException, ExecutionException, IOException {
+    public static void test(AsynchronousChannelGroup asynchronousChannelGroup,
+                            BufferPagePool bufferPagePool, MessageProcessor<String> processor) throws Exception {
         AioMioClient<String> client = new AioMioClient<>("localhost", 8888, new StringProtocol(), processor);
-        client.setBufferPagePool(bufferPagePool);
-        client.setWriteQueueCapacity(10);
-        client.setBufferPoolChunkSize(1024 * 1024);
+        client.setBufferPool(bufferPagePool);
+        client.getConfig().setWriteQueueCapacity(10);
+        client.getConfig().setBufferPoolChunkSize(1024 * 1024);
         AioMioSession<String> session = client.start(asynchronousChannelGroup);
         WriteBuffer outputStream = session.writeBuffer();
         byte[] data = "mio-aio".getBytes();

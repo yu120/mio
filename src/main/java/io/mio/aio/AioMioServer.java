@@ -27,13 +27,13 @@ import java.util.concurrent.TimeUnit;
  * @author lry
  */
 @Slf4j
-@Getter
 public class AioMioServer<T> implements Runnable {
 
     /**
      * Server端服务配置。
      * <p>调用AioQuickServer的各setXX()方法，都是为了设置config的各配置项</p>
      */
+    @Getter
     private IoServerConfig<T> config = new IoServerConfig<>();
     /**
      * 内存池
