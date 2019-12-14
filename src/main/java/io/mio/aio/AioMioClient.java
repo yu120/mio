@@ -81,7 +81,7 @@ public class AioMioClient<T> {
         }
 
         //连接成功则构造AIOSession对象
-        session = new AioMioSession<T>(socketChannel,
+        return new AioMioSession<T>(socketChannel,
                 config.getReadBufferSize(),
                 config.getWriteQueueCapacity(),
                 config.getBufferPoolChunkSize(),
@@ -89,8 +89,6 @@ public class AioMioClient<T> {
                 new ReadCompletionHandler<T>(),
                 new WriteCompletionHandler<T>(),
                 bufferPagePool.allocateBufferPage());
-        session.initSession();
-        return session;
     }
 
     /**

@@ -41,7 +41,7 @@ public class StringMutilClient {
                 @Override
                 public void run() {
                     try {
-                        WriteBuffer outputStream = session.writeBuffer();
+                        WriteBuffer outputStream = session.getWriteBuffer();
                         byte[] data = "mio-aio".getBytes();
                         ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES + data.length);
                         buffer.putInt(data.length);

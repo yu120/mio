@@ -60,7 +60,7 @@ public class StringClient {
         client.setBufferPagePool(bufferPagePool);
 
         AioMioSession<String> session = client.start(asynchronousChannelGroup);
-        WriteBuffer outputStream = session.writeBuffer();
+        WriteBuffer outputStream = session.getWriteBuffer();
         byte[] data = "mio-aio".getBytes();
         while (true) {
             int num = (int) (Math.random() * 10) + 1;

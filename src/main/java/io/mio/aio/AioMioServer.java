@@ -132,9 +132,8 @@ public class AioMioServer<T> implements Runnable {
      */
     private void createSession(AsynchronousSocketChannel channel) {
         //连接成功,则构造AioMioSession对象
-        AioMioSession<T> session = null;
         try {
-            session = new AioMioSession<>(channel,
+            new AioMioSession<>(channel,
                     config.getReadBufferSize(),
                     config.getWriteQueueCapacity(),
                     config.getBufferPoolChunkSize(),
@@ -143,14 +142,9 @@ public class AioMioServer<T> implements Runnable {
                     readCompletionHandler,
                     writeCompletionHandler,
                     bufferPool.allocateBufferPage());
-            session.initSession();
         } catch (Exception e1) {
             log.error(e1.getMessage(), e1);
-            if (session == null) {
-                AioMioSession.close(channel);
-            } else {
-                session.close(true);
-            }
+            AioMioSession.close(channel);
         }
     }
 

@@ -16,7 +16,7 @@ public class StringServer {
         MessageProcessor<String> messageProcessor = new MessageProcessor<String>() {
             @Override
             public void process0(AioMioSession<String> session, String msg) {
-                WriteBuffer outputStream = session.writeBuffer();
+                WriteBuffer outputStream = session.getWriteBuffer();
 
                 try {
                     byte[] bytes = msg.getBytes();

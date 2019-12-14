@@ -6,7 +6,7 @@ import io.mio.aio.buffer.BufferPage;
 import io.mio.aio.buffer.VirtualBuffer;
 import io.mio.aio.handler.ReadCompletionHandler;
 import io.mio.aio.handler.WriteCompletionHandler;
-import lombok.Getter;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -25,7 +25,7 @@ import java.util.function.Function;
  * @author lry
  */
 @Slf4j
-@Getter
+@Data
 public class AioMioSession<T> {
 
     /**
@@ -57,8 +57,8 @@ public class AioMioSession<T> {
      * 读缓冲。
      * <p>大小取决于AioMioClient/AioMioServer设置的setReadBufferSize</p>
      */
-    private VirtualBuffer readBuffer;
-    private VirtualBuffer writeBuffer;
+    private VirtualBuffer readVirtualBuffer;
+    private VirtualBuffer writeVirtualBuffer;
 
     /**
      * 读回调信号量
@@ -72,11 +72,13 @@ public class AioMioSession<T> {
 
     private ReadCompletionHandler<T> readCompletionHandler;
     private WriteCompletionHandler<T> writeCompletionHandler;
+    private InetSocketAddress localAddress;
+    private InetSocketAddress remoteAddress;
 
     /**
      * 输出流
      */
-    private WriteBuffer byteBuf;
+    private WriteBuffer writeBuffer;
     /**
      * 是否处于数据输出中
      */
@@ -98,12 +100,12 @@ public class AioMioSession<T> {
             if (!semaphore.tryAcquire()) {
                 return null;
             }
-            AioMioSession.this.writeBuffer = var.poll();
-            if (writeBuffer == null) {
+            AioMioSession.this.writeVirtualBuffer = var.poll();
+            if (writeVirtualBuffer == null) {
                 semaphore.release();
             } else {
                 writing = true;
-                continueWrite(writeBuffer);
+                continueWrite(writeVirtualBuffer);
             }
             return null;
         }
@@ -124,8 +126,8 @@ public class AioMioSession<T> {
         @Override
         public void write(VirtualBuffer buffer) {
             writing = true;
-            writeBuffer = buffer;
-            continueWrite(writeBuffer);
+            writeVirtualBuffer = buffer;
+            continueWrite(writeVirtualBuffer);
         }
     };
 
@@ -144,17 +146,25 @@ public class AioMioSession<T> {
         this.readCompletionHandler = readCompletionHandler;
         this.writeCompletionHandler = writeCompletionHandler;
 
-        this.readBuffer = bufferPage.allocate(readBufferSize);
-        byteBuf = new WriteBuffer(bufferPage, flushFunction, writeQueueCapacity, bufferPoolChunkSize, fasterWrite);
-        //触发状态机
-        messageProcessor.stateEvent(this, EventState.NEW_SESSION, null);
-    }
+        try {
+            this.localAddress = (InetSocketAddress) channel.getLocalAddress();
+            this.remoteAddress = (InetSocketAddress) channel.getRemoteAddress();
+        } catch (IOException e) {
+            log.error("Parse network socket address exception", e);
+        }
 
-    /**
-     * 初始化AioSession
-     */
-    public void initSession() {
-        continueRead();
+        this.readVirtualBuffer = bufferPage.allocate(readBufferSize);
+        writeBuffer = new WriteBuffer(bufferPage, flushFunction, writeQueueCapacity, bufferPoolChunkSize, fasterWrite);
+        // 触发状态机
+        messageProcessor.stateEvent(this, EventState.NEW_SESSION, null);
+
+        // 初始化AioSession
+        try {
+            continueRead();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            close(true);
+        }
     }
 
     /**
@@ -162,55 +172,26 @@ public class AioMioSession<T> {
      * <p>需要调用控制同步</p>
      */
     public void writeToChannel() {
-        if (writeBuffer == null) {
-            writeBuffer = byteBuf.poll();
-        } else if (!writeBuffer.buffer().hasRemaining()) {
-            writeBuffer.clean();
-            writeBuffer = byteBuf.poll();
+        if (writeVirtualBuffer == null) {
+            writeVirtualBuffer = writeBuffer.poll();
+        } else if (!writeVirtualBuffer.buffer().hasRemaining()) {
+            writeVirtualBuffer.clean();
+            writeVirtualBuffer = writeBuffer.poll();
         }
 
-        if (writeBuffer != null) {
-            continueWrite(writeBuffer);
+        if (writeVirtualBuffer != null) {
+            continueWrite(writeVirtualBuffer);
             return;
         }
         writing = false;
         semaphore.release();
-        //此时可能是Closing或Closed状态
+        // 此时可能是Closing或Closed状态
         if (status != SESSION_STATUS_ENABLED) {
             close(true);
         } else {
-            //也许此时有新的消息通过write方法添加到writeCacheQueue中
-            byteBuf.flush();
+            // 也许此时有新的消息通过write方法添加到writeCacheQueue中
+            writeBuffer.flush();
         }
-    }
-
-    public void setReadSemaphore(Semaphore readSemaphore) {
-        this.readSemaphore = readSemaphore;
-    }
-
-    /**
-     * 内部方法：触发通道的读操作
-     *
-     * @param buffer 用于存放待读取数据的buffer
-     */
-    private void readFromChannel0(ByteBuffer buffer) {
-        channel.read(buffer, this, readCompletionHandler);
-    }
-
-    /**
-     * 内部方法：触发通道的写操作
-     *
-     * @param buffer 待输出的buffer
-     */
-    private void writeToChannel0(ByteBuffer buffer) {
-        channel.write(buffer, 0L, TimeUnit.MILLISECONDS, this, writeCompletionHandler);
-    }
-
-    /**
-     * @return 输入流
-     */
-    public final WriteBuffer writeBuffer() {
-        return byteBuf;
     }
 
     /**
@@ -219,50 +200,31 @@ public class AioMioSession<T> {
      * @param immediate true:立即关闭,false:响应消息发送完后关闭
      */
     public synchronized void close(boolean immediate) {
-        //status == SESSION_STATUS_CLOSED说明close方法被重复调用
+        // status == SESSION_STATUS_CLOSED说明close方法被重复调用
         if (status == SESSION_STATUS_CLOSED) {
-            log.warn("ignore, session:{} is closed:", getSessionId());
+            log.warn("Session is closed");
             return;
         }
         status = immediate ? SESSION_STATUS_CLOSED : SESSION_STATUS_CLOSING;
-        boolean noWriteBuffer = (writeBuffer == null || !writeBuffer.buffer().hasRemaining());
+        boolean noWriteBuffer = (writeVirtualBuffer == null || !writeVirtualBuffer.buffer().hasRemaining());
         if (immediate) {
-            byteBuf.close();
-            byteBuf = null;
-            readBuffer.clean();
-            readBuffer = null;
-            if (writeBuffer != null) {
-                writeBuffer.clean();
-                writeBuffer = null;
+            writeBuffer.close();
+            writeBuffer = null;
+            readVirtualBuffer.clean();
+            readVirtualBuffer = null;
+            if (writeVirtualBuffer != null) {
+                writeVirtualBuffer.clean();
+                writeVirtualBuffer = null;
             }
             close(channel);
             messageProcessor.stateEvent(this, EventState.SESSION_CLOSED, null);
-        } else if (noWriteBuffer && !byteBuf.hasData()) {
+        } else if (noWriteBuffer && !writeBuffer.hasData()) {
             close(true);
         } else {
             messageProcessor.stateEvent(this, EventState.SESSION_CLOSING, null);
-            byteBuf.flush();
+            writeBuffer.flush();
         }
     }
-
-    /**
-     * 获取当前Session的唯一标识
-     *
-     * @return sessionId
-     */
-    public final String getSessionId() {
-        return "aioSession-" + hashCode();
-    }
-
-    /**
-     * 当前会话是否已失效
-     *
-     * @return 是否失效
-     */
-    public final boolean isInvalid() {
-        return status != SESSION_STATUS_ENABLED;
-    }
-
 
     /**
      * 触发通道的读回调操作
@@ -273,7 +235,7 @@ public class AioMioSession<T> {
         if (status == SESSION_STATUS_CLOSED) {
             return;
         }
-        final ByteBuffer readBuffer = this.readBuffer.buffer();
+        final ByteBuffer readBuffer = this.readVirtualBuffer.buffer();
         readBuffer.flip();
         while (readBuffer.hasRemaining() && status == SESSION_STATUS_ENABLED) {
             T dataEntry = null;
@@ -287,7 +249,7 @@ public class AioMioSession<T> {
                 break;
             }
 
-            //处理消息
+            // 处理消息
             try {
                 messageProcessor.process(this, dataEntry);
             } catch (Exception e) {
@@ -310,11 +272,11 @@ public class AioMioSession<T> {
             return;
         }
 
-        if (!writing && byteBuf != null) {
-            byteBuf.flush();
+        if (!writing && writeBuffer != null) {
+            writeBuffer.flush();
         }
 
-        //数据读取完毕
+        // 数据读取完毕
         if (readBuffer.remaining() == 0) {
             readBuffer.clear();
         } else if (readBuffer.position() > 0) {
@@ -325,7 +287,7 @@ public class AioMioSession<T> {
             readBuffer.limit(readBuffer.capacity());
         }
 
-        //读缓冲区已满
+        // 读缓冲区已满
         if (!readBuffer.hasRemaining()) {
             RuntimeException exception = new RuntimeException("readBuffer has no remaining");
             messageProcessor.stateEvent(this, EventState.DECODE_EXCEPTION, exception);
@@ -342,25 +304,9 @@ public class AioMioSession<T> {
         if (messageProcessor != null) {
             messageProcessor.beforeRead(this);
         }
-        readFromChannel0(readBuffer.buffer());
-    }
 
-    /**
-     * 同步读取数据
-     */
-    private int synRead() throws IOException {
-        ByteBuffer buffer = readBuffer.buffer();
-        if (buffer.remaining() > 0) {
-            return 0;
-        }
-        try {
-            buffer.clear();
-            int size = channel.read(buffer).get();
-            buffer.flip();
-            return size;
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+        // 触发通道的读操作
+        channel.read(readVirtualBuffer.buffer(), this, readCompletionHandler);
     }
 
     /**
@@ -372,46 +318,9 @@ public class AioMioSession<T> {
         if (messageProcessor != null) {
             messageProcessor.beforeWrite(this);
         }
-        writeToChannel0(writeBuffer.buffer());
-    }
 
-    public int getLastReadSize() {
-        return lastReadSize;
-    }
-
-    public void setLastReadSize(int lastReadSize) {
-        this.lastReadSize = lastReadSize;
-    }
-
-    /**
-     * @return 本地地址
-     * @throws IOException IO异常
-     * @see AsynchronousSocketChannel#getLocalAddress()
-     */
-    public final InetSocketAddress getLocalAddress() throws IOException {
-        assertChannel();
-        return (InetSocketAddress) channel.getLocalAddress();
-    }
-
-    /**
-     * @return 远程地址
-     * @throws IOException IO异常
-     * @see AsynchronousSocketChannel#getRemoteAddress()
-     */
-    public final InetSocketAddress getRemoteAddress() throws IOException {
-        assertChannel();
-        return (InetSocketAddress) channel.getRemoteAddress();
-    }
-
-    /**
-     * 断言当前会话是否可用
-     *
-     * @throws IOException IO异常
-     */
-    private void assertChannel() throws IOException {
-        if (status == SESSION_STATUS_CLOSED || channel == null) {
-            throw new IOException("session is closed");
-        }
+        // 触发通道的写操作
+        channel.write(writeBuffer.buffer(), 0L, TimeUnit.MILLISECONDS, this, writeCompletionHandler);
     }
 
     /**
