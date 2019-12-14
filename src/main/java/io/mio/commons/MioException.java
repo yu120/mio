@@ -18,6 +18,7 @@ public class MioException extends RuntimeException {
     public static final int FUTURE_CANCEL = 4;
     public static final int FUTURE_TIMEOUT_CANCEL = 5;
     public static final int FUTURE_LISTENER_NULL = 6;
+    public static final int NOT_FOUND_CLIENT = 7;
 
     private final int code;
     private final String message;

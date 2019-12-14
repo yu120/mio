@@ -22,6 +22,14 @@ public interface MioServer {
     void initialize(ServerConfig serverConfig, final MioCallback<MioMessage> mioCallback);
 
     /**
+     * The send request
+     *
+     * @param mioMessage {@link MioMessage}
+     * @throws Throwable exception {@link Throwable}
+     */
+    void send(final MioMessage mioMessage) throws Throwable;
+
+    /**
      * The destroy server
      */
     void destroy();

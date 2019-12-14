@@ -1,10 +1,7 @@
 package io.mio.netty;
 
 import io.mio.MioServer;
-import io.mio.commons.MioCallback;
-import io.mio.commons.MioConstants;
-import io.mio.commons.MioMessage;
-import io.mio.commons.ServerConfig;
+import io.mio.commons.*;
 import io.mio.compress.Compress;
 import io.mio.compress.GzipCompress;
 import io.mio.commons.extension.Extension;
@@ -98,6 +95,19 @@ public class NettyMioServer implements MioServer {
         } catch (Exception e) {
             log.error("The server initialize exception", e);
         }
+    }
+
+    @Override
+    public void send(MioMessage mioMessage) throws Throwable {
+        String key = String.format("%s->%s", MioConstants.getSocketAddressKey(mioMessage.getLocalAddress()),
+                MioConstants.getSocketAddressKey(mioMessage.getRemoteAddress()));
+        Channel clientChannel = serverHandler.getChannels().get(key);
+        if (clientChannel == null) {
+            throw new MioException(MioException.NOT_FOUND_CLIENT, "Not found client:" + key);
+        }
+
+        // send
+        clientChannel.writeAndFlush(mioMessage);
     }
 
     @Override
