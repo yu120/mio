@@ -19,11 +19,6 @@ import java.util.Map;
 public class MioMessage implements Serializable {
 
     /**
-     * Data length(Header data length + Data length)
-     */
-    private int dataLength;
-
-    /**
      * The header parameters
      */
     private Map<String, Object> headers;
@@ -31,6 +26,10 @@ public class MioMessage implements Serializable {
      * Body data
      */
     private byte[] data;
+    /**
+     * Data length(Header data length + Data length)
+     */
+    private int dataLength;
 
     /**
      * The local net socket address
@@ -56,16 +55,15 @@ public class MioMessage implements Serializable {
      *
      * @param headers header parameters
      * @param data    data byte[]
-     * @return {@link MioMessage}
      */
-    public static MioMessage build(Map<String, Object> headers, byte[] data) {
-        MioMessage mioMessage = new MioMessage();
-        mioMessage.setDataLength(data.length);
-        if (headers != null && !headers.isEmpty()) {
-            mioMessage.setHeaders(new LinkedHashMap<>(headers));
+    public MioMessage(Map<String, Object> headers, byte[] data) {
+        this.data = data;
+        this.dataLength = data.length;
+        if (headers == null || headers.isEmpty()) {
+            this.headers = new LinkedHashMap<>();
+        } else {
+            this.headers = new LinkedHashMap<>(headers);
         }
-        mioMessage.setData(data);
-        return mioMessage;
     }
 
     /**

@@ -15,7 +15,7 @@ public class AioMioServerTest {
             public void onProcessor(Consumer<MioMessage> consumer, MioMessage result) {
                 System.out.println("服务端收到：" + result);
                 // 当服务端完成写操作后，关闭与客户端的连接
-                MioMessage mioMessage = MioMessage.build(result.getHeaders(), result.getData());
+                MioMessage mioMessage = new MioMessage(result.getHeaders(), result.getData());
                 consumer.accept(mioMessage);
             }
 

@@ -38,7 +38,7 @@ public class NettyHttpDecoder extends MessageToMessageDecoder<FullHttpMessage> {
         byte[] data = readByteBuf(msg.content());
 
         // build message
-        final MioMessage mioMessage = MioMessage.build(headers, data);
+        final MioMessage mioMessage = new MioMessage(headers, data);
         mioMessage.wrapper(channel.localAddress(), channel.remoteAddress());
         out.add(mioMessage);
     }

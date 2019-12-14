@@ -96,7 +96,7 @@ public class NettyMioDecoder extends ByteToMessageDecoder {
         buffer.readBytes(data);
 
         // Step 8：Add to output
-        final MioMessage mioMessage = MioMessage.build(headers, data);
+        final MioMessage mioMessage = new MioMessage(headers, data);
         mioMessage.wrapper(channel.localAddress(), channel.remoteAddress());
         out.add(mioMessage);
     }

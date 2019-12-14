@@ -18,7 +18,7 @@ public class AioMioClientTest {
         for (int i = 0; i < 1000; i++) {
             Map<String, Object> headers = new HashMap<>();
             headers.put("msg", "头部参数" + i);
-            MioMessage mioMessage = MioMessage.build(headers, (i + "-hello").getBytes(StandardCharsets.UTF_8));
+            MioMessage mioMessage = new MioMessage(headers, (i + "-hello").getBytes(StandardCharsets.UTF_8));
             mioMessage.setRemoteAddress(socketAddress);
             aioMioClient.callback(mioMessage, new MioCallback<MioMessage>() {
                 @Override
