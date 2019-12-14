@@ -30,7 +30,7 @@ public class IoServerConfig<T> {
     /**
      * 远程服务器IP
      */
-    private String host;
+    private String hostname;
     /**
      * 服务器消息拦截器
      */

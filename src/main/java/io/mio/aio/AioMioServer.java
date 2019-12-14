@@ -28,15 +28,8 @@ import java.util.concurrent.*;
 @Slf4j
 public class AioMioServer<T> implements Runnable {
 
-    /**
-     * Server端服务配置。
-     * <p>调用AioQuickServer的各setXX()方法，都是为了设置config的各配置项</p>
-     */
     @Getter
     private IoServerConfig<T> config = new IoServerConfig<>();
-    /**
-     * 内存池
-     */
     private BufferPagePool bufferPool;
 
     private ReadCompletionHandler<T> readCompletionHandler;
@@ -53,9 +46,9 @@ public class AioMioServer<T> implements Runnable {
         config.setThreadNum(Math.min(Runtime.getRuntime().availableProcessors(), 2));
     }
 
-    public AioMioServer(String host, int port, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
+    public AioMioServer(String hostName, int port, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
         this(port, protocol, messageProcessor);
-        config.setHost(host);
+        config.setHostname(hostName);
     }
 
     /**
@@ -79,8 +72,8 @@ public class AioMioServer<T> implements Runnable {
                 }
             }
             //bind host
-            if (config.getHost() != null) {
-                serverSocketChannel.bind(new InetSocketAddress(config.getHost(), config.getPort()), 1000);
+            if (config.getHostname() != null) {
+                serverSocketChannel.bind(new InetSocketAddress(config.getHostname(), config.getPort()), 1000);
             } else {
                 serverSocketChannel.bind(new InetSocketAddress(config.getPort()), 1000);
             }

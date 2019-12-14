@@ -40,8 +40,8 @@ public class AioMioClient<T> {
      */
     private AsynchronousChannelGroup asynchronousChannelGroup;
 
-    public AioMioClient(String host, int port, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
-        config.setHost(host);
+    public AioMioClient(String hostName, int port, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
+        config.setHostname(hostName);
         config.setPort(port);
         config.setProtocol(protocol);
         config.setProcessor(messageProcessor);
@@ -72,7 +72,7 @@ public class AioMioClient<T> {
         }
 
         try {
-            Future<Void> future = socketChannel.connect(new InetSocketAddress(config.getHost(), config.getPort()));
+            Future<Void> future = socketChannel.connect(new InetSocketAddress(config.getHostname(), config.getPort()));
             if (config.getConnectTimeout() > 0) {
                 future.get(config.getConnectTimeout(), TimeUnit.MILLISECONDS);
             } else {
