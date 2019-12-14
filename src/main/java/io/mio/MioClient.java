@@ -4,12 +4,14 @@ import io.mio.commons.ClientConfig;
 import io.mio.commons.MioCallback;
 import io.mio.commons.MioMessage;
 import io.mio.commons.MioMessageFuture;
+import io.mio.extension.SPI;
 
 /**
  * MioClient
  *
  * @author lry
  */
+@SPI("netty")
 public interface MioClient {
 
     /**

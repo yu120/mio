@@ -1,14 +1,15 @@
 package io.mio.netty;
 
 import io.mio.MioServer;
-import io.mio.compress.Compress;
-import io.mio.compress.GzipCompress;
-import io.mio.netty.protocol.NettyMioDecoder;
-import io.mio.netty.protocol.NettyMioEncoder;
 import io.mio.commons.MioCallback;
 import io.mio.commons.MioConstants;
 import io.mio.commons.MioMessage;
 import io.mio.commons.ServerConfig;
+import io.mio.compress.Compress;
+import io.mio.compress.GzipCompress;
+import io.mio.extension.Extension;
+import io.mio.netty.protocol.NettyMioDecoder;
+import io.mio.netty.protocol.NettyMioEncoder;
 import io.mio.serialize.Hessian2Serialize;
 import io.mio.serialize.Serialize;
 import io.netty.bootstrap.ServerBootstrap;
@@ -34,6 +35,7 @@ import java.util.concurrent.TimeUnit;
  * @author lry
  */
 @Slf4j
+@Extension("netty")
 public class NettyMioServer implements MioServer {
 
     private EventLoopGroup bossGroup;

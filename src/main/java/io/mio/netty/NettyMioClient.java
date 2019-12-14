@@ -4,6 +4,7 @@ import io.mio.MioClient;
 import io.mio.commons.*;
 import io.mio.compress.Compress;
 import io.mio.compress.GzipCompress;
+import io.mio.extension.Extension;
 import io.mio.netty.protocol.NettyMioDecoder;
 import io.mio.netty.protocol.NettyMioEncoder;
 import io.mio.serialize.Hessian2Serialize;
@@ -11,16 +12,22 @@ import io.mio.serialize.Serialize;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.pool.*;
+import io.netty.channel.pool.AbstractChannelPoolHandler;
+import io.netty.channel.pool.AbstractChannelPoolMap;
+import io.netty.channel.pool.FixedChannelPool;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.*;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 /**
  * NettyMioClient
@@ -28,6 +35,7 @@ import java.util.concurrent.*;
  * @author lry
  */
 @Slf4j
+@Extension("netty")
 public class NettyMioClient implements MioClient {
 
     public static final AttributeKey<MioCallback<MioMessage>> MIO_CALLBACK_KEY = AttributeKey.valueOf("MIO_CALLBACK");
