@@ -35,10 +35,10 @@ public class StringServer {
         };
 
         AioMioServer<String> server = new AioMioServer<>(8888, new StringProtocol(), processor);
-        server.setReadBufferSize(1024 * 1024)
-                .setThreadNum(Runtime.getRuntime().availableProcessors() + 1)
-                .setBufferPoolPageSize(1024 * 1024 * 16)
-                .setBufferPoolChunkSize(4096);
+        server.getConfig().setReadBufferSize(1024 * 1024);
+        server.getConfig().setThreadNum(Runtime.getRuntime().availableProcessors() + 1);
+        server.getConfig().setBufferPoolPageSize(1024 * 1024 * 16);
+        server.getConfig().setBufferPoolChunkSize(4096);
         processor.addPlugin(new MonitorFilter(5));
         server.start();
     }

@@ -19,7 +19,7 @@ import java.util.Map;
 public class IoServerConfig<T> {
 
     /**
-     * 消息体缓存大小,字节
+     * 消息体缓存大小,字节。设置读缓存区大小。单位：byte
      */
     private int readBufferSize = 512;
 
@@ -54,12 +54,12 @@ public class IoServerConfig<T> {
     private Map<SocketOption<Object>, Object> socketOptions;
 
     /**
-     * 线程数
+     * 线程数。设置服务工作线程数,设置数值必须大于等于2
      */
     private int threadNum = 1;
 
     /**
-     * 内存页大小
+     * 内存页大小。设置单个内存页大小.多个内存页共同组成内存池
      */
     private int bufferPoolPageSize = 4096;
 
@@ -69,17 +69,17 @@ public class IoServerConfig<T> {
     private int bufferPoolSharedPageSize = -1;
 
     /**
-     * 内存页个数
+     * 内存页个数。设置内存页个数，多个内存页共同组成内存池。
      */
     private int bufferPoolPageNum = -1;
 
     /**
-     * 内存块大小限制
+     * 内存块大小限制。限制写操作时从内存页中申请内存块的大小
      */
     private int bufferPoolChunkSize = 128;
 
     /**
-     * 是否使用直接缓冲区内存
+     * 设置内存池是否使用直接缓冲区。true:直接缓冲区,false:堆内缓冲区
      */
     private boolean bufferPoolDirect = true;
 

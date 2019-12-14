@@ -1,12 +1,13 @@
 package io.mio.aio;
 
+import io.mio.aio.buffer.BufferPagePool;
 import io.mio.aio.handler.ReadCompletionHandler;
 import io.mio.aio.handler.WriteCompletionHandler;
 import io.mio.aio.support.AioMioSession;
 import io.mio.aio.support.EventState;
 import io.mio.aio.support.IoServerConfig;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import io.mio.aio.buffer.BufferPagePool;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -14,7 +15,6 @@ import java.net.SocketOption;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
-import java.security.InvalidParameterException;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
@@ -28,7 +28,8 @@ import java.util.function.Function;
  * @author lry
  */
 @Slf4j
-public class AioMioServer<T> {
+@Getter
+public class AioMioServer<T> implements Runnable {
 
     /**
      * Server端服务配置。
@@ -39,47 +40,23 @@ public class AioMioServer<T> {
      * 内存池
      */
     private BufferPagePool bufferPool;
-    /**
-     * 读回调事件处理
-     */
+
     private ReadCompletionHandler<T> aioReadCompletionHandler;
-    /**
-     * 写回调事件处理
-     */
     private WriteCompletionHandler<T> aioWriteCompletionHandler;
     /**
      * 连接会话实例化Function
      */
     private Function<AsynchronousSocketChannel, AioMioSession<T>> aioSessionFunction;
-    /**
-     * asynchronousServerSocketChannel
-     */
-    private AsynchronousServerSocketChannel serverSocketChannel = null;
-    /**
-     * asynchronousChannelGroup
-     */
-    private AsynchronousChannelGroup asynchronousChannelGroup;
-    /**
-     * accept处理线程
-     */
-    private Thread acceptThread = null;
 
-    /**
-     * watcher线程
-     */
-    private Thread watcherThread;
+    private AsynchronousServerSocketChannel serverSocketChannel = null;
+    private AsynchronousChannelGroup asynchronousChannelGroup;
+
     /**
      * accept线程运行状态
      */
     private volatile boolean acceptRunning = true;
 
-    /**
-     * 设置服务端启动必要参数配置
-     *
-     * @param port             绑定服务端口号
-     * @param protocol         协议编解码
-     * @param messageProcessor 消息处理器
-     */
+
     public AioMioServer(int port, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
         config.setPort(port);
         config.setProtocol(protocol);
@@ -87,12 +64,6 @@ public class AioMioServer<T> {
         config.setThreadNum(Runtime.getRuntime().availableProcessors());
     }
 
-    /**
-     * @param host             绑定服务端Host地址
-     * @param port             绑定服务端口号
-     * @param protocol         协议编解码
-     * @param messageProcessor 消息处理器
-     */
     public AioMioServer(String host, int port, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
         this(port, protocol, messageProcessor);
         config.setHost(host);
@@ -104,27 +75,17 @@ public class AioMioServer<T> {
      * @throws IOException IO异常
      */
     public void start() throws IOException {
-        start0(channel -> new AioMioSession<T>(channel, config, aioReadCompletionHandler, aioWriteCompletionHandler, bufferPool.allocateBufferPage()));
-    }
-
-    /**
-     * 内部启动逻辑
-     *
-     * @param aioSessionFunction 实例化会话的Function
-     * @throws IOException IO异常
-     */
-    protected final void start0(Function<AsynchronousSocketChannel, AioMioSession<T>> aioSessionFunction) throws IOException {
         checkAndResetConfig();
+        this.aioSessionFunction = channel -> new AioMioSession<T>(channel, config,
+                aioReadCompletionHandler, aioWriteCompletionHandler, bufferPool.allocateBufferPage());
+        this.aioReadCompletionHandler = new ReadCompletionHandler<>(new Semaphore(config.getThreadNum() - 1));
+        this.aioWriteCompletionHandler = new WriteCompletionHandler<>();
+        this.bufferPool = new BufferPagePool(config.getBufferPoolPageSize(), config.getBufferPoolPageNum(),
+                config.getBufferPoolSharedPageSize(), config.isBufferPoolDirect());
 
         try {
-
-            aioReadCompletionHandler = new ReadCompletionHandler<>(new Semaphore(config.getThreadNum() - 1));
-            aioWriteCompletionHandler = new WriteCompletionHandler<>();
-
-            this.bufferPool = new BufferPagePool(config.getBufferPoolPageSize(), config.getBufferPoolPageNum(), config.getBufferPoolSharedPageSize(), config.isBufferPoolDirect());
-            this.aioSessionFunction = aioSessionFunction;
-
-            asynchronousChannelGroup = AsynchronousChannelGroup.withFixedThreadPool(config.getThreadNum(), r -> bufferPool.newThread(r, "mio-aio:Worker-"));
+            this.asynchronousChannelGroup = AsynchronousChannelGroup.withFixedThreadPool(
+                    config.getThreadNum(), r -> bufferPool.newThread(r, "mio-aio:Worker-"));
             this.serverSocketChannel = AsynchronousServerSocketChannel.open(asynchronousChannelGroup);
             //set socket options
             if (config.getSocketOptions() != null) {
@@ -139,48 +100,35 @@ public class AioMioServer<T> {
                 serverSocketChannel.bind(new InetSocketAddress(config.getPort()), 1000);
             }
 
-            startWatcherThread();
-            startAcceptThread();
+            Thread acceptThread = new Thread(this);
+            acceptThread.setDaemon(true);
+            acceptThread.setPriority(1);
+            acceptThread.start();
         } catch (IOException e) {
             shutdown();
             throw e;
         }
-        log.info("mio-aio server started on port {},threadNum:{}", config.getPort(), config.getThreadNum());
-        log.info("mio-aio server config is {}", config);
+        log.info("mio-aio server[{}] started.", config);
     }
 
-    private void startAcceptThread() {
-        acceptThread = new Thread(new Runnable() {
-            private NetFilter<T> monitor = config.getMonitor();
-
-            @Override
-            public void run() {
-                Future<AsynchronousSocketChannel> nextFuture = serverSocketChannel.accept();
-                while (acceptRunning) {
-                    try {
-                        final AsynchronousSocketChannel channel = nextFuture.get();
-                        nextFuture = serverSocketChannel.accept();
-                        if (monitor == null || monitor.shouldAccept(channel)) {
-                            createSession(channel);
-                        } else {
-                            config.getProcessor().stateEvent(null, EventState.REJECT_ACCEPT, null);
-                            log.warn("reject accept channel:{}", channel);
-                            closeChannel(channel);
-                        }
-                    } catch (Exception e) {
-                        log.error("accept exception", e);
-                    }
+    @Override
+    public void run() {
+        Future<AsynchronousSocketChannel> nextFuture = serverSocketChannel.accept();
+        while (acceptRunning) {
+            try {
+                final AsynchronousSocketChannel channel = nextFuture.get();
+                nextFuture = serverSocketChannel.accept();
+                if (config.getMonitor() == null || config.getMonitor().shouldAccept(channel)) {
+                    createSession(channel);
+                } else {
+                    config.getProcessor().stateEvent(null, EventState.REJECT_ACCEPT, null);
+                    log.warn("reject accept channel:{}", channel);
+                    AioMioSession.close(channel);
                 }
+            } catch (Exception e) {
+                log.error("accept exception", e);
             }
-        }, "mio-aio:accept");
-        acceptThread.start();
-    }
-
-    private void startWatcherThread() {
-        watcherThread = new Thread(aioReadCompletionHandler, "mio-aio:watcher");
-        watcherThread.setDaemon(true);
-        watcherThread.setPriority(1);
-        watcherThread.start();
+        }
     }
 
     /**
@@ -223,40 +171,14 @@ public class AioMioServer<T> {
         } catch (Exception e1) {
             log.error(e1.getMessage(), e1);
             if (session == null) {
-                closeChannel(channel);
+                AioMioSession.close(channel);
             } else {
                 session.close(true);
             }
         }
     }
 
-    /**
-     * 关闭服务端通道
-     *
-     * @param channel AsynchronousSocketChannel
-     */
-    private void closeChannel(AsynchronousSocketChannel channel) {
-        try {
-            channel.shutdownInput();
-        } catch (IOException e) {
-            log.debug(e.getMessage(), e);
-        }
-        try {
-            channel.shutdownOutput();
-        } catch (IOException e) {
-            log.debug(e.getMessage(), e);
-        }
-        try {
-            channel.close();
-        } catch (IOException e) {
-            log.debug("close channel exception", e);
-        }
-    }
-
-    /**
-     * 停止服务端
-     */
-    public final void shutdown() {
+    public void shutdown() {
         acceptRunning = false;
         try {
             if (serverSocketChannel != null) {
@@ -286,113 +208,4 @@ public class AioMioServer<T> {
         aioReadCompletionHandler.shutdown();
     }
 
-    /**
-     * 设置读缓存区大小
-     *
-     * @param size 单位：byte
-     * @return 当前AioQuickServer对象
-     */
-    public final AioMioServer<T> setReadBufferSize(int size) {
-        this.config.setReadBufferSize(size);
-        return this;
-    }
-
-    /**
-     * 设置Socket的TCP参数配置。
-     * <p>
-     * AIO客户端的有效可选范围为：<br/>
-     * 2. StandardSocketOptions.SO_RCVBUF<br/>
-     * 4. StandardSocketOptions.SO_REUSEADDR<br/>
-     * </p>
-     *
-     * @param socketOption 配置项
-     * @param value        配置值
-     * @param <V>          配置项类型
-     * @return 当前AioQuickServer对象
-     */
-    public final <V> AioMioServer<T> setOption(SocketOption<V> socketOption, V value) {
-        config.setOption(socketOption, value);
-        return this;
-    }
-
-    /**
-     * 设置write缓冲区容量
-     *
-     * @param writeQueueCapacity 缓存区容量
-     * @return 当前AioQuickServer对象
-     */
-    public final AioMioServer<T> setWriteQueueCapacity(int writeQueueCapacity) {
-        config.setWriteQueueCapacity(writeQueueCapacity);
-        return this;
-    }
-
-    /**
-     * 设置服务工作线程数,设置数值必须大于等于2
-     *
-     * @param threadNum 线程数
-     * @return 当前AioQuickServer对象
-     */
-    public final AioMioServer<T> setThreadNum(int threadNum) {
-        if (threadNum <= 1) {
-            throw new InvalidParameterException("threadNum must >= 2");
-        }
-        config.setThreadNum(threadNum);
-        return this;
-    }
-
-    /**
-     * 设置单个内存页大小.多个内存页共同组成内存池
-     *
-     * @param bufferPoolPageSize 内存页大小
-     * @return 当前AioQuickServer对象
-     */
-    public final AioMioServer<T> setBufferPoolPageSize(int bufferPoolPageSize) {
-        config.setBufferPoolPageSize(bufferPoolPageSize);
-        return this;
-    }
-
-    /**
-     * 设置内存页个数，多个内存页共同组成内存池。
-     *
-     * @param bufferPoolPageNum 内存页个数
-     * @return 当前AioQuickServer对象
-     */
-    public final AioMioServer<T> setBufferPoolPageNum(int bufferPoolPageNum) {
-        config.setBufferPoolPageNum(bufferPoolPageNum);
-        return this;
-    }
-
-
-    /**
-     * 限制写操作时从内存页中申请内存块的大小
-     *
-     * @param bufferPoolChunkSizeLimit 内存块大小限制
-     * @return 当前AioQuickServer对象
-     */
-    public final AioMioServer<T> setBufferPoolChunkSize(int bufferPoolChunkSizeLimit) {
-        config.setBufferPoolChunkSize(bufferPoolChunkSizeLimit);
-        return this;
-    }
-
-    /**
-     * 设置内存池是否使用直接缓冲区,默认：true
-     *
-     * @param isDirect true:直接缓冲区,false:堆内缓冲区
-     * @return 当前AioQuickServer对象
-     */
-    public final AioMioServer<T> setBufferPoolDirect(boolean isDirect) {
-        config.setBufferPoolDirect(isDirect);
-        return this;
-    }
-
-    /**
-     * 设置共享内存页大小
-     *
-     * @param bufferPoolSharedPageSize 共享内存页大小
-     * @return 当前AioQuickServer对象
-     */
-    public final AioMioServer<T> setBufferPoolSharedPageSize(int bufferPoolSharedPageSize) {
-        config.setBufferPoolSharedPageSize(bufferPoolSharedPageSize);
-        return this;
-    }
 }
