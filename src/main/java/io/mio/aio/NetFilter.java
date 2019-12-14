@@ -1,7 +1,7 @@
 package io.mio.aio;
 
+import io.mio.aio.support.AioMioSession;
 import io.mio.aio.support.EventState;
-import io.mio.aio.support.TcpAioSession;
 
 import java.nio.channels.AsynchronousSocketChannel;
 
@@ -36,14 +36,14 @@ public interface NetFilter<T> {
      * @param session  当前执行read的AioSession对象
      * @param readSize 已读数据长度
      */
-    void afterRead(TcpAioSession<T> session, int readSize);
+    void afterRead(AioMioSession<T> session, int readSize);
 
     /**
      * 即将开始读取数据
      *
      * @param session 当前会话对象
      */
-    void beforeRead(TcpAioSession<T> session);
+    void beforeRead(AioMioSession<T> session);
 
     /**
      * 监控触发本次写回调session的已写数据字节数
@@ -51,14 +51,14 @@ public interface NetFilter<T> {
      * @param session   本次执行write回调的AIOSession对象
      * @param writeSize 本次输出的数据长度
      */
-    void afterWrite(TcpAioSession<T> session, int writeSize);
+    void afterWrite(AioMioSession<T> session, int writeSize);
 
     /**
      * 即将开始写数据
      *
      * @param session 当前会话对象
      */
-    void beforeWrite(TcpAioSession<T> session);
+    void beforeWrite(AioMioSession<T> session);
 
     /**
      * 对请求消息进行预处理，并决策是否进行后续的MessageProcessor处理。
@@ -69,7 +69,7 @@ public interface NetFilter<T> {
      * @param t
      * @return
      */
-    boolean preProcess(TcpAioSession<T> session, T t);
+    boolean preProcess(AioMioSession<T> session, T t);
 
     /**
      * 监听状态机事件
@@ -77,8 +77,8 @@ public interface NetFilter<T> {
      * @param eventState
      * @param session
      * @param throwable
-     * @see MessageProcessor#stateEvent(TcpAioSession, EventState, Throwable)
+     * @see MessageProcessor#stateEvent(AioMioSession, EventState, Throwable)
      */
-    void stateEvent(EventState eventState, TcpAioSession<T> session, Throwable throwable);
+    void stateEvent(EventState eventState, AioMioSession<T> session, Throwable throwable);
 
 }

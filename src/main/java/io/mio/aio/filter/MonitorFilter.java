@@ -1,8 +1,8 @@
 package io.mio.aio.filter;
 
+import io.mio.aio.support.AioMioSession;
 import io.mio.aio.support.EventState;
 import io.mio.aio.NetFilter;
-import io.mio.aio.support.TcpAioSession;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.channels.AsynchronousSocketChannel;
@@ -85,14 +85,14 @@ public final class MonitorFilter<T> implements Runnable, NetFilter<T> {
     }
 
     @Override
-    public boolean preProcess(TcpAioSession<T> session, T t) {
+    public boolean preProcess(AioMioSession<T> session, T t) {
         processMsgNum.increment();
         totalProcessMsgNum.increment();
         return true;
     }
 
     @Override
-    public void stateEvent(EventState eventState, TcpAioSession<T> session, Throwable throwable) {
+    public void stateEvent(EventState eventState, AioMioSession<T> session, Throwable throwable) {
         switch (eventState) {
             case PROCESS_EXCEPTION:
                 processFailNum.increment();
@@ -144,7 +144,7 @@ public final class MonitorFilter<T> implements Runnable, NetFilter<T> {
     }
 
     @Override
-    public void afterRead(TcpAioSession<T> session, int readSize) {
+    public void afterRead(AioMioSession<T> session, int readSize) {
         //出现result为0,说明代码存在问题
         if (readSize == 0) {
             log.error("readSize is 0");
@@ -153,17 +153,17 @@ public final class MonitorFilter<T> implements Runnable, NetFilter<T> {
     }
 
     @Override
-    public void beforeRead(TcpAioSession<T> session) {
+    public void beforeRead(AioMioSession<T> session) {
         readCount.increment();
     }
 
     @Override
-    public void afterWrite(TcpAioSession<T> session, int writeSize) {
+    public void afterWrite(AioMioSession<T> session, int writeSize) {
         outFlow.add(writeSize);
     }
 
     @Override
-    public void beforeWrite(TcpAioSession<T> session) {
+    public void beforeWrite(AioMioSession<T> session) {
         writeCount.increment();
     }
 

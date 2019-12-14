@@ -2,9 +2,9 @@ package io.mio.aio;
 
 import io.mio.aio.handler.ReadCompletionHandler;
 import io.mio.aio.handler.WriteCompletionHandler;
+import io.mio.aio.support.AioMioSession;
 import io.mio.aio.support.EventState;
 import io.mio.aio.support.IoServerConfig;
-import io.mio.aio.support.TcpAioSession;
 import lombok.extern.slf4j.Slf4j;
 import io.mio.aio.buffer.BufferPagePool;
 
@@ -50,7 +50,7 @@ public class AioMioServer<T> {
     /**
      * 连接会话实例化Function
      */
-    private Function<AsynchronousSocketChannel, TcpAioSession<T>> aioSessionFunction;
+    private Function<AsynchronousSocketChannel, AioMioSession<T>> aioSessionFunction;
     /**
      * asynchronousServerSocketChannel
      */
@@ -104,7 +104,7 @@ public class AioMioServer<T> {
      * @throws IOException IO异常
      */
     public void start() throws IOException {
-        start0(channel -> new TcpAioSession<T>(channel, config, aioReadCompletionHandler, aioWriteCompletionHandler, bufferPool.allocateBufferPage()));
+        start0(channel -> new AioMioSession<T>(channel, config, aioReadCompletionHandler, aioWriteCompletionHandler, bufferPool.allocateBufferPage()));
     }
 
     /**
@@ -113,7 +113,7 @@ public class AioMioServer<T> {
      * @param aioSessionFunction 实例化会话的Function
      * @throws IOException IO异常
      */
-    protected final void start0(Function<AsynchronousSocketChannel, TcpAioSession<T>> aioSessionFunction) throws IOException {
+    protected final void start0(Function<AsynchronousSocketChannel, AioMioSession<T>> aioSessionFunction) throws IOException {
         checkAndResetConfig();
 
         try {
@@ -216,7 +216,7 @@ public class AioMioServer<T> {
      */
     private void createSession(AsynchronousSocketChannel channel) {
         //连接成功则构造AIOSession对象
-        TcpAioSession<T> session = null;
+        AioMioSession<T> session = null;
         try {
             session = aioSessionFunction.apply(channel);
             session.initSession();

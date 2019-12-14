@@ -1,8 +1,8 @@
 package io.mio.aio.handler;
 
+import io.mio.aio.support.AioMioSession;
 import io.mio.aio.support.EventState;
 import io.mio.aio.NetFilter;
-import io.mio.aio.support.TcpAioSession;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.channels.CompletionHandler;
@@ -19,7 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author lry
  */
 @Slf4j
-public class ReadCompletionHandler<T> implements CompletionHandler<Integer, TcpAioSession<T>>, Runnable {
+public class ReadCompletionHandler<T> implements CompletionHandler<Integer, AioMioSession<T>>, Runnable {
 
     private static final int LIFE_CYCLE = 1 << 8;
 
@@ -31,7 +31,7 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, TcpA
     /**
      * 读会话缓存队列
      */
-    private ConcurrentLinkedQueue<TcpAioSession<T>> cacheAioSessionQueue;
+    private ConcurrentLinkedQueue<AioMioSession<T>> cacheAioSessionQueue;
 
     /**
      * 应该可以不用volatile
@@ -61,7 +61,7 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, TcpA
 
 
     @Override
-    public void completed(final Integer result, final TcpAioSession<T> aioSession) {
+    public void completed(final Integer result, final AioMioSession<T> aioSession) {
         if (semaphore == null) {
             completed0(result, aioSession);
             return;
@@ -92,12 +92,12 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, TcpA
         if (cacheAioSessionQueue.isEmpty() || !semaphore.tryAcquire()) {
             return;
         }
-        TcpAioSession<T> curSession = cacheAioSessionQueue.poll();
+        AioMioSession<T> curSession = cacheAioSessionQueue.poll();
         if (curSession == null) {
             semaphore.release();
             return;
         }
-        TcpAioSession<T> nextSession;
+        AioMioSession<T> nextSession;
         longAdder.increment();
         long step = longAdder.sum();
         int i = LIFE_CYCLE;
@@ -118,7 +118,7 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, TcpA
      * @param result     已读消息字节数
      * @param aioSession 当前触发读回调的会话
      */
-    private void completed0(final Integer result, final TcpAioSession<T> aioSession) {
+    private void completed0(final Integer result, final AioMioSession<T> aioSession) {
         try {
             // 接收到的消息进行预处理
             NetFilter<T> monitor = aioSession.getServerConfig().getMonitor();
@@ -132,7 +132,7 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, TcpA
     }
 
     @Override
-    public void failed(Throwable exc, TcpAioSession<T> aioSession) {
+    public void failed(Throwable exc, AioMioSession<T> aioSession) {
         try {
             aioSession.getServerConfig().getProcessor().stateEvent(aioSession, EventState.INPUT_EXCEPTION, exc);
         } catch (Exception e) {
@@ -165,7 +165,7 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, TcpA
     public void run() {
         while (running) {
             try {
-                TcpAioSession<T> aioSession = cacheAioSessionQueue.poll();
+                AioMioSession<T> aioSession = cacheAioSessionQueue.poll();
                 if (aioSession != null) {
                     completed0(aioSession.getLastReadSize(), aioSession);
                     synchronized (this) {

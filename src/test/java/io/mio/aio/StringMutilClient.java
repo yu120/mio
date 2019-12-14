@@ -1,9 +1,8 @@
 package io.mio.aio;
 
 import io.mio.aio.buffer.BufferPagePool;
-import io.mio.aio.support.AbstractMessageProcessor;
+import io.mio.aio.support.AioMioSession;
 import io.mio.aio.support.EventState;
-import io.mio.aio.support.TcpAioSession;
 import io.mio.aio.support.WriteBuffer;
 
 import java.io.IOException;
@@ -14,14 +13,14 @@ public class StringMutilClient {
 
     public static void main(String[] args) throws InterruptedException, ExecutionException, IOException {
         BufferPagePool bufferPagePool = new BufferPagePool(1024 * 1024 * 32, 10, true);
-        AbstractMessageProcessor<String> processor = new AbstractMessageProcessor<String>() {
+        MessageProcessor<String> processor = new MessageProcessor<String>() {
             @Override
-            public void process0(TcpAioSession<String> session, String msg) {
+            public void process0(AioMioSession<String> session, String msg) {
 
             }
 
             @Override
-            public void stateEvent0(TcpAioSession<String> session, EventState stateMachineEnum, Throwable throwable) {
+            public void stateEvent0(AioMioSession<String> session, EventState stateMachineEnum, Throwable throwable) {
                 if (throwable != null) {
                     throwable.printStackTrace();
                 }
@@ -31,7 +30,7 @@ public class StringMutilClient {
         AioMioClient<String> client = new AioMioClient<>("localhost", 8888, new StringProtocol(), processor);
         client.setBufferPagePool(bufferPagePool);
         client.setWriteQueueCapacity(20);
-        TcpAioSession<String> session = client.start();
+        AioMioSession<String> session = client.start();
         for (int i = 0; i < 10; i++) {
             new Thread() {
                 @Override

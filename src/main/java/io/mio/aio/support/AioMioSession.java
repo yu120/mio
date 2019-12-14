@@ -24,7 +24,7 @@ import java.util.function.Function;
  * @author lry
  */
 @Slf4j
-public class TcpAioSession<T> {
+public class AioMioSession<T> {
 
     /**
      * Session状态:已关闭
@@ -41,9 +41,9 @@ public class TcpAioSession<T> {
     /**
      * 会话当前状态
      *
-     * @see TcpAioSession#SESSION_STATUS_CLOSED
-     * @see TcpAioSession#SESSION_STATUS_CLOSING
-     * @see TcpAioSession#SESSION_STATUS_ENABLED
+     * @see AioMioSession#SESSION_STATUS_CLOSED
+     * @see AioMioSession#SESSION_STATUS_CLOSING
+     * @see AioMioSession#SESSION_STATUS_ENABLED
      */
     private byte status = SESSION_STATUS_ENABLED;
 
@@ -94,7 +94,7 @@ public class TcpAioSession<T> {
             if (!semaphore.tryAcquire()) {
                 return null;
             }
-            TcpAioSession.this.writeBuffer = var.poll();
+            AioMioSession.this.writeBuffer = var.poll();
             if (writeBuffer == null) {
                 semaphore.release();
             } else {
@@ -132,7 +132,7 @@ public class TcpAioSession<T> {
      * @param writeCompletionHandler
      * @param bufferPage             是否服务端Session
      */
-    public TcpAioSession(AsynchronousSocketChannel channel,
+    public AioMioSession(AsynchronousSocketChannel channel,
                          final IoServerConfig<T> config,
                          ReadCompletionHandler<T> readCompletionHandler,
                          WriteCompletionHandler<T> writeCompletionHandler,

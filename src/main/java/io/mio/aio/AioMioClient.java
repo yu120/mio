@@ -3,8 +3,8 @@ package io.mio.aio;
 import io.mio.aio.buffer.BufferPagePool;
 import io.mio.aio.handler.ReadCompletionHandler;
 import io.mio.aio.handler.WriteCompletionHandler;
+import io.mio.aio.support.AioMioSession;
 import io.mio.aio.support.IoServerConfig;
-import io.mio.aio.support.TcpAioSession;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -35,9 +35,9 @@ public class AioMioClient<T> {
     /**
      * 网络连接的会话对象
      *
-     * @see TcpAioSession
+     * @see AioMioSession
      */
-    protected TcpAioSession<T> session;
+    protected AioMioSession<T> session;
     /**
      * 内存池
      */
@@ -93,7 +93,7 @@ public class AioMioClient<T> {
      * @throws InterruptedException InterruptedException
      * @see AsynchronousSocketChannel#connect(SocketAddress)
      */
-    public TcpAioSession<T> start(AsynchronousChannelGroup asynchronousChannelGroup) throws IOException, ExecutionException, InterruptedException {
+    public AioMioSession<T> start(AsynchronousChannelGroup asynchronousChannelGroup) throws IOException, ExecutionException, InterruptedException {
         AsynchronousSocketChannel socketChannel = AsynchronousSocketChannel.open(asynchronousChannelGroup);
         if (bufferPool == null) {
             bufferPool = new BufferPagePool(config.getBufferPoolPageSize(), 1, config.isBufferPoolDirect());
@@ -118,12 +118,12 @@ public class AioMioClient<T> {
             }
 
         } catch (TimeoutException e) {
-            TcpAioSession.close(socketChannel);
+            AioMioSession.close(socketChannel);
             shutdownNow();
             throw new IOException(e);
         }
         //连接成功则构造AIOSession对象
-        session = new TcpAioSession<T>(socketChannel, config, new ReadCompletionHandler<T>(), new WriteCompletionHandler<T>(), bufferPool.allocateBufferPage());
+        session = new AioMioSession<T>(socketChannel, config, new ReadCompletionHandler<T>(), new WriteCompletionHandler<T>(), bufferPool.allocateBufferPage());
         session.initSession();
         return session;
     }
@@ -141,7 +141,7 @@ public class AioMioClient<T> {
      * @throws InterruptedException InterruptedException
      * @see AioMioClient#start(AsynchronousChannelGroup)
      */
-    public final TcpAioSession<T> start() throws IOException, ExecutionException, InterruptedException {
+    public final AioMioSession<T> start() throws IOException, ExecutionException, InterruptedException {
         this.asynchronousChannelGroup = AsynchronousChannelGroup.withFixedThreadPool(2, new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {

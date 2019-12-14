@@ -1,13 +1,13 @@
 package io.mio.aio;
 
-import io.mio.aio.support.TcpAioSession;
+import io.mio.aio.support.AioMioSession;
 
 import java.nio.ByteBuffer;
 
 public class StringProtocol implements Protocol<String> {
 
     @Override
-    public String decode(ByteBuffer readBuffer, TcpAioSession<String> session) {
+    public String decode(ByteBuffer readBuffer, AioMioSession<String> session) {
         int remaining = readBuffer.remaining();
         if (remaining < Integer.BYTES) {
             return null;
