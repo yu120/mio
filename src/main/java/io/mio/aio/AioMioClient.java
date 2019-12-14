@@ -81,13 +81,13 @@ public class AioMioClient<T> {
         }
 
         //连接成功则构造AIOSession对象
-        return new AioMioSession<T>(socketChannel,
+        return new AioMioSession<>(socketChannel,
                 config.getReadBufferSize(),
                 config.getWriteQueueCapacity(),
                 config.getBufferPoolChunkSize(),
                 protocol, messageProcessor,
-                new ReadCompletionHandler<T>(),
-                new WriteCompletionHandler<T>(),
+                new ReadCompletionHandler<>(),
+                new WriteCompletionHandler<>(),
                 bufferPagePool.allocateBufferPage());
     }
 
@@ -100,7 +100,7 @@ public class AioMioClient<T> {
      * @throws Exception IOException,ExecutionException,InterruptedException
      * @see AioMioClient#start(AsynchronousChannelGroup)
      */
-    public final AioMioSession<T> start() throws Exception {
+    public AioMioSession<T> start() throws Exception {
         // 作为客户端，该AsynchronousChannelGroup只需保证2个长度的线程池大小即可满足通信读写所需。
         this.asynchronousChannelGroup = AsynchronousChannelGroup.withFixedThreadPool(2,
                 MioConstants.newThreadFactory("aio-mio-client", true));

@@ -41,8 +41,8 @@ public class StringServer {
         config.setThreadNum(Runtime.getRuntime().availableProcessors() + 1);
         config.setBufferPoolPageSize(1024 * 1024 * 16);
         config.setBufferPoolChunkSize(4096);
-        AioMioServer<String> server = new AioMioServer<>(config, new StringProtocol(), messageProcessor);
-        server.initialize();
+        AioMioServer<String> server = new AioMioServer<>();
+        server.initialize(config, new StringProtocol(), messageProcessor);
     }
 
 }

@@ -262,7 +262,6 @@ public class AioMioSession<T> {
             readSemaphore = null;
         }
 
-
         if (eof || status == SESSION_STATUS_CLOSING) {
             close(false);
             messageProcessor.stateEvent(this, EventState.INPUT_SHUTDOWN, null);

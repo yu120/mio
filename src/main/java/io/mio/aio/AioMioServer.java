@@ -4,13 +4,12 @@ import io.mio.aio.buffer.BufferPagePool;
 import io.mio.aio.handler.ReadCompletionHandler;
 import io.mio.aio.handler.WriteCompletionHandler;
 import io.mio.aio.support.AioMioSession;
-import io.mio.aio.support.EventState;
 import io.mio.aio.support.AioServerConfig;
+import io.mio.aio.support.EventState;
 import io.mio.commons.MioConstants;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.SocketOption;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousServerSocketChannel;
@@ -40,16 +39,10 @@ public class AioMioServer<T> implements Runnable {
     private Protocol<T> protocol;
     private MessageProcessor<T> messageProcessor;
 
-    public AioMioServer(AioServerConfig<T> config, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
+    public void initialize(AioServerConfig<T> config, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
         this.config = config;
         this.protocol = protocol;
         this.messageProcessor = messageProcessor;
-    }
-
-    /**
-     * 启动Server端的AIO服务
-     */
-    public void initialize() throws IOException {
         checkAndResetConfig();
         this.readCompletionHandler = new ReadCompletionHandler<>(new Semaphore(config.getThreadNum() - 1));
         this.writeCompletionHandler = new WriteCompletionHandler<>();
@@ -57,30 +50,30 @@ public class AioMioServer<T> implements Runnable {
                 config.getBufferPoolSharedPageSize(), config.isBufferPoolDirect());
 
         try {
+            // create channel
             this.asynchronousChannelGroup = AsynchronousChannelGroup.withFixedThreadPool(
-                    config.getThreadNum(), r -> bufferPool.newThread(r, "mio-aio:Worker-"));
+                    config.getThreadNum(), r -> bufferPool.newThread(r, "aio-mio-worker-"));
             this.serverSocketChannel = AsynchronousServerSocketChannel.open(asynchronousChannelGroup);
-            //set socket options
+
+            // set socket options
             if (config.getSocketOptions() != null) {
                 for (Map.Entry<SocketOption<Object>, Object> entry : config.getSocketOptions().entrySet()) {
                     this.serverSocketChannel.setOption(entry.getKey(), entry.getValue());
                 }
             }
-            //bind host
-            if (config.getHostname() != null) {
-                serverSocketChannel.bind(new InetSocketAddress(config.getHostname(), config.getPort()), 1000);
-            } else {
-                serverSocketChannel.bind(new InetSocketAddress(config.getPort()), 1000);
-            }
 
+            // bind host
+            serverSocketChannel.bind(MioConstants.buildSocketAddress(config.getHostname(), config.getPort()), 1000);
+
+            // accept thread pool
             this.acceptThreadPoolExecutor = new ThreadPoolExecutor(1, 1, 0L,
                     TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), MioConstants.newThreadFactory("aio-mio-accept", true));
             acceptThreadPoolExecutor.submit(this);
-        } catch (IOException e) {
+            log.info("mio-aio server[{}] started.", config);
+        } catch (Exception e) {
+            log.error("Initialize exception", e);
             destroy();
-            throw e;
         }
-        log.info("mio-aio server[{}] started.", config);
     }
 
     @Override
