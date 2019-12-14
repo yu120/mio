@@ -19,15 +19,6 @@ import java.util.Map;
 public class IoServerConfig<T> {
 
     /**
-     * banner信息
-     */
-    public static final String BANNER = "======================";
-    /**
-     * 当前mio-aio版本号
-     */
-    public static final String VERSION = "v1.0.0-SNAPSHOT";
-
-    /**
      * 消息体缓存大小,字节
      */
     private int readBufferSize = 512;
@@ -56,10 +47,6 @@ public class IoServerConfig<T> {
      * 协议编解码
      */
     private Protocol<T> protocol;
-    /**
-     * 是否启用控制台banner
-     */
-    private boolean bannerEnabled = true;
 
     /**
      * Socket 配置
@@ -132,7 +119,6 @@ public class IoServerConfig<T> {
                 ", port=" + port +
                 ", processor=" + processor +
                 ", protocol=" + protocol +
-                ", bannerEnabled=" + bannerEnabled +
                 ", socketOptions=" + socketOptions +
                 ", threadNum=" + threadNum +
                 ", bufferPoolPageSize=" + bufferPoolPageSize +

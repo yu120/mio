@@ -40,14 +40,6 @@ public class MioMessage implements Serializable {
      */
     private InetSocketAddress remoteAddress;
 
-    private MioMessage() {
-
-    }
-
-    public static MioMessage buildEmpty() {
-        return new MioMessage();
-    }
-
     /**
      * The build new {@link MioMessage}
      * <p>
@@ -58,7 +50,9 @@ public class MioMessage implements Serializable {
      */
     public MioMessage(Map<String, Object> headers, byte[] data) {
         this.data = data;
-        this.dataLength = data.length;
+        if (data != null) {
+            this.dataLength = data.length;
+        }
         if (headers == null || headers.isEmpty()) {
             this.headers = new LinkedHashMap<>();
         } else {

@@ -115,9 +115,6 @@ public class AioMioServer<T> {
      * @throws IOException IO异常
      */
     public void start() throws IOException {
-        if (config.isBannerEnabled()) {
-            log.info(IoServerConfig.BANNER + "\r\n :: mio-aio ::\t(" + IoServerConfig.VERSION + ")");
-        }
         start0(channel -> new TcpAioSession<T>(channel, config, aioReadCompletionHandler, aioWriteCompletionHandler, bufferPool.allocateBufferPage()));
     }
 
@@ -308,17 +305,6 @@ public class AioMioServer<T> {
      */
     public final AioMioServer<T> setReadBufferSize(int size) {
         this.config.setReadBufferSize(size);
-        return this;
-    }
-
-    /**
-     * 是否启用控制台Banner打印
-     *
-     * @param bannerEnabled true:启用，false:禁用
-     * @return 当前AioQuickServer对象
-     */
-    public final AioMioServer<T> setBannerEnabled(boolean bannerEnabled) {
-        config.setBannerEnabled(bannerEnabled);
         return this;
     }
 
