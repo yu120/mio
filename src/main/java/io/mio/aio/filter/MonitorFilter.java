@@ -3,6 +3,7 @@ package io.mio.aio.filter;
 import io.mio.aio.support.AioMioSession;
 import io.mio.aio.support.EventState;
 import io.mio.aio.NetFilter;
+import io.mio.commons.MioConstants;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.channels.AsynchronousSocketChannel;
@@ -20,22 +21,17 @@ import java.util.concurrent.atomic.LongAdder;
 @Slf4j
 public final class MonitorFilter<T> implements Runnable, NetFilter<T> {
 
-    public static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE =
-            new ScheduledThreadPoolExecutor(1, r -> {
-                Thread thread = new Thread(r, "Mio-Timer");
-                thread.setDaemon(true);
-                return thread;
-            });
+    private static ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE;
 
     /**
      * 任务执行频率
      */
     private int seconds = 0;
+
     /**
      * 当前周期内消息 流量监控
      */
     private LongAdder inFlow = new LongAdder();
-
     /**
      * 当前周期内消息 流量监控
      */
@@ -45,42 +41,38 @@ public final class MonitorFilter<T> implements Runnable, NetFilter<T> {
      * 当前周期内处理失败消息数
      */
     private LongAdder processFailNum = new LongAdder();
-
     /**
      * 当前周期内处理消息数
      */
     private LongAdder processMsgNum = new LongAdder();
-
     private LongAdder totalProcessMsgNum = new LongAdder();
 
     /**
      * 新建连接数
      */
     private LongAdder newConnect = new LongAdder();
-
     /**
      * 断链数
      */
     private LongAdder disConnect = new LongAdder();
-
     /**
      * 在线连接数
      */
     private long onlineCount;
 
     private LongAdder totalConnect = new LongAdder();
-
     private LongAdder readCount = new LongAdder();
-
     private LongAdder writeCount = new LongAdder();
 
     public MonitorFilter() {
-        this(60);
+        this(5);
     }
 
     public MonitorFilter(int seconds) {
         this.seconds = seconds;
         long mills = TimeUnit.SECONDS.toMillis(seconds);
+        SCHEDULED_EXECUTOR_SERVICE = new ScheduledThreadPoolExecutor(1,
+                MioConstants.newThreadFactory("aio-mio-timer", true));
         SCHEDULED_EXECUTOR_SERVICE.scheduleAtFixedRate(this, mills, mills, TimeUnit.MILLISECONDS);
     }
 
