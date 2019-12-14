@@ -32,8 +32,11 @@ public class ExtensionLoader<T> {
     private ConcurrentMap<String, Class<T>> extensionClasses = null;
     private static ConcurrentMap<Class<?>, ExtensionLoader<?>> extensionLoaders = new ConcurrentHashMap<>();
     private static final List<String> PREFIX_LIST = Arrays.asList("META-INF/", "META-INF/mio/", "META-INF/services/");
-    private static final String ORDER_KEY = "order";
-    private static final String CATEGORY_KEY = "category";
+    private static final List<Class<? extends Annotation>> ANNOTATION_LIST = Arrays.asList(Extension.class);
+
+    public static void addExtensionAnnotation(Class<? extends Annotation> annotationClass) {
+        ANNOTATION_LIST.add(annotationClass);
+    }
 
     private ExtensionLoader(Class<T> type, ClassLoader classLoader) {
         this.type = type;
@@ -221,7 +224,7 @@ public class ExtensionLoader<T> {
             } else if (extension != null) {
                 Object category;
                 try {
-                    category = annotationClass.getMethod(key).invoke("category");
+                    category = annotationClass.getMethod("category").invoke(extension);
                 } catch (Exception e) {
                     throw new RuntimeException("Not found:" + key, e);
                 }
@@ -350,8 +353,30 @@ public class ExtensionLoader<T> {
     }
 
     private String getSpiName(Class<?> clz) {
-        Extension extension = clz.getAnnotation(Extension.class);
-        return (extension != null && !"".equals(extension.value())) ? extension.value() : clz.getSimpleName();
+        for (Class<? extends Annotation> annotationClass : ANNOTATION_LIST) {
+            Annotation extension = clz.getAnnotation(annotationClass);
+            if (extension == null) {
+                continue;
+            }
+
+            try {
+                Method method = annotationClass.getMethod("value");
+                if (method == null) {
+                    continue;
+                }
+
+                Object value = method.invoke(extension);
+                if (value == null || "".equals(String.valueOf(value))) {
+                    continue;
+                }
+
+                return String.valueOf(value);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return clz.getSimpleName();
     }
 
     private void parseUrl(Class<T> type, URL url, List<String> classNames) throws ServiceConfigurationError {
@@ -381,8 +406,7 @@ public class ExtensionLoader<T> {
         }
     }
 
-    private void parseLine(Class<T> type, URL url, String line, List<String> names)
-            throws IOException, ServiceConfigurationError {
+    private void parseLine(Class<T> type, URL url, String line, List<String> names) throws ServiceConfigurationError {
         int ci = line.indexOf('#');
         if (ci >= 0) {
             line = line.substring(0, ci);
