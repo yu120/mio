@@ -19,9 +19,9 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 /**
- * AIO服务端
+ * AioMioServer
  *
- * @param <T> 消息对象类型
+ * @param <T>
  * @author lry
  */
 @Slf4j

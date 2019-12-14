@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * AIO实现的客户端服务
+ * AioMioClient
  *
  * @param <T>
  * @author lry
@@ -31,12 +31,6 @@ public class AioMioClient<T> {
     private AioMioSession<T> session;
     private Protocol<T> protocol;
     private MessageProcessor<T> messageProcessor;
-
-    /**
-     * IO事件处理线程组。
-     * <p>
-     * 作为客户端，该AsynchronousChannelGroup只需保证2个长度的线程池大小即可满足通信读写所需。
-     */
     private AsynchronousChannelGroup asynchronousChannelGroup;
 
     public AioMioClient(AioClientConfig<T> config, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
@@ -109,6 +103,7 @@ public class AioMioClient<T> {
      * @see AioMioClient#start(AsynchronousChannelGroup)
      */
     public final AioMioSession<T> start() throws Exception {
+        // 作为客户端，该AsynchronousChannelGroup只需保证2个长度的线程池大小即可满足通信读写所需。
         this.asynchronousChannelGroup = AsynchronousChannelGroup.withFixedThreadPool(2,
                 MioConstants.newThreadFactory("aio-mio-client", true));
         return start(asynchronousChannelGroup);
