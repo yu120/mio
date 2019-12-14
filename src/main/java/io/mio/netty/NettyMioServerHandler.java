@@ -35,12 +35,13 @@ public class NettyMioServerHandler extends SimpleChannelInboundHandler<MioMessag
     /**
      * The all client channel
      */
-    private ConcurrentMap<String, Channel> channels = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, Channel> channels;
 
     public NettyMioServerHandler(int maxConnections, MioCallback<MioMessage> mioCallback) {
         super();
         this.maxConnections = maxConnections;
         this.mioCallback = mioCallback;
+        this.channels = new ConcurrentHashMap<>(Math.min(maxConnections, 100));
     }
 
     @Override
