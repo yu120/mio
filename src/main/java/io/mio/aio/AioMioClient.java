@@ -9,7 +9,6 @@ import io.mio.commons.MioConstants;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.SocketOption;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousSocketChannel;
@@ -26,35 +25,20 @@ import java.util.concurrent.TimeoutException;
  */
 public class AioMioClient<T> {
 
-    private AioClientConfig config;
     private BufferPagePool bufferPagePool;
     private AioMioSession<T> session;
-    private Protocol<T> protocol;
-    private MessageProcessor<T> messageProcessor;
     private AsynchronousChannelGroup asynchronousChannelGroup;
 
-    public AioMioClient(AioClientConfig config, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
-        this.config = config;
-        this.protocol = protocol;
-        this.messageProcessor = messageProcessor;
+    public AioMioSession<T> start(AioClientConfig config, Protocol<T> protocol, BufferPagePool bufferPagePool, MessageProcessor<T> messageProcessor) throws Exception {
+        // 作为客户端，该AsynchronousChannelGroup只需保证2个长度的线程池大小即可满足通信读写所需。
+        this.asynchronousChannelGroup = AsynchronousChannelGroup.withFixedThreadPool(2,
+                MioConstants.newThreadFactory("aio-mio-client", true));
+        return start(config, protocol, bufferPagePool, messageProcessor, asynchronousChannelGroup);
     }
 
-    public void setBufferPagePool(BufferPagePool bufferPagePool) {
+    public AioMioSession<T> start(AioClientConfig config, Protocol<T> protocol, BufferPagePool bufferPagePool, MessageProcessor<T> messageProcessor, AsynchronousChannelGroup asynchronousChannelGroup) throws Exception {
         this.bufferPagePool = bufferPagePool;
-    }
 
-    /**
-     * 启动客户端。
-     * <p>
-     * 在与服务端建立连接期间，该方法处于阻塞状态。直至连接建立成功，或者发生异常。
-     * 该start方法支持外部指定AsynchronousChannelGroup，实现多个客户端共享一组线程池资源，有效提升资源利用率。
-     *
-     * @param asynchronousChannelGroup IO事件处理线程组
-     * @return 建立连接后的会话对象
-     * @throws Exception IOException,ExecutionException,InterruptedException
-     * @see AsynchronousSocketChannel#connect(SocketAddress)
-     */
-    public AioMioSession<T> start(AsynchronousChannelGroup asynchronousChannelGroup) throws Exception {
         AsynchronousSocketChannel socketChannel = AsynchronousSocketChannel.open(asynchronousChannelGroup);
         if (bufferPagePool == null) {
             this.bufferPagePool = new BufferPagePool(config.getBufferPoolPageSize(), 1, config.isBufferPoolDirect());
@@ -76,7 +60,7 @@ public class AioMioClient<T> {
             }
         } catch (TimeoutException e) {
             AioMioSession.close(socketChannel);
-            shutdownNow();
+            destroy();
             throw new IOException(e);
         }
 
@@ -88,36 +72,12 @@ public class AioMioClient<T> {
                 protocol, messageProcessor,
                 new ReadCompletionHandler<>(),
                 new WriteCompletionHandler<>(),
-                bufferPagePool.allocateBufferPage());
+                this.bufferPagePool.allocateBufferPage());
     }
 
-    /**
-     * 启动客户端。
-     * <p>
-     * 本方法会构建线程数为2的{@code asynchronousChannelGroup}，并通过调用{@link AioMioClient#start(AsynchronousChannelGroup)}启动服务。
-     *
-     * @return 建立连接后的会话对象
-     * @throws Exception IOException,ExecutionException,InterruptedException
-     * @see AioMioClient#start(AsynchronousChannelGroup)
-     */
-    public AioMioSession<T> start() throws Exception {
-        // 作为客户端，该AsynchronousChannelGroup只需保证2个长度的线程池大小即可满足通信读写所需。
-        this.asynchronousChannelGroup = AsynchronousChannelGroup.withFixedThreadPool(2,
-                MioConstants.newThreadFactory("aio-mio-client", true));
-        return start(asynchronousChannelGroup);
-    }
-
-    public final void shutdownGracefully() {
-        showdown0(false);
-    }
-
-    public final void shutdownNow() {
-        showdown0(true);
-    }
-
-    private void showdown0(boolean flag) {
+    public void destroy() {
         if (session != null) {
-            session.close(flag);
+            session.close(false);
             session = null;
         }
         //仅Client内部创建的ChannelGroup需要shutdown

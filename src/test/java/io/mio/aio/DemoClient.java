@@ -56,10 +56,8 @@ public class DemoClient {
         config.setWriteQueueCapacity(10);
         config.setBufferPoolChunkSize(1024 * 1024);
 
-        AioMioClient<String> client = new AioMioClient<>(config, new DemoProtocol(), processor);
-        client.setBufferPagePool(bufferPagePool);
-
-        AioMioSession<String> session = client.start(asynchronousChannelGroup);
+        AioMioClient<String> client = new AioMioClient<>();
+        AioMioSession<String> session = client.start(config, new DemoProtocol(), bufferPagePool, processor, asynchronousChannelGroup);
         WriteBuffer outputStream = session.getWriteBuffer();
         byte[] data = "mio-aio".getBytes();
         while (true) {

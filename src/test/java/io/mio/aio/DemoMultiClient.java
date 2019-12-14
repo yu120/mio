@@ -32,9 +32,8 @@ public class DemoMultiClient {
         config.setWriteQueueCapacity(20);
         config.setBufferPoolChunkSize(1024 * 1024);
 
-        AioMioClient<String> client = new AioMioClient<>(config, new DemoProtocol(), processor);
-        client.setBufferPagePool(bufferPagePool);
-        AioMioSession<String> session = client.start();
+        AioMioClient<String> client = new AioMioClient<>();
+        AioMioSession<String> session = client.start(config, new DemoProtocol(), bufferPagePool, processor);
 
         for (int i = 0; i < 10; i++) {
             new Thread() {

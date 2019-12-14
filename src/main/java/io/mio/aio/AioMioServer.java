@@ -96,51 +96,6 @@ public class AioMioServer<T> implements Runnable {
         }
     }
 
-    /**
-     * 检查配置项
-     */
-    private void checkAndResetConfig() {
-        //未指定内存页数量默认等同于线程数
-        if (config.getBufferPoolPageNum() <= 0) {
-            config.setBufferPoolPageNum(config.getThreadNum());
-        }
-        //内存页数量不可多于线程数，会造成内存浪费
-        if (config.getBufferPoolPageNum() > config.getThreadNum()) {
-            throw new RuntimeException("bufferPoolPageNum=" + config.getBufferPoolPageNum() + " can't greater than threadNum=" + config.getThreadNum());
-        }
-        //内存块不可大于内存页
-        if (config.getBufferPoolChunkSize() > config.getBufferPoolPageSize()) {
-            throw new RuntimeException("bufferPoolChunkSize=" + config.getBufferPoolChunkSize() + " can't greater than bufferPoolPageSize=" + config.getBufferPoolPageSize());
-        }
-        //read缓冲区不可大于内存页
-        if (config.getReadBufferSize() > config.getBufferPoolPageSize()) {
-            throw new RuntimeException("readBufferSize=" + config.getReadBufferSize() + " can't greater than bufferPoolPageSize=" + config.getBufferPoolPageSize());
-        }
-    }
-
-    /**
-     * 为每个新建立的连接创建AIOSession对象
-     *
-     * @param channel 当前已建立连接通道
-     */
-    private void createSession(AsynchronousSocketChannel channel) {
-        //连接成功,则构造AioMioSession对象
-        try {
-            new AioMioSession<>(channel,
-                    config.getReadBufferSize(),
-                    config.getWriteQueueCapacity(),
-                    config.getBufferPoolChunkSize(),
-                    protocol,
-                    messageProcessor,
-                    readCompletionHandler,
-                    writeCompletionHandler,
-                    bufferPool.allocateBufferPage());
-        } catch (Exception e1) {
-            log.error(e1.getMessage(), e1);
-            AioMioSession.close(channel);
-        }
-    }
-
     public void destroy() {
         acceptRunning = false;
         try {
@@ -177,6 +132,46 @@ public class AioMioServer<T> implements Runnable {
             bufferPool = null;
         }
         readCompletionHandler.shutdown();
+    }
+
+    private void checkAndResetConfig() {
+        //未指定内存页数量默认等同于线程数
+        if (config.getBufferPoolPageNum() <= 0) {
+            config.setBufferPoolPageNum(config.getThreadNum());
+        }
+        //内存页数量不可多于线程数，会造成内存浪费
+        if (config.getBufferPoolPageNum() > config.getThreadNum()) {
+            throw new RuntimeException("bufferPoolPageNum=" + config.getBufferPoolPageNum() + " can't greater than threadNum=" + config.getThreadNum());
+        }
+        //内存块不可大于内存页
+        if (config.getBufferPoolChunkSize() > config.getBufferPoolPageSize()) {
+            throw new RuntimeException("bufferPoolChunkSize=" + config.getBufferPoolChunkSize() + " can't greater than bufferPoolPageSize=" + config.getBufferPoolPageSize());
+        }
+        //read缓冲区不可大于内存页
+        if (config.getReadBufferSize() > config.getBufferPoolPageSize()) {
+            throw new RuntimeException("readBufferSize=" + config.getReadBufferSize() + " can't greater than bufferPoolPageSize=" + config.getBufferPoolPageSize());
+        }
+    }
+
+    /**
+     * 为每个新建立的连接创建AIOSession对象
+     */
+    private void createSession(AsynchronousSocketChannel channel) {
+        // 连接成功,则构造AioMioSession对象
+        try {
+            new AioMioSession<>(channel,
+                    config.getReadBufferSize(),
+                    config.getWriteQueueCapacity(),
+                    config.getBufferPoolChunkSize(),
+                    protocol,
+                    messageProcessor,
+                    readCompletionHandler,
+                    writeCompletionHandler,
+                    bufferPool.allocateBufferPage());
+        } catch (Exception e1) {
+            log.error(e1.getMessage(), e1);
+            AioMioSession.close(channel);
+        }
     }
 
 }
