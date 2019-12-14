@@ -1,14 +1,13 @@
 package io.mio.aio.handler;
 
+import io.mio.aio.NetFilter;
 import io.mio.aio.support.AioMioSession;
 import io.mio.aio.support.EventState;
-import io.mio.aio.NetFilter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.channels.CompletionHandler;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.LongAdder;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -21,34 +20,19 @@ import java.util.concurrent.locks.ReentrantLock;
 @Slf4j
 public class ReadCompletionHandler<T> implements CompletionHandler<Integer, AioMioSession<T>>, Runnable {
 
-    private static final int LIFE_CYCLE = 1 << 8;
-
     /**
      * 读回调资源信号量
      */
     private Semaphore semaphore;
-
     /**
      * 读会话缓存队列
      */
     private ConcurrentLinkedQueue<AioMioSession<T>> cacheAioMioSessionQueue;
 
-    /**
-     * 应该可以不用volatile
-     */
-    private boolean needNotify = true;
-    /**
-     * 同步锁
-     */
+    private volatile boolean needNotify = true;
     private ReentrantLock lock = new ReentrantLock();
-    /**
-     * 非空条件
-     */
     private final Condition notEmpty = lock.newCondition();
-
     private boolean running = true;
-
-    private LongAdder longAdder;
 
     public ReadCompletionHandler() {
     }
@@ -56,9 +40,7 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, AioM
     public ReadCompletionHandler(final Semaphore semaphore) {
         this.semaphore = semaphore;
         this.cacheAioMioSessionQueue = new ConcurrentLinkedQueue<>();
-        longAdder = new LongAdder();
     }
-
 
     @Override
     public void completed(final Integer result, final AioMioSession<T> aioSession) {
@@ -92,23 +74,20 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, AioM
         if (cacheAioMioSessionQueue.isEmpty() || !semaphore.tryAcquire()) {
             return;
         }
-        AioMioSession<T> curSession = cacheAioMioSessionQueue.poll();
-        if (curSession == null) {
+        AioMioSession<T> currentSession = cacheAioMioSessionQueue.poll();
+        if (currentSession == null) {
             semaphore.release();
             return;
         }
+
         AioMioSession<T> nextSession;
-        longAdder.increment();
-        long step = longAdder.sum();
-        int i = LIFE_CYCLE;
-        while (curSession != null) {
-            nextSession = (i >> 1 > 0 || step == longAdder.sum())
-                    ? cacheAioMioSessionQueue.poll() : null;
+        while (currentSession != null) {
+            nextSession = cacheAioMioSessionQueue.poll();
             if (nextSession == null) {
-                curSession.setReadSemaphore(semaphore);
+                currentSession.setReadSemaphore(semaphore);
             }
-            completed0(curSession.getLastReadSize(), curSession);
-            curSession = nextSession;
+            completed0(currentSession.getLastReadSize(), currentSession);
+            currentSession = nextSession;
         }
     }
 
@@ -185,9 +164,8 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, AioM
                 } finally {
                     lock.unlock();
                 }
-
             } catch (InterruptedException e) {
-                log.error("", e);
+                log.error("Interrupted exception", e);
             }
         }
     }

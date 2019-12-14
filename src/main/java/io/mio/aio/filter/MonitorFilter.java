@@ -28,6 +28,8 @@ public final class MonitorFilter<T> implements Runnable, NetFilter<T> {
      */
     private int seconds = 0;
 
+    // === 流量统计
+
     /**
      * 当前周期内消息 流量监控
      */
@@ -37,6 +39,8 @@ public final class MonitorFilter<T> implements Runnable, NetFilter<T> {
      */
     private LongAdder outFlow = new LongAdder();
 
+    // === 消息数统计
+
     /**
      * 当前周期内处理失败消息数
      */
@@ -45,20 +49,27 @@ public final class MonitorFilter<T> implements Runnable, NetFilter<T> {
      * 当前周期内处理消息数
      */
     private LongAdder processMsgNum = new LongAdder();
-    private LongAdder totalProcessMsgNum = new LongAdder();
+    /**
+     * 累计处理消息数
+     */
+    private LongAdder processMsgTotal = new LongAdder();
+
+    // === 连接数统计
 
     /**
      * 新建连接数
      */
     private LongAdder newConnect = new LongAdder();
     /**
-     * 断链数
+     * 断开连接数
      */
     private LongAdder disConnect = new LongAdder();
     /**
      * 在线连接数
      */
-    private long onlineCount;
+    private long onlineConnect;
+
+    // === 读写数统计
 
     private LongAdder totalConnect = new LongAdder();
     private LongAdder readCount = new LongAdder();
@@ -79,7 +90,7 @@ public final class MonitorFilter<T> implements Runnable, NetFilter<T> {
     @Override
     public boolean preProcess(AioMioSession<T> session, T t) {
         processMsgNum.increment();
-        totalProcessMsgNum.increment();
+        processMsgTotal.increment();
         return true;
     }
 
@@ -109,16 +120,16 @@ public final class MonitorFilter<T> implements Runnable, NetFilter<T> {
         long curProcessMsgNum = getAndReset(processMsgNum);
         long connectCount = getAndReset(newConnect);
         long disConnectCount = getAndReset(disConnect);
-        onlineCount += connectCount - disConnectCount;
+        onlineConnect += connectCount - disConnectCount;
         log.info("inflow:" + curInFlow * 1.0 / (1024 * 1024) + "(MB)"
                 + ",outflow:" + curOutFlow * 1.0 / (1024 * 1024) + "(MB)"
                 + ",process fail:" + curDiscardNum
                 + ",process success:" + curProcessMsgNum
-                + ",process total:" + totalProcessMsgNum.longValue()
+                + ",process total:" + processMsgTotal.longValue()
                 + ",read count:" + getAndReset(readCount) + ",write count:" + getAndReset(writeCount)
                 + ",connect count:" + connectCount
                 + ",disconnect count:" + disConnectCount
-                + ",online count:" + onlineCount
+                + ",online count:" + onlineConnect
                 + ",connected total:" + getAndReset(totalConnect)
                 + ",Requests/sec:" + curProcessMsgNum * 1.0 / seconds
                 + ",Transfer/sec:" + (curInFlow * 1.0 / (1024 * 1024) / seconds) + "(MB)");
