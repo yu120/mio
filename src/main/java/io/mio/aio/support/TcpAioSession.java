@@ -11,7 +11,6 @@ import io.mio.aio.handler.WriteCompletionHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
@@ -28,19 +27,19 @@ import java.util.function.Function;
  */
 @Slf4j
 public class TcpAioSession<T> {
+
     /**
      * Session状态:已关闭
      */
-    protected static final byte SESSION_STATUS_CLOSED = 1;
+    private static final byte SESSION_STATUS_CLOSED = 1;
     /**
      * Session状态:关闭中
      */
-    protected static final byte SESSION_STATUS_CLOSING = 2;
+    private static final byte SESSION_STATUS_CLOSING = 2;
     /**
      * Session状态:正常
      */
-    protected static final byte SESSION_STATUS_ENABLED = 3;
-
+    private static final byte SESSION_STATUS_ENABLED = 3;
     /**
      * 会话当前状态
      *
@@ -48,12 +47,7 @@ public class TcpAioSession<T> {
      * @see TcpAioSession#SESSION_STATUS_CLOSING
      * @see TcpAioSession#SESSION_STATUS_ENABLED
      */
-    protected byte status = SESSION_STATUS_ENABLED;
-    /**
-     * 附件对象
-     */
-    private Object attachment;
-
+    private byte status = SESSION_STATUS_ENABLED;
 
     /**
      * 底层通信channel对象
@@ -61,13 +55,10 @@ public class TcpAioSession<T> {
     protected AsynchronousSocketChannel channel;
     /**
      * 读缓冲。
-     * <p>大小取决于AioQuickClient/AioQuickServer设置的setReadBufferSize</p>
+     * <p>大小取决于AioMioClient/AioMioServer设置的setReadBufferSize</p>
      */
-    protected VirtualBuffer readBuffer;
-    /**
-     * 写缓冲
-     */
-    protected VirtualBuffer writeBuffer;
+    private VirtualBuffer readBuffer;
+    private VirtualBuffer writeBuffer;
 
     /**
      * 读回调信号量
@@ -78,22 +69,11 @@ public class TcpAioSession<T> {
      * 输出信号量,防止并发write导致异常
      */
     private Semaphore semaphore = new Semaphore(1);
-    /**
-     * 读回调
-     */
+
     private ReadCompletionHandler<T> readCompletionHandler;
-    /**
-     * 写回调
-     */
     private WriteCompletionHandler<T> writeCompletionHandler;
-    /**
-     * 服务配置
-     */
+
     private IoServerConfig<T> ioServerConfig;
-    /**
-     * 同步输入流
-     */
-    private InputStream inputStream;
     /**
      * 输出流
      */
