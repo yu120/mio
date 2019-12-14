@@ -347,9 +347,6 @@ public class AioMioSession<T> {
 
     /**
      * 同步读取数据
-     *
-     * @return
-     * @throws Exception
      */
     private int synRead() throws IOException {
         ByteBuffer buffer = readBuffer.buffer();
