@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 /**
  * AIO服务端
@@ -41,19 +40,10 @@ public class AioMioServer<T> implements Runnable {
      */
     private BufferPagePool bufferPool;
 
-    private ReadCompletionHandler<T> aioReadCompletionHandler;
-    private WriteCompletionHandler<T> aioWriteCompletionHandler;
-    /**
-     * 连接会话实例化Function
-     */
-    private Function<AsynchronousSocketChannel, AioMioSession<T>> aioSessionFunction;
-
+    private ReadCompletionHandler<T> readCompletionHandler;
+    private WriteCompletionHandler<T> writeCompletionHandler;
     private AsynchronousServerSocketChannel serverSocketChannel = null;
     private AsynchronousChannelGroup asynchronousChannelGroup;
-
-    /**
-     * accept线程运行状态
-     */
     private volatile boolean acceptRunning = true;
 
 
@@ -61,7 +51,7 @@ public class AioMioServer<T> implements Runnable {
         config.setPort(port);
         config.setProtocol(protocol);
         config.setProcessor(messageProcessor);
-        config.setThreadNum(Runtime.getRuntime().availableProcessors());
+        config.setThreadNum(Math.min(Runtime.getRuntime().availableProcessors(), 2));
     }
 
     public AioMioServer(String host, int port, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
@@ -71,15 +61,11 @@ public class AioMioServer<T> implements Runnable {
 
     /**
      * 启动Server端的AIO服务
-     *
-     * @throws IOException IO异常
      */
-    public void start() throws IOException {
+    public void initialize() throws IOException {
         checkAndResetConfig();
-        this.aioSessionFunction = channel -> new AioMioSession<T>(channel, config,
-                aioReadCompletionHandler, aioWriteCompletionHandler, bufferPool.allocateBufferPage());
-        this.aioReadCompletionHandler = new ReadCompletionHandler<>(new Semaphore(config.getThreadNum() - 1));
-        this.aioWriteCompletionHandler = new WriteCompletionHandler<>();
+        this.readCompletionHandler = new ReadCompletionHandler<>(new Semaphore(config.getThreadNum() - 1));
+        this.writeCompletionHandler = new WriteCompletionHandler<>();
         this.bufferPool = new BufferPagePool(config.getBufferPoolPageSize(), config.getBufferPoolPageNum(),
                 config.getBufferPoolSharedPageSize(), config.isBufferPoolDirect());
 
@@ -105,7 +91,7 @@ public class AioMioServer<T> implements Runnable {
             acceptThread.setPriority(1);
             acceptThread.start();
         } catch (IOException e) {
-            shutdown();
+            destroy();
             throw e;
         }
         log.info("mio-aio server[{}] started.", config);
@@ -135,10 +121,6 @@ public class AioMioServer<T> implements Runnable {
      * 检查配置项
      */
     private void checkAndResetConfig() {
-        //确保单核CPU默认初始化至少2个线程
-        if (config.getThreadNum() == 1) {
-            config.setThreadNum(2);
-        }
         //未指定内存页数量默认等同于线程数
         if (config.getBufferPoolPageNum() <= 0) {
             config.setBufferPoolPageNum(config.getThreadNum());
@@ -163,10 +145,10 @@ public class AioMioServer<T> implements Runnable {
      * @param channel 当前已建立连接通道
      */
     private void createSession(AsynchronousSocketChannel channel) {
-        //连接成功则构造AIOSession对象
+        //连接成功,则构造AioMioSession对象
         AioMioSession<T> session = null;
         try {
-            session = aioSessionFunction.apply(channel);
+            session = new AioMioSession<T>(channel, config, readCompletionHandler, writeCompletionHandler, bufferPool.allocateBufferPage());
             session.initSession();
         } catch (Exception e1) {
             log.error(e1.getMessage(), e1);
@@ -178,7 +160,7 @@ public class AioMioServer<T> implements Runnable {
         }
     }
 
-    public void shutdown() {
+    public void destroy() {
         acceptRunning = false;
         try {
             if (serverSocketChannel != null) {
@@ -205,7 +187,7 @@ public class AioMioServer<T> implements Runnable {
             bufferPool.release();
             bufferPool = null;
         }
-        aioReadCompletionHandler.shutdown();
+        readCompletionHandler.shutdown();
     }
 
 }

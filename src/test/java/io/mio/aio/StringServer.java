@@ -40,7 +40,7 @@ public class StringServer {
         server.getConfig().setBufferPoolPageSize(1024 * 1024 * 16);
         server.getConfig().setBufferPoolChunkSize(4096);
         processor.addPlugin(new MonitorFilter(5));
-        server.start();
+        server.initialize();
     }
 
 }
