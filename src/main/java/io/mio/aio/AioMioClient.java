@@ -29,10 +29,14 @@ import java.util.concurrent.TimeoutException;
 public class AioMioClient<T> {
 
     @Getter
-    private IoServerConfig<T> config = new IoServerConfig<>();
+    private IoServerConfig<T> config;
     @Setter
     private BufferPagePool bufferPool = null;
     private AioMioSession<T> session;
+
+    private Protocol<T> protocol;
+    private MessageProcessor<T> messageProcessor;
+
     /**
      * IO事件处理线程组。
      * <p>
@@ -40,11 +44,10 @@ public class AioMioClient<T> {
      */
     private AsynchronousChannelGroup asynchronousChannelGroup;
 
-    public AioMioClient(String hostName, int port, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
-        config.setHostname(hostName);
-        config.setPort(port);
-        config.setProtocol(protocol);
-        config.setProcessor(messageProcessor);
+    public AioMioClient(IoServerConfig<T> config, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
+        this.config = config;
+        this.protocol = protocol;
+        this.messageProcessor = messageProcessor;
     }
 
     /**
@@ -85,8 +88,8 @@ public class AioMioClient<T> {
         }
 
         //连接成功则构造AIOSession对象
-        session = new AioMioSession<T>(socketChannel, config, new ReadCompletionHandler<T>(),
-                new WriteCompletionHandler<T>(), bufferPool.allocateBufferPage());
+        session = new AioMioSession<T>(socketChannel, config, protocol, messageProcessor,
+                new ReadCompletionHandler<T>(), new WriteCompletionHandler<T>(), bufferPool.allocateBufferPage());
         session.initSession();
         return session;
     }

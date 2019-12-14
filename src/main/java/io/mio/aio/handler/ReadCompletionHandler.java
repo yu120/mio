@@ -121,7 +121,7 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, AioM
     private void completed0(final Integer result, final AioMioSession<T> aioSession) {
         try {
             // 接收到的消息进行预处理
-            NetFilter<T> monitor = aioSession.getServerConfig().getMonitor();
+            NetFilter<T> monitor = aioSession.getMessageProcessor();
             if (monitor != null) {
                 monitor.afterRead(aioSession, result);
             }
@@ -134,7 +134,7 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, AioM
     @Override
     public void failed(Throwable exc, AioMioSession<T> aioSession) {
         try {
-            aioSession.getServerConfig().getProcessor().stateEvent(aioSession, EventState.INPUT_EXCEPTION, exc);
+            aioSession.getMessageProcessor().stateEvent(aioSession, EventState.INPUT_EXCEPTION, exc);
         } catch (Exception e) {
             log.debug(e.getMessage(), e);
         }

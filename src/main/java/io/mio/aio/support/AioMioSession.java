@@ -1,11 +1,12 @@
 package io.mio.aio.support;
 
 import io.mio.aio.MessageProcessor;
-import io.mio.aio.NetFilter;
+import io.mio.aio.Protocol;
 import io.mio.aio.buffer.BufferPage;
 import io.mio.aio.buffer.VirtualBuffer;
 import io.mio.aio.handler.ReadCompletionHandler;
 import io.mio.aio.handler.WriteCompletionHandler;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -24,6 +25,7 @@ import java.util.function.Function;
  * @author lry
  */
 @Slf4j
+@Getter
 public class AioMioSession<T> {
 
     /**
@@ -85,6 +87,9 @@ public class AioMioSession<T> {
      */
     private int lastReadSize;
 
+    private Protocol<T> protocol;
+    private MessageProcessor<T> messageProcessor;
+
     /**
      * 数据输出Function
      */
@@ -125,27 +130,24 @@ public class AioMioSession<T> {
         }
     };
 
-    /**
-     * @param channel
-     * @param config
-     * @param readCompletionHandler
-     * @param writeCompletionHandler
-     * @param bufferPage             是否服务端Session
-     */
     public AioMioSession(AsynchronousSocketChannel channel,
-                         final IoServerConfig<T> config,
+                         IoServerConfig<T> config,
+                         Protocol<T> protocol,
+                         MessageProcessor<T> messageProcessor,
                          ReadCompletionHandler<T> readCompletionHandler,
                          WriteCompletionHandler<T> writeCompletionHandler,
                          BufferPage bufferPage) {
         this.channel = channel;
+        this.ioServerConfig = config;
+        this.protocol = protocol;
+        this.messageProcessor = messageProcessor;
         this.readCompletionHandler = readCompletionHandler;
         this.writeCompletionHandler = writeCompletionHandler;
-        this.ioServerConfig = config;
 
         this.readBuffer = bufferPage.allocate(config.getReadBufferSize());
         byteBuf = new WriteBuffer(bufferPage, flushFunction, ioServerConfig, fasterWrite);
         //触发状态机
-        config.getProcessor().stateEvent(this, EventState.NEW_SESSION, null);
+        messageProcessor.stateEvent(this, EventState.NEW_SESSION, null);
     }
 
     /**
@@ -234,11 +236,11 @@ public class AioMioSession<T> {
                 writeBuffer = null;
             }
             close(channel);
-            ioServerConfig.getProcessor().stateEvent(this, EventState.SESSION_CLOSED, null);
+            messageProcessor.stateEvent(this, EventState.SESSION_CLOSED, null);
         } else if (noWriteBuffer && !byteBuf.hasData()) {
             close(true);
         } else {
-            ioServerConfig.getProcessor().stateEvent(this, EventState.SESSION_CLOSING, null);
+            messageProcessor.stateEvent(this, EventState.SESSION_CLOSING, null);
             byteBuf.flush();
         }
     }
@@ -273,11 +275,10 @@ public class AioMioSession<T> {
         }
         final ByteBuffer readBuffer = this.readBuffer.buffer();
         readBuffer.flip();
-        final MessageProcessor<T> messageProcessor = ioServerConfig.getProcessor();
         while (readBuffer.hasRemaining() && status == SESSION_STATUS_ENABLED) {
             T dataEntry = null;
             try {
-                dataEntry = ioServerConfig.getProtocol().decode(readBuffer, this);
+                dataEntry = protocol.decode(readBuffer, this);
             } catch (Exception e) {
                 messageProcessor.stateEvent(this, EventState.DECODE_EXCEPTION, e);
                 throw e;
@@ -338,9 +339,8 @@ public class AioMioSession<T> {
      * 触发读操作
      */
     private void continueRead() {
-        NetFilter<T> monitor = getServerConfig().getMonitor();
-        if (monitor != null) {
-            monitor.beforeRead(this);
+        if (messageProcessor != null) {
+            messageProcessor.beforeRead(this);
         }
         readFromChannel0(readBuffer.buffer());
     }
@@ -372,9 +372,8 @@ public class AioMioSession<T> {
      * @param writeBuffer 存放待输出数据的buffer
      */
     private void continueWrite(VirtualBuffer writeBuffer) {
-        NetFilter<T> monitor = getServerConfig().getMonitor();
-        if (monitor != null) {
-            monitor.beforeWrite(this);
+        if (messageProcessor != null) {
+            messageProcessor.beforeWrite(this);
         }
         writeToChannel0(writeBuffer.buffer());
     }

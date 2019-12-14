@@ -4,6 +4,7 @@ import io.mio.aio.buffer.BufferPagePool;
 import io.mio.aio.filter.MonitorFilter;
 import io.mio.aio.support.AioMioSession;
 import io.mio.aio.support.EventState;
+import io.mio.aio.support.IoServerConfig;
 import io.mio.aio.support.WriteBuffer;
 
 import java.io.IOException;
@@ -13,7 +14,6 @@ import java.util.concurrent.ThreadFactory;
 public class StringClient {
 
     public static void main(String[] args) throws IOException {
-        BufferPagePool bufferPagePool = new BufferPagePool(1024 * 1024 * 32, 10, true);
         MessageProcessor<String> processor = new MessageProcessor<String>() {
             @Override
             public void process0(AioMioSession<String> session, String msg) {
@@ -27,13 +27,15 @@ public class StringClient {
                 }
             }
         };
-        processor.addPlugin(new MonitorFilter(5));
-        AsynchronousChannelGroup asynchronousChannelGroup = AsynchronousChannelGroup.withFixedThreadPool(Runtime.getRuntime().availableProcessors(), new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                return new Thread(r, "ClientGroup");
-            }
-        });
+        processor.addFilter(new MonitorFilter(5));
+        BufferPagePool bufferPagePool = new BufferPagePool(1024 * 1024 * 32, 10, true);
+        AsynchronousChannelGroup asynchronousChannelGroup = AsynchronousChannelGroup.withFixedThreadPool(
+                Runtime.getRuntime().availableProcessors(), new ThreadFactory() {
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        return new Thread(r, "ClientGroup");
+                    }
+                });
 
         for (int i = 0; i < 10; i++) {
             new Thread() {
@@ -51,10 +53,15 @@ public class StringClient {
 
     public static void test(AsynchronousChannelGroup asynchronousChannelGroup,
                             BufferPagePool bufferPagePool, MessageProcessor<String> processor) throws Exception {
-        AioMioClient<String> client = new AioMioClient<>("localhost", 8888, new StringProtocol(), processor);
+        IoServerConfig<String> config = new IoServerConfig<>();
+        config.setHostname("localhost");
+        config.setPort(8888);
+        config.setWriteQueueCapacity(10);
+        config.setBufferPoolChunkSize(1024 * 1024);
+
+        AioMioClient<String> client = new AioMioClient<>(config, new StringProtocol(), processor);
         client.setBufferPool(bufferPagePool);
-        client.getConfig().setWriteQueueCapacity(10);
-        client.getConfig().setBufferPoolChunkSize(1024 * 1024);
+
         AioMioSession<String> session = client.start(asynchronousChannelGroup);
         WriteBuffer outputStream = session.writeBuffer();
         byte[] data = "mio-aio".getBytes();

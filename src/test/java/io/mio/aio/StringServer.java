@@ -3,6 +3,7 @@ package io.mio.aio;
 import io.mio.aio.filter.MonitorFilter;
 import io.mio.aio.support.AioMioSession;
 import io.mio.aio.support.EventState;
+import io.mio.aio.support.IoServerConfig;
 import io.mio.aio.support.WriteBuffer;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,7 +13,7 @@ import java.io.IOException;
 public class StringServer {
 
     public static void main(String[] args) throws IOException {
-        MessageProcessor<String> processor = new MessageProcessor<String>() {
+        MessageProcessor<String> messageProcessor = new MessageProcessor<String>() {
             @Override
             public void process0(AioMioSession<String> session, String msg) {
                 WriteBuffer outputStream = session.writeBuffer();
@@ -33,13 +34,14 @@ public class StringServer {
                 }
             }
         };
+        messageProcessor.addFilter(new MonitorFilter(5));
 
-        AioMioServer<String> server = new AioMioServer<>(8888, new StringProtocol(), processor);
-        server.getConfig().setReadBufferSize(1024 * 1024);
-        server.getConfig().setThreadNum(Runtime.getRuntime().availableProcessors() + 1);
-        server.getConfig().setBufferPoolPageSize(1024 * 1024 * 16);
-        server.getConfig().setBufferPoolChunkSize(4096);
-        processor.addPlugin(new MonitorFilter(5));
+        IoServerConfig<String> config = new IoServerConfig<>();
+        config.setReadBufferSize(1024 * 1024);
+        config.setThreadNum(Runtime.getRuntime().availableProcessors() + 1);
+        config.setBufferPoolPageSize(1024 * 1024 * 16);
+        config.setBufferPoolChunkSize(4096);
+        AioMioServer<String> server = new AioMioServer<>(config, new StringProtocol(), messageProcessor);
         server.initialize();
     }
 

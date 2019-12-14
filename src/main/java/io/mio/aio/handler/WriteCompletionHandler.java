@@ -1,8 +1,8 @@
 package io.mio.aio.handler;
 
+import io.mio.aio.NetFilter;
 import io.mio.aio.support.AioMioSession;
 import io.mio.aio.support.EventState;
-import io.mio.aio.NetFilter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.channels.CompletionHandler;
@@ -18,7 +18,7 @@ public class WriteCompletionHandler<T> implements CompletionHandler<Integer, Aio
     @Override
     public void completed(final Integer result, final AioMioSession<T> aioSession) {
         try {
-            NetFilter<T> monitor = aioSession.getServerConfig().getMonitor();
+            NetFilter<T> monitor = aioSession.getMessageProcessor();
             if (monitor != null) {
                 monitor.afterWrite(aioSession, result);
             }
@@ -32,7 +32,7 @@ public class WriteCompletionHandler<T> implements CompletionHandler<Integer, Aio
     @Override
     public void failed(Throwable exc, AioMioSession<T> aioSession) {
         try {
-            aioSession.getServerConfig().getProcessor().stateEvent(aioSession, EventState.OUTPUT_EXCEPTION, exc);
+            aioSession.getMessageProcessor().stateEvent(aioSession, EventState.OUTPUT_EXCEPTION, exc);
         } catch (Exception e) {
             log.debug(e.getMessage(), e);
         }

@@ -1,8 +1,10 @@
 package io.mio.aio;
 
 import io.mio.aio.buffer.BufferPagePool;
+import io.mio.aio.filter.MonitorFilter;
 import io.mio.aio.support.AioMioSession;
 import io.mio.aio.support.EventState;
+import io.mio.aio.support.IoServerConfig;
 import io.mio.aio.support.WriteBuffer;
 
 import java.io.IOException;
@@ -11,7 +13,6 @@ import java.nio.ByteBuffer;
 public class StringMutilClient {
 
     public static void main(String[] args) throws Exception {
-        BufferPagePool bufferPagePool = new BufferPagePool(1024 * 1024 * 32, 10, true);
         MessageProcessor<String> processor = new MessageProcessor<String>() {
             @Override
             public void process0(AioMioSession<String> session, String msg) {
@@ -25,11 +26,19 @@ public class StringMutilClient {
                 }
             }
         };
+        processor.addFilter(new MonitorFilter(5));
+        BufferPagePool bufferPagePool = new BufferPagePool(1024 * 1024 * 32, 10, true);
 
-        AioMioClient<String> client = new AioMioClient<>("localhost", 8888, new StringProtocol(), processor);
+        IoServerConfig<String> config = new IoServerConfig<>();
+        config.setHostname("localhost");
+        config.setPort(8888);
+        config.setWriteQueueCapacity(20);
+        config.setBufferPoolChunkSize(1024 * 1024);
+
+        AioMioClient<String> client = new AioMioClient<>(config, new StringProtocol(), processor);
         client.setBufferPool(bufferPagePool);
-        client.getConfig().setWriteQueueCapacity(20);
         AioMioSession<String> session = client.start();
+
         for (int i = 0; i < 10; i++) {
             new Thread() {
                 @Override

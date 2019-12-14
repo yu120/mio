@@ -92,8 +92,8 @@ public class MessageProcessor<T> implements NetFilter<T> {
         stateEvent0(session, eventState, throwable);
     }
 
-    public final void addPlugin(NetFilter plugin) {
-        this.plugins.add(plugin);
+    public final void addFilter(NetFilter filter) {
+        this.plugins.add(filter);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class MessageProcessor<T> implements NetFilter<T> {
      * @param msg     {@link T}
      * @see MessageProcessor#process(AioMioSession, Object)
      */
-    public void process0(AioMioSession<T> session, T msg){
+    public void process0(AioMioSession<T> session, T msg) {
 
     }
 
@@ -125,7 +125,7 @@ public class MessageProcessor<T> implements NetFilter<T> {
      * @param throwable  {@link Throwable}
      * @see #stateEvent(AioMioSession, EventState, Throwable)
      */
-    public void stateEvent0(AioMioSession<T> session, EventState eventState, Throwable throwable){
+    public void stateEvent0(AioMioSession<T> session, EventState eventState, Throwable throwable) {
 
     }
 

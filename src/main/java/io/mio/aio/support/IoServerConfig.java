@@ -1,8 +1,5 @@
 package io.mio.aio.support;
 
-import io.mio.aio.MessageProcessor;
-import io.mio.aio.NetFilter;
-import io.mio.aio.Protocol;
 import lombok.Data;
 
 import java.net.SocketOption;
@@ -32,21 +29,9 @@ public class IoServerConfig<T> {
      */
     private String hostname;
     /**
-     * 服务器消息拦截器
-     */
-    private NetFilter<T> monitor;
-    /**
      * 服务器端口号
      */
     private int port = 8888;
-    /**
-     * 消息处理器
-     */
-    private MessageProcessor<T> processor;
-    /**
-     * 协议编解码
-     */
-    private Protocol<T> protocol;
 
     /**
      * Socket 配置
@@ -56,7 +41,7 @@ public class IoServerConfig<T> {
     /**
      * 线程数。设置服务工作线程数,设置数值必须大于等于2
      */
-    private int threadNum = 1;
+    private int threadNum = Math.min(Runtime.getRuntime().availableProcessors(), 2);
 
     /**
      * 内存页大小。设置单个内存页大小.多个内存页共同组成内存池
@@ -86,15 +71,6 @@ public class IoServerConfig<T> {
      * 客户端连接超时时间，单位:毫秒
      */
     private int connectTimeout;
-
-    /**
-     * @param processor 消息处理器
-     */
-    public void setProcessor(MessageProcessor<T> processor) {
-        this.processor = processor;
-        this.monitor = (processor instanceof NetFilter) ? (NetFilter<T>) processor : null;
-    }
-
 
     public Map<SocketOption<Object>, Object> getSocketOptions() {
         return socketOptions;

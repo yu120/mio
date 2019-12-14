@@ -29,7 +29,7 @@ import java.util.concurrent.*;
 public class AioMioServer<T> implements Runnable {
 
     @Getter
-    private IoServerConfig<T> config = new IoServerConfig<>();
+    private IoServerConfig<T> config;
     private BufferPagePool bufferPool;
 
     private ReadCompletionHandler<T> readCompletionHandler;
@@ -39,16 +39,13 @@ public class AioMioServer<T> implements Runnable {
     private volatile boolean acceptRunning = true;
     private ThreadPoolExecutor acceptThreadPoolExecutor;
 
-    public AioMioServer(int port, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
-        config.setPort(port);
-        config.setProtocol(protocol);
-        config.setProcessor(messageProcessor);
-        config.setThreadNum(Math.min(Runtime.getRuntime().availableProcessors(), 2));
-    }
+    private Protocol<T> protocol;
+    private MessageProcessor<T> messageProcessor;
 
-    public AioMioServer(String hostName, int port, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
-        this(port, protocol, messageProcessor);
-        config.setHostname(hostName);
+    public AioMioServer(IoServerConfig<T> config, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
+        this.config = config;
+        this.protocol = protocol;
+        this.messageProcessor = messageProcessor;
     }
 
     /**
@@ -95,10 +92,10 @@ public class AioMioServer<T> implements Runnable {
             try {
                 final AsynchronousSocketChannel channel = nextFuture.get();
                 nextFuture = serverSocketChannel.accept();
-                if (config.getMonitor() == null || config.getMonitor().shouldAccept(channel)) {
+                if (messageProcessor == null || messageProcessor.shouldAccept(channel)) {
                     createSession(channel);
                 } else {
-                    config.getProcessor().stateEvent(null, EventState.REJECT_ACCEPT, null);
+                    messageProcessor.stateEvent(null, EventState.REJECT_ACCEPT, null);
                     log.warn("reject accept channel:{}", channel);
                     AioMioSession.close(channel);
                 }
@@ -139,7 +136,8 @@ public class AioMioServer<T> implements Runnable {
         //连接成功,则构造AioMioSession对象
         AioMioSession<T> session = null;
         try {
-            session = new AioMioSession<T>(channel, config, readCompletionHandler, writeCompletionHandler, bufferPool.allocateBufferPage());
+            session = new AioMioSession<>(channel, config, protocol, messageProcessor,
+                    readCompletionHandler, writeCompletionHandler, bufferPool.allocateBufferPage());
             session.initSession();
         } catch (Exception e1) {
             log.error(e1.getMessage(), e1);
