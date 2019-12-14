@@ -33,7 +33,7 @@ public class StringMutilClient {
         config.setBufferPoolChunkSize(1024 * 1024);
 
         AioMioClient<String> client = new AioMioClient<>(config, new StringProtocol(), processor);
-        client.setBufferPool(bufferPagePool);
+        client.setBufferPagePool(bufferPagePool);
         AioMioSession<String> session = client.start();
 
         for (int i = 0; i < 10; i++) {

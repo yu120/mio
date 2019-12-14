@@ -57,7 +57,7 @@ public class StringClient {
         config.setBufferPoolChunkSize(1024 * 1024);
 
         AioMioClient<String> client = new AioMioClient<>(config, new StringProtocol(), processor);
-        client.setBufferPool(bufferPagePool);
+        client.setBufferPagePool(bufferPagePool);
 
         AioMioSession<String> session = client.start(asynchronousChannelGroup);
         WriteBuffer outputStream = session.writeBuffer();

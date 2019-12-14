@@ -7,7 +7,6 @@ import io.mio.aio.support.AioMioSession;
 import io.mio.aio.support.EventState;
 import io.mio.aio.support.AioServerConfig;
 import io.mio.commons.MioConstants;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -28,13 +27,12 @@ import java.util.concurrent.*;
 @Slf4j
 public class AioMioServer<T> implements Runnable {
 
-    @Getter
     private AioServerConfig<T> config;
     private BufferPagePool bufferPool;
 
     private ReadCompletionHandler<T> readCompletionHandler;
     private WriteCompletionHandler<T> writeCompletionHandler;
-    private AsynchronousServerSocketChannel serverSocketChannel = null;
+    private AsynchronousServerSocketChannel serverSocketChannel;
     private AsynchronousChannelGroup asynchronousChannelGroup;
     private volatile boolean acceptRunning = true;
     private ThreadPoolExecutor acceptThreadPoolExecutor;

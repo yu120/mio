@@ -6,8 +6,6 @@ import io.mio.aio.handler.WriteCompletionHandler;
 import io.mio.aio.support.AioClientConfig;
 import io.mio.aio.support.AioMioSession;
 import io.mio.commons.MioConstants;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -28,12 +26,9 @@ import java.util.concurrent.TimeoutException;
  */
 public class AioMioClient<T> {
 
-    @Getter
     private AioClientConfig<T> config;
-    @Setter
-    private BufferPagePool bufferPool = null;
+    private BufferPagePool bufferPagePool;
     private AioMioSession<T> session;
-
     private Protocol<T> protocol;
     private MessageProcessor<T> messageProcessor;
 
@@ -50,6 +45,10 @@ public class AioMioClient<T> {
         this.messageProcessor = messageProcessor;
     }
 
+    public void setBufferPagePool(BufferPagePool bufferPagePool) {
+        this.bufferPagePool = bufferPagePool;
+    }
+
     /**
      * 启动客户端。
      * <p>
@@ -63,8 +62,8 @@ public class AioMioClient<T> {
      */
     public AioMioSession<T> start(AsynchronousChannelGroup asynchronousChannelGroup) throws Exception {
         AsynchronousSocketChannel socketChannel = AsynchronousSocketChannel.open(asynchronousChannelGroup);
-        if (bufferPool == null) {
-            this.bufferPool = new BufferPagePool(config.getBufferPoolPageSize(), 1, config.isBufferPoolDirect());
+        if (bufferPagePool == null) {
+            this.bufferPagePool = new BufferPagePool(config.getBufferPoolPageSize(), 1, config.isBufferPoolDirect());
         }
 
         //set socket options
@@ -95,7 +94,7 @@ public class AioMioClient<T> {
                 protocol, messageProcessor,
                 new ReadCompletionHandler<T>(),
                 new WriteCompletionHandler<T>(),
-                bufferPool.allocateBufferPage());
+                bufferPagePool.allocateBufferPage());
         session.initSession();
         return session;
     }
@@ -132,8 +131,8 @@ public class AioMioClient<T> {
         if (asynchronousChannelGroup != null) {
             asynchronousChannelGroup.shutdown();
         }
-        if (bufferPool != null) {
-            bufferPool.release();
+        if (bufferPagePool != null) {
+            bufferPagePool.release();
         }
     }
 
