@@ -5,7 +5,7 @@ import io.mio.aio.handler.ReadCompletionHandler;
 import io.mio.aio.handler.WriteCompletionHandler;
 import io.mio.aio.support.AioMioSession;
 import io.mio.aio.support.EventState;
-import io.mio.aio.support.IoServerConfig;
+import io.mio.aio.support.AioServerConfig;
 import io.mio.commons.MioConstants;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ import java.util.concurrent.*;
 public class AioMioServer<T> implements Runnable {
 
     @Getter
-    private IoServerConfig<T> config;
+    private AioServerConfig<T> config;
     private BufferPagePool bufferPool;
 
     private ReadCompletionHandler<T> readCompletionHandler;
@@ -42,7 +42,7 @@ public class AioMioServer<T> implements Runnable {
     private Protocol<T> protocol;
     private MessageProcessor<T> messageProcessor;
 
-    public AioMioServer(IoServerConfig<T> config, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
+    public AioMioServer(AioServerConfig<T> config, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
         this.config = config;
         this.protocol = protocol;
         this.messageProcessor = messageProcessor;
@@ -136,8 +136,15 @@ public class AioMioServer<T> implements Runnable {
         //连接成功,则构造AioMioSession对象
         AioMioSession<T> session = null;
         try {
-            session = new AioMioSession<>(channel, config, protocol, messageProcessor,
-                    readCompletionHandler, writeCompletionHandler, bufferPool.allocateBufferPage());
+            session = new AioMioSession<>(channel,
+                    config.getReadBufferSize(),
+                    config.getWriteQueueCapacity(),
+                    config.getBufferPoolChunkSize(),
+                    protocol,
+                    messageProcessor,
+                    readCompletionHandler,
+                    writeCompletionHandler,
+                    bufferPool.allocateBufferPage());
             session.initSession();
         } catch (Exception e1) {
             log.error(e1.getMessage(), e1);

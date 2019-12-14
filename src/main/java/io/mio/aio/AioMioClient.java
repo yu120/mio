@@ -3,8 +3,8 @@ package io.mio.aio;
 import io.mio.aio.buffer.BufferPagePool;
 import io.mio.aio.handler.ReadCompletionHandler;
 import io.mio.aio.handler.WriteCompletionHandler;
+import io.mio.aio.support.AioClientConfig;
 import io.mio.aio.support.AioMioSession;
-import io.mio.aio.support.IoServerConfig;
 import io.mio.commons.MioConstants;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,7 +29,7 @@ import java.util.concurrent.TimeoutException;
 public class AioMioClient<T> {
 
     @Getter
-    private IoServerConfig<T> config;
+    private AioClientConfig<T> config;
     @Setter
     private BufferPagePool bufferPool = null;
     private AioMioSession<T> session;
@@ -44,7 +44,7 @@ public class AioMioClient<T> {
      */
     private AsynchronousChannelGroup asynchronousChannelGroup;
 
-    public AioMioClient(IoServerConfig<T> config, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
+    public AioMioClient(AioClientConfig<T> config, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
         this.config = config;
         this.protocol = protocol;
         this.messageProcessor = messageProcessor;
@@ -88,8 +88,14 @@ public class AioMioClient<T> {
         }
 
         //连接成功则构造AIOSession对象
-        session = new AioMioSession<T>(socketChannel, config, protocol, messageProcessor,
-                new ReadCompletionHandler<T>(), new WriteCompletionHandler<T>(), bufferPool.allocateBufferPage());
+        session = new AioMioSession<T>(socketChannel,
+                config.getReadBufferSize(),
+                config.getWriteQueueCapacity(),
+                config.getBufferPoolChunkSize(),
+                protocol, messageProcessor,
+                new ReadCompletionHandler<T>(),
+                new WriteCompletionHandler<T>(),
+                bufferPool.allocateBufferPage());
         session.initSession();
         return session;
     }

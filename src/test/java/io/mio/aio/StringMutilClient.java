@@ -2,10 +2,7 @@ package io.mio.aio;
 
 import io.mio.aio.buffer.BufferPagePool;
 import io.mio.aio.filter.MonitorFilter;
-import io.mio.aio.support.AioMioSession;
-import io.mio.aio.support.EventState;
-import io.mio.aio.support.IoServerConfig;
-import io.mio.aio.support.WriteBuffer;
+import io.mio.aio.support.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -29,7 +26,7 @@ public class StringMutilClient {
         processor.addFilter(new MonitorFilter(5));
         BufferPagePool bufferPagePool = new BufferPagePool(1024 * 1024 * 32, 10, true);
 
-        IoServerConfig<String> config = new IoServerConfig<>();
+        AioClientConfig<String> config = new AioClientConfig<>();
         config.setHostname("localhost");
         config.setPort(8888);
         config.setWriteQueueCapacity(20);

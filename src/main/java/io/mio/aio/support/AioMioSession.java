@@ -73,7 +73,6 @@ public class AioMioSession<T> {
     private ReadCompletionHandler<T> readCompletionHandler;
     private WriteCompletionHandler<T> writeCompletionHandler;
 
-    private IoServerConfig<T> ioServerConfig;
     /**
      * 输出流
      */
@@ -131,21 +130,22 @@ public class AioMioSession<T> {
     };
 
     public AioMioSession(AsynchronousSocketChannel channel,
-                         IoServerConfig<T> config,
+                         int readBufferSize,
+                         int writeQueueCapacity,
+                         int bufferPoolChunkSize,
                          Protocol<T> protocol,
                          MessageProcessor<T> messageProcessor,
                          ReadCompletionHandler<T> readCompletionHandler,
                          WriteCompletionHandler<T> writeCompletionHandler,
                          BufferPage bufferPage) {
         this.channel = channel;
-        this.ioServerConfig = config;
         this.protocol = protocol;
         this.messageProcessor = messageProcessor;
         this.readCompletionHandler = readCompletionHandler;
         this.writeCompletionHandler = writeCompletionHandler;
 
-        this.readBuffer = bufferPage.allocate(config.getReadBufferSize());
-        byteBuf = new WriteBuffer(bufferPage, flushFunction, ioServerConfig, fasterWrite);
+        this.readBuffer = bufferPage.allocate(readBufferSize);
+        byteBuf = new WriteBuffer(bufferPage, flushFunction, writeQueueCapacity, bufferPoolChunkSize, fasterWrite);
         //触发状态机
         messageProcessor.stateEvent(this, EventState.NEW_SESSION, null);
     }
@@ -415,10 +415,6 @@ public class AioMioSession<T> {
         if (status == SESSION_STATUS_CLOSED || channel == null) {
             throw new IOException("session is closed");
         }
-    }
-
-    public IoServerConfig<T> getServerConfig() {
-        return this.ioServerConfig;
     }
 
     /**

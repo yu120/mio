@@ -2,10 +2,7 @@ package io.mio.aio;
 
 import io.mio.aio.buffer.BufferPagePool;
 import io.mio.aio.filter.MonitorFilter;
-import io.mio.aio.support.AioMioSession;
-import io.mio.aio.support.EventState;
-import io.mio.aio.support.IoServerConfig;
-import io.mio.aio.support.WriteBuffer;
+import io.mio.aio.support.*;
 
 import java.io.IOException;
 import java.nio.channels.AsynchronousChannelGroup;
@@ -53,7 +50,7 @@ public class StringClient {
 
     public static void test(AsynchronousChannelGroup asynchronousChannelGroup,
                             BufferPagePool bufferPagePool, MessageProcessor<String> processor) throws Exception {
-        IoServerConfig<String> config = new IoServerConfig<>();
+        AioClientConfig<String> config = new AioClientConfig<>();
         config.setHostname("localhost");
         config.setPort(8888);
         config.setWriteQueueCapacity(10);

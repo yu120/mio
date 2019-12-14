@@ -80,12 +80,13 @@ public class WriteBuffer extends OutputStream {
      */
     private int chunkSize;
 
-    protected WriteBuffer(BufferPage bufferPage, Function<WriteBuffer, Void> flushFunction, IoServerConfig config, FasterWrite fasterWrite) {
+    protected WriteBuffer(BufferPage bufferPage, Function<WriteBuffer, Void> flushFunction,
+                          int writeQueueCapacity, int bufferPoolChunkSize, FasterWrite fasterWrite) {
         this.bufferPage = bufferPage;
         this.function = flushFunction;
-        this.items = new VirtualBuffer[config.getWriteQueueCapacity()];
+        this.items = new VirtualBuffer[writeQueueCapacity];
         this.fasterWrite = fasterWrite == null ? new FasterWrite() : fasterWrite;
-        this.chunkSize = config.getBufferPoolChunkSize();
+        this.chunkSize = bufferPoolChunkSize;
     }
 
     /**

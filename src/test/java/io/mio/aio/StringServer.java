@@ -3,7 +3,7 @@ package io.mio.aio;
 import io.mio.aio.filter.MonitorFilter;
 import io.mio.aio.support.AioMioSession;
 import io.mio.aio.support.EventState;
-import io.mio.aio.support.IoServerConfig;
+import io.mio.aio.support.AioServerConfig;
 import io.mio.aio.support.WriteBuffer;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,7 +36,7 @@ public class StringServer {
         };
         messageProcessor.addFilter(new MonitorFilter(5));
 
-        IoServerConfig<String> config = new IoServerConfig<>();
+        AioServerConfig<String> config = new AioServerConfig<>();
         config.setReadBufferSize(1024 * 1024);
         config.setThreadNum(Runtime.getRuntime().availableProcessors() + 1);
         config.setBufferPoolPageSize(1024 * 1024 * 16);

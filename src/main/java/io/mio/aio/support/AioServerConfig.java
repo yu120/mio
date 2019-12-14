@@ -13,7 +13,7 @@ import java.util.Map;
  * @author lry
  */
 @Data
-public class IoServerConfig<T> {
+public class AioServerConfig<T> {
 
     /**
      * 消息体缓存大小,字节。设置读缓存区大小。单位：byte
@@ -79,16 +79,9 @@ public class IoServerConfig<T> {
     /**
      * 设置Socket的TCP参数配置。
      * <p>
-     * AIO客户端的有效可选范围为：
-     * 2. StandardSocketOptions.SO_RCVBUF
-     * 4. StandardSocketOptions.SO_REUSEADDR
-     * <p>
-     * AIO客户端的有效可选范围为：
-     * 1. StandardSocketOptions.SO_SNDBUF
-     * 2. StandardSocketOptions.SO_RCVBUF
-     * 3. StandardSocketOptions.SO_KEEPALIVE
-     * 4. StandardSocketOptions.SO_REUSEADDR
-     * 5. StandardSocketOptions.TCP_NODELAY
+     * AIO服务端的有效可选范围为：
+     * 1. StandardSocketOptions.SO_RCVBUF
+     * 2. StandardSocketOptions.SO_REUSEADDR
      *
      * @param socketOption socketOption名称
      * @param f            socketOption值
