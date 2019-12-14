@@ -4,7 +4,7 @@ import io.mio.MioServer;
 import io.mio.commons.MioCallback;
 import io.mio.commons.MioMessage;
 import io.mio.commons.ServerConfig;
-import io.mio.extension.ExtensionLoader;
+import io.mio.commons.extension.ExtensionLoader;
 
 import java.util.function.Consumer;
 

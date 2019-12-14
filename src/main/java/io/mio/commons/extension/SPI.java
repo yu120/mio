@@ -1,4 +1,4 @@
-package io.mio.extension;
+package io.mio.commons.extension;
 
 import java.lang.annotation.*;
 

@@ -4,7 +4,7 @@ import io.mio.commons.ClientConfig;
 import io.mio.commons.MioCallback;
 import io.mio.commons.MioMessage;
 import io.mio.commons.MioMessageFuture;
-import io.mio.extension.SPI;
+import io.mio.commons.extension.SPI;
 
 /**
  * MioClient

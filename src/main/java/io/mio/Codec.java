@@ -1,6 +1,6 @@
 package io.mio;
 
-import io.mio.extension.SPI;
+import io.mio.commons.extension.SPI;
 
 /**
  * Codec

@@ -3,7 +3,7 @@ package io.mio.netty;
 import io.mio.MioClient;
 import io.mio.commons.ClientConfig;
 import io.mio.commons.MioMessage;
-import io.mio.extension.ExtensionLoader;
+import io.mio.commons.extension.ExtensionLoader;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;

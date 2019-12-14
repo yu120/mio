@@ -3,7 +3,7 @@ package io.mio;
 import io.mio.commons.MioCallback;
 import io.mio.commons.MioMessage;
 import io.mio.commons.ServerConfig;
-import io.mio.extension.SPI;
+import io.mio.commons.extension.SPI;
 
 /**
  * MioServer

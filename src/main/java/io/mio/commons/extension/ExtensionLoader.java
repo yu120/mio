@@ -1,4 +1,4 @@
-package io.mio.extension;
+package io.mio.commons.extension;
 
 import lombok.extern.slf4j.Slf4j;
 
