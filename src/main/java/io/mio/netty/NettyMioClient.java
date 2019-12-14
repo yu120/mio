@@ -1,6 +1,7 @@
 package io.mio.netty;
 
-import io.mio.*;
+import io.mio.MioClient;
+import io.mio.commons.*;
 import io.mio.compress.Compress;
 import io.mio.compress.GzipCompress;
 import io.mio.netty.protocol.NettyMioDecoder;
@@ -27,7 +28,7 @@ import java.util.concurrent.*;
  * @author lry
  */
 @Slf4j
-public class NettyMioClient {
+public class NettyMioClient implements MioClient {
 
     public static final AttributeKey<MioCallback<MioMessage>> MIO_CALLBACK_KEY = AttributeKey.valueOf("MIO_CALLBACK");
 
@@ -39,11 +40,7 @@ public class NettyMioClient {
     private Serialize serialize;
     private Compress compress;
 
-    /**
-     * The initialize client
-     *
-     * @param clientConfig {@link ClientConfig}
-     */
+    @Override
     public void initialize(ClientConfig clientConfig) {
         ThreadFactory threadFactory = MioConstants.newThreadFactory("mio-client-worker", true);
 
@@ -98,24 +95,12 @@ public class NettyMioClient {
         }
     }
 
-    /**
-     * The send request
-     *
-     * @param mioMessage {@link MioMessage}
-     * @return {@link MioMessage}
-     * @throws Throwable exception {@link Throwable}
-     */
+    @Override
     public MioMessage request(final MioMessage mioMessage) throws Throwable {
         return submit(mioMessage).get();
     }
 
-    /**
-     * The send submit
-     *
-     * @param mioMessage {@link MioMessage}
-     * @return {@link MioMessageFuture}
-     * @throws Throwable exception {@link Throwable}
-     */
+    @Override
     public MioMessageFuture<MioMessage> submit(final MioMessage mioMessage) throws Throwable {
         final MioMessageFuture<MioMessage> future = new MioMessageFuture<>();
 
@@ -135,13 +120,7 @@ public class NettyMioClient {
         return future;
     }
 
-    /**
-     * The send callback
-     *
-     * @param mioMessage  {@link MioMessage}
-     * @param mioCallback {@link MioCallback}
-     * @throws Throwable exception {@link Throwable}
-     */
+    @Override
     public void callback(final MioMessage mioMessage, final MioCallback<MioMessage> mioCallback) throws Throwable {
         log.debug("The callback request: {}", mioMessage);
         final FixedChannelPool channelPool = channelPools.get(mioMessage.getRemoteAddress());
@@ -163,9 +142,7 @@ public class NettyMioClient {
         }
     }
 
-    /**
-     * The destroy client
-     */
+    @Override
     public void destroy() {
         // close channel pool
         if (channelPools != null) {

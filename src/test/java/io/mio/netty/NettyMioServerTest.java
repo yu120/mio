@@ -1,8 +1,8 @@
 package io.mio.netty;
 
-import io.mio.MioCallback;
-import io.mio.MioMessage;
-import io.mio.ServerConfig;
+import io.mio.commons.MioCallback;
+import io.mio.commons.MioMessage;
+import io.mio.commons.ServerConfig;
 
 import java.util.function.Consumer;
 

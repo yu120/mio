@@ -1,7 +1,7 @@
 package io.mio.aio2;
 
-import io.mio.MioCallback;
-import io.mio.MioMessage;
+import io.mio.commons.MioCallback;
+import io.mio.commons.MioMessage;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 

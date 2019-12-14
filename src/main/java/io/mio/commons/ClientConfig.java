@@ -1,4 +1,4 @@
-package io.mio;
+package io.mio.commons;
 
 import lombok.Data;
 

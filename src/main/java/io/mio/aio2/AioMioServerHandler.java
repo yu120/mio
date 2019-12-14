@@ -1,6 +1,6 @@
 package io.mio.aio2;
 
-import io.mio.MioMessage;
+import io.mio.commons.MioMessage;
 import io.mio.aio2.protocol.AioMioDecoder;
 import io.mio.aio2.protocol.AioMioEncoder;
 import lombok.extern.slf4j.Slf4j;

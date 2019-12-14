@@ -1,4 +1,4 @@
-package io.mio;
+package io.mio.commons;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

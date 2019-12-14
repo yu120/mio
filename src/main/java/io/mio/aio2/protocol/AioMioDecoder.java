@@ -1,6 +1,6 @@
 package io.mio.aio2.protocol;
 
-import io.mio.MioMessage;
+import io.mio.commons.MioMessage;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;

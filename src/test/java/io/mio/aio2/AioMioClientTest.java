@@ -1,8 +1,8 @@
 package io.mio.aio2;
 
-import io.mio.ClientConfig;
-import io.mio.MioCallback;
-import io.mio.MioMessage;
+import io.mio.commons.ClientConfig;
+import io.mio.commons.MioCallback;
+import io.mio.commons.MioMessage;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;

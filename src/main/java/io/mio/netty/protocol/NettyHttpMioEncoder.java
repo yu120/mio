@@ -1,7 +1,7 @@
 package io.mio.netty.protocol;
 
-import io.mio.MioConstants;
-import io.mio.MioMessage;
+import io.mio.commons.MioConstants;
+import io.mio.commons.MioMessage;
 import io.mio.serialize.Serialize;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

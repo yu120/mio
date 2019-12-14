@@ -2,8 +2,8 @@ package io.mio.aio2;
 
 import io.mio.aio2.protocol.AioMioDecoder;
 import io.mio.aio2.protocol.AioMioEncoder;
-import io.mio.MioCallback;
-import io.mio.MioMessage;
+import io.mio.commons.MioCallback;
+import io.mio.commons.MioMessage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;

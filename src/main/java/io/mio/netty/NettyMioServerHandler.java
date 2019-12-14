@@ -1,8 +1,8 @@
 package io.mio.netty;
 
-import io.mio.MioCallback;
-import io.mio.MioConstants;
-import io.mio.MioMessage;
+import io.mio.commons.MioCallback;
+import io.mio.commons.MioConstants;
+import io.mio.commons.MioMessage;
 import io.netty.channel.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

@@ -1,8 +1,8 @@
 package io.mio.netty.protocol;
 
-import io.mio.MioConstants;
-import io.mio.MioException;
-import io.mio.MioMessage;
+import io.mio.commons.MioConstants;
+import io.mio.commons.MioException;
+import io.mio.commons.MioMessage;
 import io.mio.serialize.Serialize;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;

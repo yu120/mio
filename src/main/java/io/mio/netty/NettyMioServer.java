@@ -1,13 +1,14 @@
 package io.mio.netty;
 
+import io.mio.MioServer;
 import io.mio.compress.Compress;
 import io.mio.compress.GzipCompress;
 import io.mio.netty.protocol.NettyMioDecoder;
 import io.mio.netty.protocol.NettyMioEncoder;
-import io.mio.MioCallback;
-import io.mio.MioConstants;
-import io.mio.MioMessage;
-import io.mio.ServerConfig;
+import io.mio.commons.MioCallback;
+import io.mio.commons.MioConstants;
+import io.mio.commons.MioMessage;
+import io.mio.commons.ServerConfig;
 import io.mio.serialize.Hessian2Serialize;
 import io.mio.serialize.Serialize;
 import io.netty.bootstrap.ServerBootstrap;
@@ -33,7 +34,7 @@ import java.util.concurrent.TimeUnit;
  * @author lry
  */
 @Slf4j
-public class NettyMioServer {
+public class NettyMioServer implements MioServer {
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
@@ -43,12 +44,7 @@ public class NettyMioServer {
     private Serialize serialize;
     private Compress compress;
 
-    /**
-     * The initialize server
-     *
-     * @param serverConfig {@link ServerConfig}
-     * @param mioCallback  {@link MioCallback}
-     */
+    @Override
     public void initialize(ServerConfig serverConfig, final MioCallback<MioMessage> mioCallback) {
         ThreadFactory bossThreadFactory = MioConstants.newThreadFactory("mio-server-boss", true);
         ThreadFactory workerThreadFactory = MioConstants.newThreadFactory("mio-server-worker", true);
@@ -102,9 +98,7 @@ public class NettyMioServer {
         }
     }
 
-    /**
-     * The destroy server
-     */
+    @Override
     public void destroy() {
         // close server channel
         if (serverChannel != null) {
