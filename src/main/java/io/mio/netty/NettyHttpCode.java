@@ -1,8 +1,10 @@
-package io.mio.netty.codec;
+package io.mio.netty;
 
 import io.mio.Codec;
 import io.mio.commons.extension.Extension;
 import io.mio.Serialize;
+import io.mio.netty.codec.NettyHttpDecoder;
+import io.mio.netty.codec.NettyHttpEncoder;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.*;
 

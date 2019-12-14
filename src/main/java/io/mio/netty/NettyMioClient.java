@@ -5,7 +5,6 @@ import io.mio.commons.*;
 import io.mio.compress.Compress;
 import io.mio.compress.GzipCompress;
 import io.mio.commons.extension.Extension;
-import io.mio.netty.codec.NettyMioCode;
 import io.mio.serialize.Hessian2Serialize;
 import io.mio.Serialize;
 import io.netty.bootstrap.Bootstrap;
