@@ -26,14 +26,14 @@ import java.util.concurrent.TimeoutException;
  */
 public class AioMioClient<T> {
 
-    private AioClientConfig<T> config;
+    private AioClientConfig config;
     private BufferPagePool bufferPagePool;
     private AioMioSession<T> session;
     private Protocol<T> protocol;
     private MessageProcessor<T> messageProcessor;
     private AsynchronousChannelGroup asynchronousChannelGroup;
 
-    public AioMioClient(AioClientConfig<T> config, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
+    public AioMioClient(AioClientConfig config, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
         this.config = config;
         this.protocol = protocol;
         this.messageProcessor = messageProcessor;

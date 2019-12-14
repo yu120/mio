@@ -2,18 +2,18 @@ package io.mio.aio.support;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.net.SocketOption;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Quickly服务端/客户端配置信息
+ * AioServerConfig
  *
- * @param <T> 解码后生成的对象类型
  * @author lry
  */
 @Data
-public class AioServerConfig<T> {
+public class AioServerConfig implements Serializable {
 
     /**
      * 消息体缓存大小,字节。设置读缓存区大小。单位：byte

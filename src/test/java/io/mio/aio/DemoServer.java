@@ -36,7 +36,7 @@ public class DemoServer {
         };
         messageProcessor.addFilter(new MonitorFilter(5));
 
-        AioServerConfig<String> config = new AioServerConfig<>();
+        AioServerConfig config = new AioServerConfig();
         config.setReadBufferSize(1024 * 1024);
         config.setThreadNum(Runtime.getRuntime().availableProcessors() + 1);
         config.setBufferPoolPageSize(1024 * 1024 * 16);

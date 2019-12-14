@@ -50,7 +50,7 @@ public class DemoClient {
 
     public static void test(AsynchronousChannelGroup asynchronousChannelGroup,
                             BufferPagePool bufferPagePool, MessageProcessor<String> processor) throws Exception {
-        AioClientConfig<String> config = new AioClientConfig<>();
+        AioClientConfig config = new AioClientConfig();
         config.setHostname("localhost");
         config.setPort(8888);
         config.setWriteQueueCapacity(10);

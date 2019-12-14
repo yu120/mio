@@ -26,7 +26,7 @@ import java.util.concurrent.*;
 @Slf4j
 public class AioMioServer<T> implements Runnable {
 
-    private AioServerConfig<T> config;
+    private AioServerConfig config;
     private BufferPagePool bufferPool;
 
     private ReadCompletionHandler<T> readCompletionHandler;
@@ -39,7 +39,7 @@ public class AioMioServer<T> implements Runnable {
     private Protocol<T> protocol;
     private MessageProcessor<T> messageProcessor;
 
-    public void initialize(AioServerConfig<T> config, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
+    public void initialize(AioServerConfig config, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
         this.config = config;
         this.protocol = protocol;
         this.messageProcessor = messageProcessor;

@@ -26,7 +26,7 @@ public class DemoMultiClient {
         processor.addFilter(new MonitorFilter(5));
         BufferPagePool bufferPagePool = new BufferPagePool(1024 * 1024 * 32, 10, true);
 
-        AioClientConfig<String> config = new AioClientConfig<>();
+        AioClientConfig config = new AioClientConfig();
         config.setHostname("localhost");
         config.setPort(8888);
         config.setWriteQueueCapacity(20);
@@ -48,13 +48,11 @@ public class DemoMultiClient {
                         buffer.put(data);
                         byte[] a = buffer.array();
                         while (true) {
-
                             outputStream.write(a);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
                 }
             }.start();
         }
