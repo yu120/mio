@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 
 @Slf4j
-public class StringServer {
+public class DemoServer {
 
     public static void main(String[] args) throws IOException {
         MessageProcessor<String> messageProcessor = new MessageProcessor<String>() {
@@ -42,7 +42,7 @@ public class StringServer {
         config.setBufferPoolPageSize(1024 * 1024 * 16);
         config.setBufferPoolChunkSize(4096);
         AioMioServer<String> server = new AioMioServer<>();
-        server.initialize(config, new StringProtocol(), messageProcessor);
+        server.initialize(config, new DemoProtocol(), messageProcessor);
     }
 
 }

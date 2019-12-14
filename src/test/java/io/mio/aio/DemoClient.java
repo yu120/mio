@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.util.concurrent.ThreadFactory;
 
-public class StringClient {
+public class DemoClient {
 
     public static void main(String[] args) throws IOException {
         MessageProcessor<String> processor = new MessageProcessor<String>() {
@@ -56,7 +56,7 @@ public class StringClient {
         config.setWriteQueueCapacity(10);
         config.setBufferPoolChunkSize(1024 * 1024);
 
-        AioMioClient<String> client = new AioMioClient<>(config, new StringProtocol(), processor);
+        AioMioClient<String> client = new AioMioClient<>(config, new DemoProtocol(), processor);
         client.setBufferPagePool(bufferPagePool);
 
         AioMioSession<String> session = client.start(asynchronousChannelGroup);

@@ -4,7 +4,7 @@ import io.mio.aio.support.AioMioSession;
 
 import java.nio.ByteBuffer;
 
-public class StringProtocol implements Protocol<String> {
+public class DemoProtocol implements Protocol<String> {
 
     @Override
     public String decode(ByteBuffer readBuffer, AioMioSession<String> session) {

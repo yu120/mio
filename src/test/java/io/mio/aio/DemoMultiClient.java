@@ -7,7 +7,7 @@ import io.mio.aio.support.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class StringMutilClient {
+public class DemoMultiClient {
 
     public static void main(String[] args) throws Exception {
         MessageProcessor<String> processor = new MessageProcessor<String>() {
@@ -32,7 +32,7 @@ public class StringMutilClient {
         config.setWriteQueueCapacity(20);
         config.setBufferPoolChunkSize(1024 * 1024);
 
-        AioMioClient<String> client = new AioMioClient<>(config, new StringProtocol(), processor);
+        AioMioClient<String> client = new AioMioClient<>(config, new DemoProtocol(), processor);
         client.setBufferPagePool(bufferPagePool);
         AioMioSession<String> session = client.start();
 
