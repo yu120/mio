@@ -1,9 +1,7 @@
-package io.mio.aio.plugin;
+package io.mio.aio.support;
 
-import io.mio.aio.EventState;
 import io.mio.aio.MessageProcessor;
 import io.mio.aio.NetFilter;
-import io.mio.aio.support.TcpAioSession;
 
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.ArrayList;

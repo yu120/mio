@@ -1,6 +1,6 @@
 package io.mio.aio.handler;
 
-import io.mio.aio.EventState;
+import io.mio.aio.support.EventState;
 import io.mio.aio.NetFilter;
 import io.mio.aio.support.TcpAioSession;
 import lombok.extern.slf4j.Slf4j;

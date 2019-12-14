@@ -1,6 +1,5 @@
 package io.mio.aio.support;
 
-import io.mio.aio.EventState;
 import io.mio.aio.MessageProcessor;
 import io.mio.aio.NetFilter;
 import io.mio.aio.buffer.BufferPage;

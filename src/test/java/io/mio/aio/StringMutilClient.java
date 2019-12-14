@@ -1,7 +1,8 @@
 package io.mio.aio;
 
 import io.mio.aio.buffer.BufferPagePool;
-import io.mio.aio.plugin.AbstractMessageProcessor;
+import io.mio.aio.support.AbstractMessageProcessor;
+import io.mio.aio.support.EventState;
 import io.mio.aio.support.TcpAioSession;
 import io.mio.aio.support.WriteBuffer;
 

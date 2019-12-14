@@ -2,6 +2,7 @@ package io.mio.aio;
 
 import io.mio.aio.handler.ReadCompletionHandler;
 import io.mio.aio.handler.WriteCompletionHandler;
+import io.mio.aio.support.EventState;
 import io.mio.aio.support.IoServerConfig;
 import io.mio.aio.support.TcpAioSession;
 import lombok.extern.slf4j.Slf4j;

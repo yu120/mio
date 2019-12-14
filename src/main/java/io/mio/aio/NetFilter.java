@@ -1,5 +1,6 @@
 package io.mio.aio;
 
+import io.mio.aio.support.EventState;
 import io.mio.aio.support.TcpAioSession;
 
 import java.nio.channels.AsynchronousSocketChannel;

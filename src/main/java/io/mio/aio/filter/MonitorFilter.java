@@ -1,6 +1,6 @@
-package io.mio.aio.plugin;
+package io.mio.aio.filter;
 
-import io.mio.aio.EventState;
+import io.mio.aio.support.EventState;
 import io.mio.aio.NetFilter;
 import io.mio.aio.support.TcpAioSession;
 import lombok.extern.slf4j.Slf4j;
@@ -51,8 +51,7 @@ public final class MonitorFilter<T> implements Runnable, NetFilter<T> {
      */
     private LongAdder processMsgNum = new LongAdder();
 
-
-    private LongAdder totleProcessMsgNum = new LongAdder();
+    private LongAdder totalProcessMsgNum = new LongAdder();
 
     /**
      * 新建连接数
@@ -88,7 +87,7 @@ public final class MonitorFilter<T> implements Runnable, NetFilter<T> {
     @Override
     public boolean preProcess(TcpAioSession<T> session, T t) {
         processMsgNum.increment();
-        totleProcessMsgNum.increment();
+        totalProcessMsgNum.increment();
         return true;
     }
 
@@ -123,7 +122,7 @@ public final class MonitorFilter<T> implements Runnable, NetFilter<T> {
                 + ",outflow:" + curOutFlow * 1.0 / (1024 * 1024) + "(MB)"
                 + ",process fail:" + curDiscardNum
                 + ",process success:" + curProcessMsgNum
-                + ",process total:" + totleProcessMsgNum.longValue()
+                + ",process total:" + totalProcessMsgNum.longValue()
                 + ",read count:" + getAndReset(readCount) + ",write count:" + getAndReset(writeCount)
                 + ",connect count:" + connectCount
                 + ",disconnect count:" + disConnectCount
