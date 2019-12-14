@@ -86,8 +86,8 @@ public class NettyMioClient implements MioClient {
                             pipeline.addLast(new NettyMioEncoder(clientConfig.getMaxContentLength(), serialize, pipeline));
                             pipeline.addLast(new NettyMioDecoder(clientConfig.getMaxContentLength(), serialize, null));
                             if (clientConfig.getHeartbeat() > 0) {
-                                pipeline.addLast(new IdleStateHandler(0,
-                                        0, clientConfig.getHeartbeat(), TimeUnit.MILLISECONDS));
+                                pipeline.addLast(new IdleStateHandler(0, 0,
+                                        clientConfig.getHeartbeat(), TimeUnit.MILLISECONDS));
                             }
                             pipeline.addLast(clientHandler);
                         }

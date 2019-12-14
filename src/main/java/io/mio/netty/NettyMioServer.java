@@ -77,8 +77,8 @@ public class NettyMioServer implements MioServer {
                             ch.pipeline().addLast(new NettyMioEncoder(serverConfig.getMaxContentLength(), serialize, null));
                             // Heartbeat detection
                             if (serverConfig.getHeartbeat() > 0) {
-                                ch.pipeline().addLast(new IdleStateHandler(0,
-                                        0, serverConfig.getHeartbeat(), TimeUnit.MILLISECONDS));
+                                ch.pipeline().addLast(new IdleStateHandler(0, 0,
+                                        serverConfig.getHeartbeat(), TimeUnit.MILLISECONDS));
                             }
                             // Process network IO
                             ch.pipeline().addLast(serverHandler);
