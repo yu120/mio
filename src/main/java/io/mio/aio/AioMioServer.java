@@ -6,6 +6,7 @@ import io.mio.aio.handler.WriteCompletionHandler;
 import io.mio.aio.support.AioMioSession;
 import io.mio.aio.support.EventState;
 import io.mio.aio.support.IoServerConfig;
+import io.mio.commons.MioConstants;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,9 +17,7 @@ import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * AIO服务端
@@ -45,7 +44,7 @@ public class AioMioServer<T> implements Runnable {
     private AsynchronousServerSocketChannel serverSocketChannel = null;
     private AsynchronousChannelGroup asynchronousChannelGroup;
     private volatile boolean acceptRunning = true;
-
+    private ThreadPoolExecutor acceptThreadPoolExecutor;
 
     public AioMioServer(int port, Protocol<T> protocol, MessageProcessor<T> messageProcessor) {
         config.setPort(port);
@@ -86,10 +85,9 @@ public class AioMioServer<T> implements Runnable {
                 serverSocketChannel.bind(new InetSocketAddress(config.getPort()), 1000);
             }
 
-            Thread acceptThread = new Thread(this);
-            acceptThread.setDaemon(true);
-            acceptThread.setPriority(1);
-            acceptThread.start();
+            this.acceptThreadPoolExecutor = new ThreadPoolExecutor(1, 1, 0L,
+                    TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), MioConstants.newThreadFactory("aio-mio-accept", true));
+            acceptThreadPoolExecutor.submit(this);
         } catch (IOException e) {
             destroy();
             throw e;
@@ -162,6 +160,14 @@ public class AioMioServer<T> implements Runnable {
 
     public void destroy() {
         acceptRunning = false;
+        try {
+            if (acceptThreadPoolExecutor != null) {
+                acceptThreadPoolExecutor.shutdown();
+            }
+        } catch (Exception e) {
+            log.warn(e.getMessage(), e);
+        }
+
         try {
             if (serverSocketChannel != null) {
                 serverSocketChannel.close();
