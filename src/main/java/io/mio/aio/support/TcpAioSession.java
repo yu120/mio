@@ -27,7 +27,33 @@ import java.util.function.Function;
  * @author lry
  */
 @Slf4j
-public class TcpAioSession<T> extends AioSession<T> {
+public class TcpAioSession<T> {
+    /**
+     * Session状态:已关闭
+     */
+    protected static final byte SESSION_STATUS_CLOSED = 1;
+    /**
+     * Session状态:关闭中
+     */
+    protected static final byte SESSION_STATUS_CLOSING = 2;
+    /**
+     * Session状态:正常
+     */
+    protected static final byte SESSION_STATUS_ENABLED = 3;
+
+    /**
+     * 会话当前状态
+     *
+     * @see TcpAioSession#SESSION_STATUS_CLOSED
+     * @see TcpAioSession#SESSION_STATUS_CLOSING
+     * @see TcpAioSession#SESSION_STATUS_ENABLED
+     */
+    protected byte status = SESSION_STATUS_ENABLED;
+    /**
+     * 附件对象
+     */
+    private Object attachment;
+
 
     /**
      * 底层通信channel对象
@@ -171,7 +197,7 @@ public class TcpAioSession<T> extends AioSession<T> {
         semaphore.release();
         //此时可能是Closing或Closed状态
         if (status != SESSION_STATUS_ENABLED) {
-            close();
+            close(true);
         } else {
             //也许此时有新的消息通过write方法添加到writeCacheQueue中
             byteBuf.flush();
@@ -203,7 +229,6 @@ public class TcpAioSession<T> extends AioSession<T> {
     /**
      * @return 输入流
      */
-    @Override
     public final WriteBuffer writeBuffer() {
         return byteBuf;
     }
@@ -213,7 +238,6 @@ public class TcpAioSession<T> extends AioSession<T> {
      *
      * @param immediate true:立即关闭,false:响应消息发送完后关闭
      */
-    @Override
     public synchronized void close(boolean immediate) {
         //status == SESSION_STATUS_CLOSED说明close方法被重复调用
         if (status == SESSION_STATUS_CLOSED) {
@@ -246,7 +270,6 @@ public class TcpAioSession<T> extends AioSession<T> {
      *
      * @return sessionId
      */
-    @Override
     public final String getSessionId() {
         return "aioSession-" + hashCode();
     }
@@ -256,7 +279,6 @@ public class TcpAioSession<T> extends AioSession<T> {
      *
      * @return 是否失效
      */
-    @Override
     public final boolean isInvalid() {
         return status != SESSION_STATUS_ENABLED;
     }
@@ -392,7 +414,6 @@ public class TcpAioSession<T> extends AioSession<T> {
      * @throws IOException IO异常
      * @see AsynchronousSocketChannel#getLocalAddress()
      */
-    @Override
     public final InetSocketAddress getLocalAddress() throws IOException {
         assertChannel();
         return (InetSocketAddress) channel.getLocalAddress();
@@ -403,7 +424,6 @@ public class TcpAioSession<T> extends AioSession<T> {
      * @throws IOException IO异常
      * @see AsynchronousSocketChannel#getRemoteAddress()
      */
-    @Override
     public final InetSocketAddress getRemoteAddress() throws IOException {
         assertChannel();
         return (InetSocketAddress) channel.getRemoteAddress();

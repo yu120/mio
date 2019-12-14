@@ -1,6 +1,6 @@
 package io.mio.aio;
 
-import io.mio.aio.support.AioSession;
+import io.mio.aio.support.TcpAioSession;
 
 import java.nio.ByteBuffer;
 
@@ -29,13 +29,13 @@ public enum EventState {
     INPUT_SHUTDOWN,
     /**
      * 业务处理异常。
-     * <p>执行{@link MessageProcessor#process(AioSession, Object)}期间发生用户未捕获的异常。</p>
+     * <p>执行{@link MessageProcessor#process(TcpAioSession, Object)}期间发生用户未捕获的异常。</p>
      */
     PROCESS_EXCEPTION,
 
     /**
      * 协议解码异常。
-     * <p>执行{@link Protocol#decode(ByteBuffer, AioSession)}期间发生未捕获的异常。</p>
+     * <p>执行{@link Protocol#decode(ByteBuffer, TcpAioSession)}期间发生未捕获的异常。</p>
      */
     DECODE_EXCEPTION,
     /**
@@ -54,7 +54,7 @@ public enum EventState {
     /**
      * 会话正在关闭中。
      *
-     * <p>执行了{@link AioSession#close(boolean false)}方法，并且当前还存在待输出的数据。</p>
+     * <p>执行了{@link TcpAioSession#close(boolean false)}方法，并且当前还存在待输出的数据。</p>
      */
     SESSION_CLOSING,
     /**

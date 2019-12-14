@@ -37,7 +37,7 @@ public class WriteCompletionHandler<T> implements CompletionHandler<Integer, Tcp
             log.debug(e.getMessage(), e);
         }
         try {
-            aioSession.close();
+            aioSession.close(true);
         } catch (Exception e) {
             log.debug(e.getMessage(), e);
         }

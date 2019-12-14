@@ -1,9 +1,9 @@
 package io.mio.aio;
 
+import io.mio.aio.buffer.BufferPagePool;
 import io.mio.aio.plugin.AbstractMessageProcessor;
 import io.mio.aio.plugin.MonitorFilter;
-import io.mio.aio.buffer.BufferPagePool;
-import io.mio.aio.support.AioSession;
+import io.mio.aio.support.TcpAioSession;
 import io.mio.aio.support.WriteBuffer;
 
 import java.io.IOException;
@@ -17,12 +17,12 @@ public class StringClient {
         BufferPagePool bufferPagePool = new BufferPagePool(1024 * 1024 * 32, 10, true);
         AbstractMessageProcessor<String> processor = new AbstractMessageProcessor<String>() {
             @Override
-            public void process0(AioSession<String> session, String msg) {
+            public void process0(TcpAioSession<String> session, String msg) {
 
             }
 
             @Override
-            public void stateEvent0(AioSession<String> session, EventState stateMachineEnum, Throwable throwable) {
+            public void stateEvent0(TcpAioSession<String> session, EventState stateMachineEnum, Throwable throwable) {
                 if (throwable != null) {
                     throwable.printStackTrace();
                 }
@@ -55,7 +55,7 @@ public class StringClient {
         client.setBufferPagePool(bufferPagePool);
         client.setWriteQueueCapacity(10);
         client.setBufferPoolChunkSize(1024 * 1024);
-        AioSession<String> session = client.start(asynchronousChannelGroup);
+        TcpAioSession<String> session = client.start(asynchronousChannelGroup);
         WriteBuffer outputStream = session.writeBuffer();
         byte[] data = "mio-aio".getBytes();
         while (true) {

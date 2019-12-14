@@ -3,7 +3,6 @@ package io.mio.aio;
 import io.mio.aio.buffer.BufferPagePool;
 import io.mio.aio.handler.ReadCompletionHandler;
 import io.mio.aio.handler.WriteCompletionHandler;
-import io.mio.aio.support.AioSession;
 import io.mio.aio.support.IoServerConfig;
 import io.mio.aio.support.TcpAioSession;
 
@@ -111,7 +110,7 @@ public class AioMioClient<T> {
      * @throws InterruptedException InterruptedException
      * @see AsynchronousSocketChannel#connect(SocketAddress)
      */
-    public AioSession<T> start(AsynchronousChannelGroup asynchronousChannelGroup) throws IOException, ExecutionException, InterruptedException {
+    public TcpAioSession<T> start(AsynchronousChannelGroup asynchronousChannelGroup) throws IOException, ExecutionException, InterruptedException {
         AsynchronousSocketChannel socketChannel = AsynchronousSocketChannel.open(asynchronousChannelGroup);
         if (bufferPool == null) {
             bufferPool = new BufferPagePool(config.getBufferPoolPageSize(), 1, config.isBufferPoolDirect());
@@ -159,7 +158,7 @@ public class AioMioClient<T> {
      * @throws InterruptedException InterruptedException
      * @see AioMioClient#start(AsynchronousChannelGroup)
      */
-    public final AioSession<T> start() throws IOException, ExecutionException, InterruptedException {
+    public final TcpAioSession<T> start() throws IOException, ExecutionException, InterruptedException {
         this.asynchronousChannelGroup = AsynchronousChannelGroup.withFixedThreadPool(2, new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {

@@ -1,6 +1,6 @@
 package io.mio.aio;
 
-import io.mio.aio.support.AioSession;
+import io.mio.aio.support.TcpAioSession;
 
 import java.nio.ByteBuffer;
 
@@ -27,6 +27,6 @@ public interface Protocol<T> {
      * @param session    本次需要解码的session
      * @return 本次解码成功后封装的业务消息对象, 返回null则表示解码未完成
      */
-    T decode(final ByteBuffer readBuffer, AioSession<T> session);
+    T decode(final ByteBuffer readBuffer, TcpAioSession<T> session);
 
 }

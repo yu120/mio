@@ -236,7 +236,7 @@ public class AioMioServer<T> {
             if (session == null) {
                 closeChannel(channel);
             } else {
-                session.close();
+                session.close(true);
             }
         }
     }

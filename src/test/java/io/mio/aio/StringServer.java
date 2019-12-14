@@ -2,9 +2,9 @@ package io.mio.aio;
 
 import io.mio.aio.plugin.AbstractMessageProcessor;
 import io.mio.aio.plugin.MonitorFilter;
-import lombok.extern.slf4j.Slf4j;
-import io.mio.aio.support.AioSession;
+import io.mio.aio.support.TcpAioSession;
 import io.mio.aio.support.WriteBuffer;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
@@ -14,7 +14,7 @@ public class StringServer {
     public static void main(String[] args) throws IOException {
         AbstractMessageProcessor<String> processor = new AbstractMessageProcessor<String>() {
             @Override
-            public void process0(AioSession<String> session, String msg) {
+            public void process0(TcpAioSession<String> session, String msg) {
                 WriteBuffer outputStream = session.writeBuffer();
 
                 try {
@@ -27,7 +27,7 @@ public class StringServer {
             }
 
             @Override
-            public void stateEvent0(AioSession<String> session, EventState stateMachineEnum, Throwable throwable) {
+            public void stateEvent0(TcpAioSession<String> session, EventState stateMachineEnum, Throwable throwable) {
                 if (throwable != null) {
                     log.error(stateMachineEnum + " exception:", throwable);
                 }

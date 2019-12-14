@@ -1,6 +1,6 @@
 package io.mio.aio;
 
-import io.mio.aio.support.AioSession;
+import io.mio.aio.support.TcpAioSession;
 
 /**
  * 消息处理器。
@@ -20,7 +20,7 @@ public interface MessageProcessor<T> {
      * @param session 通信会话
      * @param msg     待处理的业务消息
      */
-    void process(AioSession<T> session, T msg);
+    void process(TcpAioSession<T> session, T msg);
 
     /**
      * 状态机事件,当枚举事件发生时由框架触发该方法
@@ -30,6 +30,6 @@ public interface MessageProcessor<T> {
      * @param throwable        异常对象，如果存在的话
      * @see EventState
      */
-    void stateEvent(AioSession<T> session, EventState eventState, Throwable throwable);
+    void stateEvent(TcpAioSession<T> session, EventState eventState, Throwable throwable);
 
 }

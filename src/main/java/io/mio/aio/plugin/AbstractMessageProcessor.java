@@ -3,7 +3,7 @@ package io.mio.aio.plugin;
 import io.mio.aio.EventState;
 import io.mio.aio.MessageProcessor;
 import io.mio.aio.NetFilter;
-import io.mio.aio.support.AioSession;
+import io.mio.aio.support.TcpAioSession;
 
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.ArrayList;
@@ -14,28 +14,28 @@ public abstract class AbstractMessageProcessor<T> implements MessageProcessor<T>
     private List<NetFilter<T>> plugins = new ArrayList<>();
 
     @Override
-    public final void afterRead(AioSession<T> session, int readSize) {
+    public final void afterRead(TcpAioSession<T> session, int readSize) {
         for (NetFilter<T> plugin : plugins) {
             plugin.afterRead(session, readSize);
         }
     }
 
     @Override
-    public final void afterWrite(AioSession<T> session, int writeSize) {
+    public final void afterWrite(TcpAioSession<T> session, int writeSize) {
         for (NetFilter<T> plugin : plugins) {
             plugin.afterWrite(session, writeSize);
         }
     }
 
     @Override
-    public final void beforeRead(AioSession<T> session) {
+    public final void beforeRead(TcpAioSession<T> session) {
         for (NetFilter<T> plugin : plugins) {
             plugin.beforeRead(session);
         }
     }
 
     @Override
-    public final void beforeWrite(AioSession<T> session) {
+    public final void beforeWrite(TcpAioSession<T> session) {
         for (NetFilter<T> plugin : plugins) {
             plugin.beforeWrite(session);
         }
@@ -54,7 +54,7 @@ public abstract class AbstractMessageProcessor<T> implements MessageProcessor<T>
     }
 
     @Override
-    public final void process(AioSession<T> session, T msg) {
+    public final void process(TcpAioSession<T> session, T msg) {
         boolean flag = true;
         for (NetFilter<T> plugin : plugins) {
             if (!plugin.preProcess(session, msg)) {
@@ -71,9 +71,9 @@ public abstract class AbstractMessageProcessor<T> implements MessageProcessor<T>
      *
      * @param session
      * @param msg
-     * @see MessageProcessor#process(AioSession, Object)
+     * @see MessageProcessor#process(TcpAioSession, Object)
      */
-    public abstract void process0(AioSession<T> session, T msg);
+    public abstract void process0(TcpAioSession<T> session, T msg);
 
     /**
      * @param session          本次触发状态机的AioSession对象
@@ -81,7 +81,7 @@ public abstract class AbstractMessageProcessor<T> implements MessageProcessor<T>
      * @param throwable        异常对象，如果存在的话
      */
     @Override
-    public final void stateEvent(AioSession<T> session, EventState eventState, Throwable throwable) {
+    public final void stateEvent(TcpAioSession<T> session, EventState eventState, Throwable throwable) {
         for (NetFilter<T> plugin : plugins) {
             plugin.stateEvent(eventState, session, throwable);
         }
@@ -92,21 +92,21 @@ public abstract class AbstractMessageProcessor<T> implements MessageProcessor<T>
      * @param session
      * @param eventState
      * @param throwable
-     * @see #stateEvent(AioSession, EventState, Throwable)
+     * @see #stateEvent(TcpAioSession, EventState, Throwable)
      */
-    public abstract void stateEvent0(AioSession<T> session, EventState eventState, Throwable throwable);
+    public abstract void stateEvent0(TcpAioSession<T> session, EventState eventState, Throwable throwable);
 
     public final void addPlugin(NetFilter plugin) {
         this.plugins.add(plugin);
     }
 
     @Override
-    public boolean preProcess(AioSession<T> session, T t) {
+    public boolean preProcess(TcpAioSession<T> session, T t) {
         return false;
     }
 
     @Override
-    public void stateEvent(EventState eventState, AioSession<T> session, Throwable throwable) {
+    public void stateEvent(EventState eventState, TcpAioSession<T> session, Throwable throwable) {
 
     }
 
