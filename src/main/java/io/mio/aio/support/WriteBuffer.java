@@ -13,6 +13,8 @@ import java.util.function.Function;
 
 /**
  * 包装当前会话分配到的虚拟Buffer,提供流式操作方式
+ *
+ * @author lry
  */
 public class WriteBuffer extends OutputStream {
 

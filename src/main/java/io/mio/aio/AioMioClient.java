@@ -20,24 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * AIO实现的客户端服务。
- *
- *
- * <h2>示例：</h2>
- * <p>
- * <pre>
- * public class IntegerClient {
- *      public static void main(String[] args) throws Exception {
- *          IntegerClientProcessor processor = new IntegerClientProcessor();
- *          AioMioClient<Integer> aioQuickClient = new AioMioClient<Integer>("localhost", 8888, new IntegerProtocol(), processor);
- *          aioQuickClient.start();
- *          processor.getSession().write(1);
- *          processor.getSession().close(false);//待数据发送完毕后关闭
- *          aioQuickClient.shutdown();
- *      }
- * }
- * </pre>
- * </p>
+ * AIO实现的客户端服务
  *
  * @param <T> 消息对象类型
  * @author lry
@@ -48,7 +31,7 @@ public class AioMioClient<T> {
      * 客户端服务配置。
      * <p>调用AioQuickClient的各setXX()方法，都是为了设置config的各配置项</p>
      */
-    protected IoServerConfig<T> config = new IoServerConfig<>();
+    private IoServerConfig<T> config = new IoServerConfig<>();
     /**
      * 网络连接的会话对象
      *
@@ -58,7 +41,7 @@ public class AioMioClient<T> {
     /**
      * 内存池
      */
-    protected BufferPagePool bufferPool = null;
+    private BufferPagePool bufferPool = null;
 
     private BufferPagePool innerBufferPool = null;
     /**
@@ -135,7 +118,7 @@ public class AioMioClient<T> {
             }
 
         } catch (TimeoutException e) {
-            AioConstants.close(socketChannel);
+            TcpAioSession.close(socketChannel);
             shutdownNow();
             throw new IOException(e);
         }

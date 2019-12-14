@@ -108,25 +108,4 @@ public class IoServerConfig<T> {
         socketOptions.put(socketOption, f);
     }
 
-
-    @Override
-    public String toString() {
-        return "IoServerConfig{" +
-                "readBufferSize=" + readBufferSize +
-                ", writeQueueCapacity=" + writeQueueCapacity +
-                ", host='" + host + '\'' +
-                ", monitor=" + monitor +
-                ", port=" + port +
-                ", processor=" + processor +
-                ", protocol=" + protocol +
-                ", socketOptions=" + socketOptions +
-                ", threadNum=" + threadNum +
-                ", bufferPoolPageSize=" + bufferPoolPageSize +
-                ", bufferPoolPageNum=" + bufferPoolPageNum +
-                ", bufferPoolChunkSize=" + bufferPoolChunkSize +
-                ", bufferPoolSharedPageSize=" + bufferPoolSharedPageSize +
-                ", bufferPoolDirect=" + bufferPoolDirect +
-                '}';
-    }
-
 }

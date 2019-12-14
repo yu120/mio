@@ -1,6 +1,5 @@
 package io.mio.aio.support;
 
-import io.mio.aio.AioConstants;
 import io.mio.aio.EventState;
 import io.mio.aio.MessageProcessor;
 import io.mio.aio.NetFilter;
@@ -193,7 +192,7 @@ public class TcpAioSession<T> {
      *
      * @param buffer 用于存放待读取数据的buffer
      */
-    protected final void readFromChannel0(ByteBuffer buffer) {
+    private void readFromChannel0(ByteBuffer buffer) {
         channel.read(buffer, this, readCompletionHandler);
     }
 
@@ -202,7 +201,7 @@ public class TcpAioSession<T> {
      *
      * @param buffer 待输出的buffer
      */
-    protected final void writeToChannel0(ByteBuffer buffer) {
+    private void writeToChannel0(ByteBuffer buffer) {
         channel.write(buffer, 0L, TimeUnit.MILLISECONDS, this, writeCompletionHandler);
     }
 
@@ -235,7 +234,7 @@ public class TcpAioSession<T> {
                 writeBuffer.clean();
                 writeBuffer = null;
             }
-            AioConstants.close(channel);
+            close(channel);
             ioServerConfig.getProcessor().stateEvent(this, EventState.SESSION_CLOSED, null);
         } else if (noWriteBuffer && !byteBuf.hasData()) {
             close(true);
@@ -339,7 +338,7 @@ public class TcpAioSession<T> {
     /**
      * 触发读操作
      */
-    protected void continueRead() {
+    private void continueRead() {
         NetFilter<T> monitor = getServerConfig().getMonitor();
         if (monitor != null) {
             monitor.beforeRead(this);
@@ -373,7 +372,7 @@ public class TcpAioSession<T> {
      *
      * @param writeBuffer 存放待输出数据的buffer
      */
-    protected void continueWrite(VirtualBuffer writeBuffer) {
+    private void continueWrite(VirtualBuffer writeBuffer) {
         NetFilter<T> monitor = getServerConfig().getMonitor();
         if (monitor != null) {
             monitor.beforeWrite(this);
@@ -422,6 +421,32 @@ public class TcpAioSession<T> {
 
     public IoServerConfig<T> getServerConfig() {
         return this.ioServerConfig;
+    }
+
+    /**
+     * The close
+     *
+     * @param channel 需要被关闭的通道
+     */
+    public static void close(AsynchronousSocketChannel channel) {
+        if (channel == null) {
+            throw new NullPointerException();
+        }
+        try {
+            channel.shutdownInput();
+        } catch (IOException e) {
+            log.debug("shutdown input exception", e);
+        }
+        try {
+            channel.shutdownOutput();
+        } catch (IOException e) {
+            log.debug("shutdown output exception", e);
+        }
+        try {
+            channel.close();
+        } catch (IOException e) {
+            log.debug("close channel exception", e);
+        }
     }
 
 }

@@ -21,19 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
- * AIO服务端。
- *
- * <h2>示例：</h2>
- * <p>
- * <pre>
- * public class IntegerServer {
- *     public static void main(String[] args) throws IOException {
- *         AioMioServer<Integer> server = new AioMioServer<Integer>(8888, new IntegerProtocol(), new IntegerServerProcessor());
- *         server.start();
- *     }
- * }
- * </pre>
- * </p>
+ * AIO服务端
  *
  * @param <T> 消息对象类型
  * @author lry
