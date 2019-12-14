@@ -1,4 +1,4 @@
-package io.mio.netty.protocol;
+package io.mio.netty.codec;
 
 import io.mio.commons.MioConstants;
 import io.mio.commons.MioMessage;
