@@ -20,7 +20,7 @@ import java.util.function.Function;
 /**
  * AIO传输层会话。
  * <p>
- * AioSession为mio-aio最核心的类，封装{@link AsynchronousSocketChannel} API接口，简化IO操作。
+ * AioMioSession为mio-aio最核心的类，封装{@link AsynchronousSocketChannel} API接口，简化IO操作。
  *
  * @author lry
  */
@@ -158,7 +158,7 @@ public class AioMioSession<T> {
         // 触发状态机
         messageProcessor.stateEvent(this, EventState.NEW_SESSION, null);
 
-        // 初始化AioSession
+        // 初始化AioMioSession
         try {
             continueRead();
         } catch (Exception e) {

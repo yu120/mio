@@ -31,7 +31,7 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, AioM
     /**
      * 读会话缓存队列
      */
-    private ConcurrentLinkedQueue<AioMioSession<T>> cacheAioSessionQueue;
+    private ConcurrentLinkedQueue<AioMioSession<T>> cacheAioMioSessionQueue;
 
     /**
      * 应该可以不用volatile
@@ -55,7 +55,7 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, AioM
 
     public ReadCompletionHandler(final Semaphore semaphore) {
         this.semaphore = semaphore;
-        this.cacheAioSessionQueue = new ConcurrentLinkedQueue<>();
+        this.cacheAioMioSessionQueue = new ConcurrentLinkedQueue<>();
         longAdder = new LongAdder();
     }
 
@@ -74,7 +74,7 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, AioM
         }
         //线程资源不足,暂时积压任务
         aioSession.setLastReadSize(result);
-        cacheAioSessionQueue.offer(aioSession);
+        cacheAioMioSessionQueue.offer(aioSession);
         if (needNotify && lock.tryLock()) {
             try {
                 needNotify = false;
@@ -89,10 +89,10 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, AioM
      * 执行异步队列中的任务
      */
     private void runRingBufferTask() {
-        if (cacheAioSessionQueue.isEmpty() || !semaphore.tryAcquire()) {
+        if (cacheAioMioSessionQueue.isEmpty() || !semaphore.tryAcquire()) {
             return;
         }
-        AioMioSession<T> curSession = cacheAioSessionQueue.poll();
+        AioMioSession<T> curSession = cacheAioMioSessionQueue.poll();
         if (curSession == null) {
             semaphore.release();
             return;
@@ -103,7 +103,7 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, AioM
         int i = LIFE_CYCLE;
         while (curSession != null) {
             nextSession = (i >> 1 > 0 || step == longAdder.sum())
-                    ? cacheAioSessionQueue.poll() : null;
+                    ? cacheAioMioSessionQueue.poll() : null;
             if (nextSession == null) {
                 curSession.setReadSemaphore(semaphore);
             }
@@ -165,7 +165,7 @@ public class ReadCompletionHandler<T> implements CompletionHandler<Integer, AioM
     public void run() {
         while (running) {
             try {
-                AioMioSession<T> aioSession = cacheAioSessionQueue.poll();
+                AioMioSession<T> aioSession = cacheAioMioSessionQueue.poll();
                 if (aioSession != null) {
                     completed0(aioSession.getLastReadSize(), aioSession);
                     synchronized (this) {

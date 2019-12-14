@@ -33,7 +33,7 @@ public interface NetFilter<T> {
     /**
      * 监控触发本次读回调Session的已读数据字节数
      *
-     * @param session  当前执行read的AioSession对象
+     * @param session  当前执行read的AioMioSession对象
      * @param readSize 已读数据长度
      */
     void afterRead(AioMioSession<T> session, int readSize);

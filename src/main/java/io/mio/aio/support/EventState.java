@@ -22,7 +22,7 @@ public enum EventState {
      * 通常由以下几种情况会触发该状态：
      * <ol>
      * <li>对端主动关闭write通道，致使本通常满足了EOF条件</li>
-     * <li>当前AioSession处理完读操作后检测到自身正处于{@link EventState#SESSION_CLOSING}状态</li>
+     * <li>当前AioMioSession处理完读操作后检测到自身正处于{@link EventState#SESSION_CLOSING}状态</li>
      * </ol>
      * </p>
      * <b>未来该状态机可能会废除，并转移至NetMonitor</b>
@@ -61,7 +61,7 @@ public enum EventState {
     /**
      * 会话关闭成功。
      *
-     * <p>AioSession关闭成功</p>
+     * <p>AioMioSession关闭成功</p>
      */
     SESSION_CLOSED,
     /**

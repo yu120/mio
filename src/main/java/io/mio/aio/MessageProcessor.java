@@ -80,7 +80,7 @@ public class MessageProcessor<T> implements NetFilter<T> {
     /**
      * 状态机事件,当枚举事件发生时由框架触发该方法
      *
-     * @param session    本次触发状态机的AioSession对象
+     * @param session    本次触发状态机的AioMioSession对象
      * @param eventState 状态枚举
      * @param throwable  异常对象，如果存在的话
      * @see EventState
