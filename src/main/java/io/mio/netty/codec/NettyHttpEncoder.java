@@ -2,11 +2,9 @@ package io.mio.netty.codec;
 
 import io.mio.commons.MioConstants;
 import io.mio.commons.MioMessage;
-import io.mio.serialize.Serialize;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.http.*;
 
@@ -16,23 +14,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * NettyHttpMioEncoder
+ * NettyHttpEncoder
  *
  * @author lry
  */
-public class NettyHttpMioEncoder extends MessageToMessageEncoder<MioMessage> {
+public class NettyHttpEncoder extends MessageToMessageEncoder<MioMessage> {
 
-    private Serialize serialize;
-    private ChannelPipeline pipeline;
+    private boolean server;
 
-    public NettyHttpMioEncoder(int maxContentLength, Serialize serialize, ChannelPipeline pipeline) {
-        this.serialize = serialize;
-        this.pipeline = pipeline;
-        if (pipeline != null) {
-            pipeline.addLast(new HttpRequestEncoder());
-            pipeline.addLast(new HttpResponseDecoder());
-            pipeline.addLast(new HttpObjectAggregator(maxContentLength));
-        }
+    public NettyHttpEncoder(boolean server) {
+        this.server = server;
     }
 
     @Override
@@ -41,7 +32,10 @@ public class NettyHttpMioEncoder extends MessageToMessageEncoder<MioMessage> {
         ByteBuf content = Unpooled.wrappedBuffer(msg.getData());
 
         FullHttpMessage httpMessage;
-        if (pipeline != null) {
+        if (server) {
+            // server send response encoder
+            httpMessage = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, content);
+        } else {
             // client send request encoder
             Object path = msg.getHeaders().getOrDefault(MioConstants.URI_KEY, "/");
             Object requestMethod = msg.getHeaders().getOrDefault(MioConstants.REQUEST_METHOD_KEY, HttpMethod.POST.name());
@@ -49,9 +43,6 @@ public class NettyHttpMioEncoder extends MessageToMessageEncoder<MioMessage> {
             HttpMethod httpMethod = HttpMethod.valueOf(String.valueOf(requestMethod));
             String uri = new URI(String.valueOf(path)).toASCIIString();
             httpMessage = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, httpMethod, uri, content);
-        } else {
-            // server send response encoder
-            httpMessage = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, content);
         }
 
         // set auto header parameter

@@ -7,7 +7,6 @@ import io.mio.serialize.Serialize;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.MessageToByteEncoder;
 import lombok.AllArgsConstructor;
 
@@ -32,7 +31,6 @@ public class NettyMioEncoder extends MessageToByteEncoder<MioMessage> {
 
     private int maxContentLength;
     private Serialize serialize;
-    private ChannelPipeline pipeline;
 
     @Override
     protected void encode(ChannelHandlerContext ctx, final MioMessage msg, ByteBuf out) throws Exception {
@@ -45,7 +43,6 @@ public class NettyMioEncoder extends MessageToByteEncoder<MioMessage> {
 
         // wrapper local and remote address
         msg.wrapper(channel.localAddress(), channel.remoteAddress());
-        msg.setHeaderLength(headerLength);
         msg.setDataLength(dataLength);
         int headerDataLength = headerLength + dataLength;
         if ((MioConstants.BASE_READ_LENGTH + headerDataLength) > maxContentLength) {

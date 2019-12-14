@@ -5,8 +5,7 @@ import io.mio.commons.*;
 import io.mio.compress.Compress;
 import io.mio.compress.GzipCompress;
 import io.mio.extension.Extension;
-import io.mio.netty.codec.NettyMioDecoder;
-import io.mio.netty.codec.NettyMioEncoder;
+import io.mio.netty.codec.NettyMioCode;
 import io.mio.serialize.Hessian2Serialize;
 import io.mio.serialize.Serialize;
 import io.netty.bootstrap.Bootstrap;
@@ -14,7 +13,6 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.pool.AbstractChannelPoolHandler;
@@ -47,6 +45,7 @@ public class NettyMioClient implements MioClient {
     private NettyMioClientHandler clientHandler;
     private Serialize serialize;
     private Compress compress;
+    private NettyMioCode codec;
 
     @Override
     public void initialize(ClientConfig clientConfig) {
@@ -58,6 +57,7 @@ public class NettyMioClient implements MioClient {
         this.clientHandler = new NettyMioClientHandler();
         this.serialize = new Hessian2Serialize();
         this.compress = new GzipCompress();
+        this.codec = new NettyMioCode();
 
         try {
             // create client bootstrap
@@ -82,14 +82,15 @@ public class NettyMioClient implements MioClient {
 
                         @Override
                         public void channelCreated(Channel ch) throws Exception {
-                            ChannelPipeline pipeline = ch.pipeline();
-                            pipeline.addLast(new NettyMioEncoder(clientConfig.getMaxContentLength(), serialize, pipeline));
-                            pipeline.addLast(new NettyMioDecoder(clientConfig.getMaxContentLength(), serialize, null));
+                            // client codec
+                            codec.client(clientConfig.getMaxContentLength(), serialize, ch.pipeline());
+                            // heartbeat detection
                             if (clientConfig.getHeartbeat() > 0) {
-                                pipeline.addLast(new IdleStateHandler(0, 0,
+                                ch.pipeline().addLast(new IdleStateHandler(0, 0,
                                         clientConfig.getHeartbeat(), TimeUnit.MILLISECONDS));
                             }
-                            pipeline.addLast(clientHandler);
+                            // process network IO
+                            ch.pipeline().addLast(clientHandler);
                         }
                     }, clientConfig.getMaxConnections());
                 }

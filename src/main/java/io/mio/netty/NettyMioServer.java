@@ -8,8 +8,7 @@ import io.mio.commons.ServerConfig;
 import io.mio.compress.Compress;
 import io.mio.compress.GzipCompress;
 import io.mio.extension.Extension;
-import io.mio.netty.codec.NettyMioDecoder;
-import io.mio.netty.codec.NettyMioEncoder;
+import io.mio.netty.codec.NettyMioCode;
 import io.mio.serialize.Hessian2Serialize;
 import io.mio.serialize.Serialize;
 import io.netty.bootstrap.ServerBootstrap;
@@ -45,6 +44,7 @@ public class NettyMioServer implements MioServer {
     private NettyMioServerHandler serverHandler;
     private Serialize serialize;
     private Compress compress;
+    private NettyMioCode codec;
 
     @Override
     public void initialize(ServerConfig serverConfig, final MioCallback<MioMessage> mioCallback) {
@@ -57,6 +57,7 @@ public class NettyMioServer implements MioServer {
         this.serverHandler = new NettyMioServerHandler(serverConfig.getMaxConnections(), mioCallback);
         this.serialize = new Hessian2Serialize();
         this.compress = new GzipCompress();
+        this.codec = new NettyMioCode();
 
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
@@ -73,14 +74,14 @@ public class NettyMioServer implements MioServer {
                     .childHandler(new ChannelInitializer<NioSocketChannel>() {
                         @Override
                         protected void initChannel(NioSocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new NettyMioDecoder(serverConfig.getMaxContentLength(), serialize, ch.pipeline()));
-                            ch.pipeline().addLast(new NettyMioEncoder(serverConfig.getMaxContentLength(), serialize, null));
-                            // Heartbeat detection
+                            // server codec
+                            codec.server(serverConfig.getMaxContentLength(), serialize, ch.pipeline());
+                            // heartbeat detection
                             if (serverConfig.getHeartbeat() > 0) {
                                 ch.pipeline().addLast(new IdleStateHandler(0, 0,
                                         serverConfig.getHeartbeat(), TimeUnit.MILLISECONDS));
                             }
-                            // Process network IO
+                            // process network IO
                             ch.pipeline().addLast(serverHandler);
                         }
                     });

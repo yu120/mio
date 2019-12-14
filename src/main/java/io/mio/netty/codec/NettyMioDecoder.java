@@ -6,7 +6,6 @@ import io.mio.serialize.Serialize;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import lombok.AllArgsConstructor;
 
@@ -34,8 +33,6 @@ public class NettyMioDecoder extends ByteToMessageDecoder {
 
     private int maxContentLength;
     private Serialize serialize;
-    private ChannelPipeline pipeline;
-
 
     @SuppressWarnings("unchecked")
     @Override
@@ -99,7 +96,7 @@ public class NettyMioDecoder extends ByteToMessageDecoder {
         buffer.readBytes(data);
 
         // Step 8：Add to output
-        final MioMessage mioMessage = MioMessage.build(headers, headerLength, dataLength, data);
+        final MioMessage mioMessage = MioMessage.build(headers, data);
         mioMessage.wrapper(channel.localAddress(), channel.remoteAddress());
         out.add(mioMessage);
     }

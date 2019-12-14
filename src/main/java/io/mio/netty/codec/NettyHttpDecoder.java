@@ -2,37 +2,24 @@ package io.mio.netty.codec;
 
 import io.mio.commons.MioConstants;
 import io.mio.commons.MioMessage;
-import io.mio.serialize.Serialize;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.MessageToMessageDecoder;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.FullHttpMessage;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.QueryStringDecoder;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * NettyHttpMioDecoder
+ * NettyHttpDecoder
  *
  * @author lry
  */
-public class NettyHttpMioDecoder extends MessageToMessageDecoder<FullHttpMessage> {
-
-    private Serialize serialize;
-    private ChannelPipeline pipeline;
-
-    public NettyHttpMioDecoder(int maxContentLength, Serialize serialize, ChannelPipeline pipeline) {
-        this.serialize = serialize;
-        this.pipeline = pipeline;
-        if (pipeline != null) {
-            pipeline.addLast(new HttpRequestDecoder());
-            pipeline.addLast(new HttpResponseEncoder());
-            pipeline.addLast(new HttpObjectAggregator(maxContentLength));
-        }
-    }
+public class NettyHttpDecoder extends MessageToMessageDecoder<FullHttpMessage> {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, FullHttpMessage msg, List<Object> out) throws Exception {
@@ -46,15 +33,12 @@ public class NettyHttpMioDecoder extends MessageToMessageDecoder<FullHttpMessage
 
         // parse header data
         Map<String, Object> headers = readHeaders(uri, msg.headers().entries());
-        byte[] header = serialize.serialize(headers);
-        int headerLength = header.length;
 
         // parse body data
         byte[] data = readByteBuf(msg.content());
-        int dataLength = data.length;
 
         // build message
-        final MioMessage mioMessage = MioMessage.build(headers, headerLength, dataLength, data);
+        final MioMessage mioMessage = MioMessage.build(headers, data);
         mioMessage.wrapper(channel.localAddress(), channel.remoteAddress());
         out.add(mioMessage);
     }
