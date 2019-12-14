@@ -2,7 +2,7 @@ package io.mio.netty.codec;
 
 import io.mio.commons.MioConstants;
 import io.mio.commons.MioMessage;
-import io.mio.serialize.Serialize;
+import io.mio.Serialize;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;

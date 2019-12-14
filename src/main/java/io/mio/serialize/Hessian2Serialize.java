@@ -7,6 +7,7 @@ import java.io.InputStream;
 
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
+import io.mio.Serialize;
 
 /**
  * The Hessian 2 Serialize.

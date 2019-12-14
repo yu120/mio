@@ -2,7 +2,7 @@ package io.mio.netty.codec;
 
 import io.mio.Codec;
 import io.mio.extension.Extension;
-import io.mio.serialize.Serialize;
+import io.mio.Serialize;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.*;
 

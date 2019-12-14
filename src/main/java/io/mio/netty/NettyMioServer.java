@@ -10,7 +10,7 @@ import io.mio.compress.GzipCompress;
 import io.mio.extension.Extension;
 import io.mio.netty.codec.NettyMioCode;
 import io.mio.serialize.Hessian2Serialize;
-import io.mio.serialize.Serialize;
+import io.mio.Serialize;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;

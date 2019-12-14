@@ -1,7 +1,6 @@
 package io.mio;
 
 import io.mio.extension.SPI;
-import io.mio.serialize.Serialize;
 
 /**
  * Codec

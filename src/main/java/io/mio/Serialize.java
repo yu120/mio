@@ -1,4 +1,4 @@
-package io.mio.serialize;
+package io.mio;
 
 import java.io.IOException;
 
