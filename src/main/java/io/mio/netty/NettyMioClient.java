@@ -140,7 +140,7 @@ public class NettyMioClient implements MioClient {
 
         try {
             mioMessage.wrapper(channel.localAddress(), channel.remoteAddress());
-            channel.attr(MIO_CALLBACK_KEY).set(mioCallback.setListener(t -> channelPool.release(channel)));
+            channel.attr(MIO_CALLBACK_KEY).set(mioCallback.listener(t -> channelPool.release(channel)));
             // write and flush
             channel.writeAndFlush(mioMessage);
         } catch (Exception e) {

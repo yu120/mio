@@ -21,7 +21,7 @@ public class MioCallback<V> {
      * @param listener {@link Consumer}
      * @return {@link MioCallback}
      */
-    public final MioCallback<V> setListener(Consumer<V> listener) {
+    public final MioCallback<V> listener(Consumer<V> listener) {
         this.listener = listener;
         return this;
     }
