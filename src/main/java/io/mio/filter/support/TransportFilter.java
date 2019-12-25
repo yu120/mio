@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentMap;
  * @author lry
  */
 @Slf4j
-@Extension(value = "transport", order = 1000)
+@Extension(value = "transport", order = 5000)
 public class TransportFilter implements Filter {
 
     private ConcurrentMap<String, MioClient> clients = new ConcurrentHashMap<>();
@@ -38,10 +38,11 @@ public class TransportFilter implements Filter {
             // build response
             response.setHeaders(responseMioMessage.getHeaders());
             response.setData(responseMioMessage.getData());
-            context.doFilter(context, request, response);
         } catch (Throwable t) {
             throw new MioException(0, "Transport request exception", t);
         }
+
+        context.doFilter(context, request, response);
     }
 
     @Override
