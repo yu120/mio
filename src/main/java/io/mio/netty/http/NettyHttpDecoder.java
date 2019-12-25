@@ -8,6 +8,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.FullHttpMessage;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.QueryStringDecoder;
 
 import java.util.LinkedHashMap;
@@ -25,14 +26,22 @@ public class NettyHttpDecoder extends MessageToMessageDecoder<FullHttpMessage> {
     protected void decode(ChannelHandlerContext ctx, FullHttpMessage msg, List<Object> out) throws Exception {
         Channel channel = ctx.channel();
 
-        // build uri
-        String uri = null;
-        if (msg instanceof FullHttpRequest) {
-            uri = ((FullHttpRequest) msg).uri();
-        }
-
+        final Map<String, Object> headers = new LinkedHashMap<>();
         // parse header data
-        Map<String, Object> headers = readHeaders(uri, msg.headers().entries());
+        for (Map.Entry<String, String> entry : msg.headers().entries()) {
+            headers.put(entry.getKey(), entry.getValue());
+        }
+        if (msg instanceof FullHttpRequest) {
+            FullHttpRequest request = (FullHttpRequest) msg;
+            // build uri
+            readUriParameters(headers, request.uri());
+            // parse set uri
+            headers.put(MioConstants.REQUEST_METHOD_KEY, request.method().name());
+        } else if (msg instanceof FullHttpResponse) {
+            FullHttpResponse response = (FullHttpResponse) msg;
+            // parse set uri
+            headers.put(MioConstants.RESPONSE_STATUS_KEY, response.status().code());
+        }
 
         // parse body data
         byte[] data = readByteBuf(msg.content());
@@ -56,18 +65,12 @@ public class NettyHttpDecoder extends MessageToMessageDecoder<FullHttpMessage> {
     }
 
     /**
-     * The read header
+     * The read uri and parameters
      *
-     * @param uri           http uri
-     * @param headerEntries header entry list
-     * @return header map
+     * @param headers headers
+     * @param uri     http uri
      */
-    private Map<String, Object> readHeaders(String uri, List<Map.Entry<String, String>> headerEntries) {
-        Map<String, Object> headers = new LinkedHashMap<>();
-        for (Map.Entry<String, String> entry : headerEntries) {
-            headers.put(entry.getKey(), entry.getValue());
-        }
-
+    private void readUriParameters(Map<String, Object> headers, String uri) {
         // parse set uri
         headers.put(MioConstants.URI_KEY, uri);
 
@@ -84,8 +87,6 @@ public class NettyHttpDecoder extends MessageToMessageDecoder<FullHttpMessage> {
             }
             headers.put(MioConstants.PARAMETERS_KEY, parameters);
         }
-
-        return headers;
     }
 
 }
