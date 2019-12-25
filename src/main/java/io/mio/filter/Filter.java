@@ -26,7 +26,7 @@ public interface Filter {
      * @param response {@link MioResponse}
      * @throws MioException MioException
      */
-    void filter(final FilterContext context, final MioRequest request, final MioResponse response) throws MioException;
+    void doFilter(final FilterContext context, final MioRequest request, final MioResponse response) throws MioException;
 
     /**
      * The destroy filter

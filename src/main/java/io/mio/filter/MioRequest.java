@@ -1,9 +1,19 @@
 package io.mio.filter;
 
+import lombok.Data;
+
+import java.io.Serializable;
+import java.util.Map;
+
 /**
  * MioRequest
  *
  * @author lry
  */
-public class MioRequest {
+@Data
+public class MioRequest implements Serializable {
+
+    private Map<String, Object> headers;
+    private byte[] data;
+
 }

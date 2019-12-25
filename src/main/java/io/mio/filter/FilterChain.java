@@ -1,8 +1,8 @@
 package io.mio.filter;
 
-import io.mio.commons.MioException;
 import io.mio.commons.extension.Extension;
 import io.mio.commons.extension.ExtensionLoader;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,7 @@ import java.util.List;
  *
  * @author lry
  */
+@Getter
 public class FilterChain {
 
     private List<Filter> filters = new ArrayList<>();
@@ -34,20 +35,6 @@ public class FilterChain {
                 scanFilter.initialize();
                 filters.add(scanFilter);
             }
-        }
-    }
-
-    /**
-     * The invoke filter
-     *
-     * @param context  {@link FilterContext}
-     * @param request  {@link MioRequest}
-     * @param response {@link MioResponse}
-     * @throws MioException MioException
-     */
-    public void filter(final FilterContext context, final MioRequest request, final MioResponse response) throws MioException {
-        for (Filter filter : filters) {
-            filter.filter(context, request, response);
         }
     }
 
