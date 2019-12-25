@@ -1,4 +1,4 @@
-package io.mio.netty.codec;
+package io.mio.netty.mio;
 
 import io.mio.commons.MioConstants;
 import io.mio.commons.MioException;

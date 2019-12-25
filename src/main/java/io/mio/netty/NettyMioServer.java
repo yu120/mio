@@ -1,12 +1,14 @@
 package io.mio.netty;
 
+import io.mio.Codec;
 import io.mio.MioServer;
+import io.mio.Serialize;
 import io.mio.commons.*;
+import io.mio.commons.extension.Extension;
 import io.mio.compress.Compress;
 import io.mio.compress.GzipCompress;
-import io.mio.commons.extension.Extension;
+import io.mio.netty.mio.NettyMioCode;
 import io.mio.serialize.Hessian2Serialize;
-import io.mio.Serialize;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -40,7 +42,7 @@ public class NettyMioServer implements MioServer {
     private NettyMioServerHandler serverHandler;
     private Serialize serialize;
     private Compress compress;
-    private NettyMioCode codec;
+    private Codec<ChannelPipeline> codec;
 
     @Override
     public void initialize(ServerConfig serverConfig, final MioCallback<MioMessage> mioCallback) {
