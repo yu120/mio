@@ -25,6 +25,10 @@ public class ClientConfig implements Serializable {
      */
     private int port = 9999;
     /**
+     * The client transport
+     */
+    private String transport = "netty";
+    /**
      * The server codec
      */
     private String codec = "mio";

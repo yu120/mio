@@ -33,6 +33,10 @@ public class ServerConfig implements Serializable {
      */
     private boolean hold = true;
     /**
+     * The server transport
+     */
+    private String transport = "netty";
+    /**
      * The server codec
      */
     private String codec = "mio";

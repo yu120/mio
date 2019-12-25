@@ -1,10 +1,10 @@
 package io.mio.netty;
 
 import io.mio.MioServer;
+import io.mio.MioTransport;
 import io.mio.commons.MioCallback;
 import io.mio.commons.MioMessage;
 import io.mio.commons.ServerConfig;
-import io.mio.commons.extension.ExtensionLoader;
 
 import java.util.function.Consumer;
 
@@ -12,8 +12,7 @@ public class NettyMioServerTest {
 
     public static void main(String[] args) throws Exception {
         ServerConfig serverConfig = new ServerConfig();
-        serverConfig.setCodec("http");
-        MioServer mioServer = ExtensionLoader.getLoader(MioServer.class).getExtension();
+        MioServer mioServer = MioTransport.createServer(serverConfig);
         mioServer.initialize(serverConfig, new MioCallback<MioMessage>() {
             @Override
             public void onProcessor(Consumer<MioMessage> context, MioMessage request) {
