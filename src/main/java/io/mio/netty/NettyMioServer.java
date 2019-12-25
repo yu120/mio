@@ -6,6 +6,7 @@ import io.mio.Serialize;
 import io.mio.commons.*;
 import io.mio.commons.extension.Extension;
 import io.mio.commons.extension.ExtensionLoader;
+import io.mio.commons.extension.TypeReference;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -52,7 +53,8 @@ public class NettyMioServer implements MioServer {
 
         // create serialize and codec
         this.serialize = ExtensionLoader.getLoader(Serialize.class).getExtension(serverConfig.getSerialize());
-        this.codec = ExtensionLoader.getLoader(Codec.class).getExtension(serverConfig.getCodec());
+        this.codec = ExtensionLoader.getLoader(new TypeReference<Codec<ChannelPipeline>>() {
+        }).getExtension(serverConfig.getCodec());
 
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();

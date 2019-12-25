@@ -39,7 +39,7 @@ public class ServerConfig implements Serializable {
     /**
      * The server header serialize
      */
-    private String serialize = "hessian";
+    private String serialize = "hessian2";
 
     /**
      * The server socket backlog size

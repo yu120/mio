@@ -1,13 +1,14 @@
 package io.mio.serialize;
 
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
+import io.mio.Serialize;
+import io.mio.commons.extension.Extension;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import com.caucho.hessian.io.Hessian2Input;
-import com.caucho.hessian.io.Hessian2Output;
-import io.mio.Serialize;
 
 /**
  * The Hessian 2 Serialize.
@@ -16,6 +17,7 @@ import io.mio.Serialize;
  *
  * @author lry
  */
+@Extension("hessian2")
 public class Hessian2Serialize implements Serialize {
 
     @Override

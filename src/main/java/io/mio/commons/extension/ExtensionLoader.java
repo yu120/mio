@@ -7,9 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -162,6 +160,14 @@ public class ExtensionLoader<T> {
 
     public static <T> ExtensionLoader<T> getLoader(Class<T> type) {
         return getLoader(type, Thread.currentThread().getContextClassLoader());
+    }
+
+    public static <T> ExtensionLoader<T> getLoader(TypeReference<T> type) {
+        return getLoader(type.getType(), Thread.currentThread().getContextClassLoader());
+    }
+
+    public static <T> ExtensionLoader<T> getLoader(TypeReference<T> type, ClassLoader classLoader) {
+        return getLoader(type.getType(), classLoader);
     }
 
     @SuppressWarnings("unchecked")

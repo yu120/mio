@@ -1,5 +1,7 @@
 package io.mio;
 
+import io.mio.commons.extension.SPI;
+
 import java.io.IOException;
 
 /**
@@ -7,6 +9,7 @@ import java.io.IOException;
  *
  * @author lry
  */
+@SPI("hessian2")
 public interface Serialize {
 
     /**
