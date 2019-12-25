@@ -1,2 +1,2 @@
-io.mio.netty.mio.NettyMioCode
-io.mio.netty.http.NettyHttpCode
+io.mio.netty.mio.NettyMioCodec
+io.mio.netty.http.NettyHttpCodec

@@ -7,12 +7,12 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.*;
 
 /**
- * NettyHttpCode
+ * NettyHttpCodec
  *
  * @author lry
  */
 @Extension("http")
-public class NettyHttpCode implements Codec<ChannelPipeline> {
+public class NettyHttpCodec implements Codec<ChannelPipeline> {
 
     @Override
     public void server(int maxContentLength, Serialize serialize, ChannelPipeline pipeline) {

@@ -33,6 +33,11 @@ public class ServerConfig implements Serializable {
      */
     private boolean hold = true;
     /**
+     * The server codec
+     */
+    private String codec = "mio";
+
+    /**
      * The server socket backlog size
      */
     private int backlog = 1024;

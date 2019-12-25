@@ -5,7 +5,7 @@ import io.mio.MioServer;
 import io.mio.Serialize;
 import io.mio.commons.*;
 import io.mio.commons.extension.Extension;
-import io.mio.netty.mio.NettyMioCode;
+import io.mio.commons.extension.ExtensionLoader;
 import io.mio.serialize.Hessian2Serialize;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -51,7 +51,7 @@ public class NettyMioServer implements MioServer {
         this.workerGroup = new NioEventLoopGroup(serverConfig.getWorkerThread(), workerThreadFactory);
         this.serverHandler = new NettyMioServerHandler(serverConfig.getMaxConnections(), mioCallback);
         this.serialize = new Hessian2Serialize();
-        this.codec = new NettyMioCode();
+        this.codec = ExtensionLoader.getLoader(Codec.class).getExtension(serverConfig.getCodec());
 
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();

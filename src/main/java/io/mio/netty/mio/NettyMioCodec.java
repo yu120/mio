@@ -6,12 +6,12 @@ import io.mio.commons.extension.Extension;
 import io.netty.channel.ChannelPipeline;
 
 /**
- * NettyMioCode
+ * NettyMioCodec
  *
  * @author lry
  */
 @Extension("mio")
-public class NettyMioCode implements Codec<ChannelPipeline> {
+public class NettyMioCodec implements Codec<ChannelPipeline> {
 
     @Override
     public void server(int maxContentLength, Serialize serialize, ChannelPipeline pipeline) {
