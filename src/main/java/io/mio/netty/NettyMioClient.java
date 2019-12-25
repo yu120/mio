@@ -111,23 +111,22 @@ public class NettyMioClient implements MioClient {
     }
 
     @Override
-    public MioMessageFuture<MioMessage> submit(final MioMessage mioMessage) throws Throwable {
-        final MioMessageFuture<MioMessage> future = new MioMessageFuture<>();
-
+    public MioFuture<MioMessage> submit(final MioMessage mioMessage) throws Throwable {
+        final MioFuture<MioMessage> mioFuture = new MioFuture<>();
         // send callback
-        this.callback(mioMessage, new MioCallback<MioMessage>() {
+        callback(mioMessage, new MioCallback<MioMessage>() {
             @Override
             public void onSuccess(MioMessage result) {
-                future.onSuccess(result);
+                mioFuture.onSuccess(result);
             }
 
             @Override
             public void onFailure(Throwable t) {
-                future.onFailure(t);
+                mioFuture.onFailure(t);
             }
         });
 
-        return future;
+        return mioFuture;
     }
 
     @Override
@@ -138,11 +137,10 @@ public class NettyMioClient implements MioClient {
         if (channel == null) {
             throw new MioException(MioException.CHANNEL_NULL, "Acquire get channel null");
         }
-        mioMessage.wrapper(channel.localAddress(), channel.remoteAddress());
 
         try {
+            mioMessage.wrapper(channel.localAddress(), channel.remoteAddress());
             channel.attr(MIO_CALLBACK_KEY).set(mioCallback.setListener(t -> channelPool.release(channel)));
-
             // write and flush
             channel.writeAndFlush(mioMessage);
         } catch (Exception e) {

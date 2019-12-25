@@ -2,8 +2,8 @@ package io.mio;
 
 import io.mio.commons.ClientConfig;
 import io.mio.commons.MioCallback;
+import io.mio.commons.MioFuture;
 import io.mio.commons.MioMessage;
-import io.mio.commons.MioMessageFuture;
 import io.mio.commons.extension.SPI;
 
 /**
@@ -34,10 +34,10 @@ public interface MioClient {
      * The send submit
      *
      * @param mioMessage {@link MioMessage}
-     * @return {@link MioMessageFuture}
+     * @return {@link MioFuture}
      * @throws Throwable exception {@link Throwable}
      */
-    MioMessageFuture<MioMessage> submit(final MioMessage mioMessage) throws Throwable;
+    MioFuture<MioMessage> submit(final MioMessage mioMessage) throws Throwable;
 
     /**
      * The send callback

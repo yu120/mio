@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * MioMessageFuture
+ * MioFuture
  *
  * @param <V>
  * @author lry
  */
 @Slf4j
-public class MioMessageFuture<V> {
+public class MioFuture<V> {
 
     private final Object lock = new Object();
     private volatile FutureState state = FutureState.DOING;
@@ -261,10 +261,10 @@ public class MioMessageFuture<V> {
          * 1.死循环：Future中调用Future
          * 2.耗资源操作或者慢操作
          *
-         * @param future {@link MioMessageFuture}
+         * @param future {@link MioFuture}
          * @throws Exception exception {@link Exception}
          */
-        void complete(MioMessageFuture<V> future) throws Exception;
+        void complete(MioFuture<V> future) throws Exception;
 
     }
 
