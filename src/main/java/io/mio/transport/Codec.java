@@ -1,6 +1,5 @@
 package io.mio.transport;
 
-import io.mio.serialize.Serialize;
 import io.mio.commons.extension.SPI;
 
 /**
@@ -15,18 +14,16 @@ public interface Codec<A> {
      * The server decode and encode
      *
      * @param maxContentLength max content length
-     * @param serialize        {@link Serialize}
      * @param attachment       {@link A}
      */
-    void server(int maxContentLength, Serialize serialize, A attachment);
+    void server(int maxContentLength, A attachment);
 
     /**
      * The client decode and encode
      *
      * @param maxContentLength max content length
-     * @param serialize        {@link Serialize}
      * @param attachment       {@link A}
      */
-    void client(int maxContentLength, Serialize serialize, A attachment);
+    void client(int maxContentLength, A attachment);
 
 }

@@ -1,8 +1,7 @@
 package io.mio.transport.netty.http;
 
-import io.mio.transport.Codec;
-import io.mio.serialize.Serialize;
 import io.mio.commons.extension.Extension;
+import io.mio.transport.Codec;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.*;
 
@@ -15,7 +14,7 @@ import io.netty.handler.codec.http.*;
 public class NettyHttpCodec implements Codec<ChannelPipeline> {
 
     @Override
-    public void server(int maxContentLength, Serialize serialize, ChannelPipeline pipeline) {
+    public void server(int maxContentLength, ChannelPipeline pipeline) {
         pipeline.addLast(new HttpRequestDecoder());
         pipeline.addLast(new HttpResponseEncoder());
         pipeline.addLast(new HttpObjectAggregator(maxContentLength));
@@ -25,7 +24,7 @@ public class NettyHttpCodec implements Codec<ChannelPipeline> {
     }
 
     @Override
-    public void client(int maxContentLength, Serialize serialize, ChannelPipeline pipeline) {
+    public void client(int maxContentLength, ChannelPipeline pipeline) {
         pipeline.addLast(new HttpRequestEncoder());
         pipeline.addLast(new HttpResponseDecoder());
         pipeline.addLast(new HttpObjectAggregator(maxContentLength));

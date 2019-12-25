@@ -2,7 +2,6 @@ package io.mio.transport.netty;
 
 import io.mio.transport.Codec;
 import io.mio.transport.MioServer;
-import io.mio.serialize.Serialize;
 import io.mio.commons.*;
 import io.mio.commons.extension.Extension;
 import io.mio.commons.extension.ExtensionLoader;
@@ -39,7 +38,6 @@ public class NettyMioServer implements MioServer {
 
     private Channel serverChannel;
     private NettyMioServerHandler serverHandler;
-    private Serialize serialize;
     private Codec<ChannelPipeline> codec;
 
     @Override
@@ -54,8 +52,7 @@ public class NettyMioServer implements MioServer {
         this.workerGroup = new NioEventLoopGroup(serverConfig.getWorkerThread(), workerThreadFactory);
         this.serverHandler = new NettyMioServerHandler(serverConfig.getMaxConnections(), mioCallback);
 
-        // create serialize and codec
-        this.serialize = ExtensionLoader.getLoader(Serialize.class).getExtension(serverConfig.getSerialize());
+        // create codec
         this.codec = ExtensionLoader.getLoader(new TypeReference<Codec<ChannelPipeline>>() {
         }).getExtension(serverConfig.getCodec());
 
@@ -75,7 +72,7 @@ public class NettyMioServer implements MioServer {
                         @Override
                         protected void initChannel(NioSocketChannel ch) throws Exception {
                             // server codec
-                            codec.server(serverConfig.getMaxContentLength(), serialize, ch.pipeline());
+                            codec.server(serverConfig.getMaxContentLength(), ch.pipeline());
                             // heartbeat detection
                             if (serverConfig.getHeartbeat() > 0) {
                                 ch.pipeline().addLast(new IdleStateHandler(0, 0,

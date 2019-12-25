@@ -3,7 +3,6 @@ package io.mio.transport.netty.mio;
 import io.mio.commons.MioConstants;
 import io.mio.commons.MioException;
 import io.mio.commons.MioMessage;
-import io.mio.serialize.Serialize;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -30,15 +29,13 @@ import lombok.AllArgsConstructor;
 public class NettyMioEncoder extends MessageToByteEncoder<MioMessage> {
 
     private int maxContentLength;
-    private Serialize serialize;
 
     @Override
     protected void encode(ChannelHandlerContext ctx, final MioMessage msg, ByteBuf out) throws Exception {
         Channel channel = ctx.channel();
 
         // serialize header data
-        byte[] headers = serialize.serialize(msg.getHeaders());
-        int headerLength = headers.length;
+        int headerLength = msg.getHeader().length;
         int dataLength = msg.getData().length;
 
         // wrapper local and remote address
@@ -56,7 +53,7 @@ public class NettyMioEncoder extends MessageToByteEncoder<MioMessage> {
         // Step 3：all content data length
         out.writeInt(headerDataLength);
         // Step 4：head meta data
-        out.writeBytes(headers);
+        out.writeBytes(msg.getHeader());
         // Step 5：body data
         out.writeBytes(msg.getData());
     }

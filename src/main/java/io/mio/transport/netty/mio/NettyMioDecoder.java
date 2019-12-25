@@ -2,7 +2,6 @@ package io.mio.transport.netty.mio;
 
 import io.mio.commons.MioConstants;
 import io.mio.commons.MioMessage;
-import io.mio.serialize.Serialize;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -10,7 +9,6 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * NettyMioDecoder
@@ -32,7 +30,6 @@ import java.util.Map;
 public class NettyMioDecoder extends ByteToMessageDecoder {
 
     private int maxContentLength;
-    private Serialize serialize;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -89,14 +86,13 @@ public class NettyMioDecoder extends ByteToMessageDecoder {
         // Step 6：Read head meta length and head meta data
         byte[] header = new byte[headerLength];
         buffer.readBytes(header);
-        Map<String, Object> headers = serialize.deserialize(header, Map.class);
 
         // Step 7：Read body data
         byte[] data = new byte[dataLength];
         buffer.readBytes(data);
 
         // Step 8：Add to output
-        final MioMessage mioMessage = new MioMessage(headers, data);
+        final MioMessage mioMessage = new MioMessage(header, data);
         mioMessage.wrapper(channel.localAddress(), channel.remoteAddress());
         out.add(mioMessage);
     }

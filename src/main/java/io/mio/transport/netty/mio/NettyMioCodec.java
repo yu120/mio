@@ -1,8 +1,7 @@
 package io.mio.transport.netty.mio;
 
-import io.mio.transport.Codec;
-import io.mio.serialize.Serialize;
 import io.mio.commons.extension.Extension;
+import io.mio.transport.Codec;
 import io.netty.channel.ChannelPipeline;
 
 /**
@@ -14,15 +13,15 @@ import io.netty.channel.ChannelPipeline;
 public class NettyMioCodec implements Codec<ChannelPipeline> {
 
     @Override
-    public void server(int maxContentLength, Serialize serialize, ChannelPipeline pipeline) {
-        pipeline.addLast(new NettyMioDecoder(maxContentLength, serialize));
-        pipeline.addLast(new NettyMioEncoder(maxContentLength, serialize));
+    public void server(int maxContentLength, ChannelPipeline pipeline) {
+        pipeline.addLast(new NettyMioDecoder(maxContentLength));
+        pipeline.addLast(new NettyMioEncoder(maxContentLength));
     }
 
     @Override
-    public void client(int maxContentLength, Serialize serialize, ChannelPipeline pipeline) {
-        pipeline.addLast(new NettyMioEncoder(maxContentLength, serialize));
-        pipeline.addLast(new NettyMioDecoder(maxContentLength, serialize));
+    public void client(int maxContentLength, ChannelPipeline pipeline) {
+        pipeline.addLast(new NettyMioEncoder(maxContentLength));
+        pipeline.addLast(new NettyMioDecoder(maxContentLength));
     }
 
 }

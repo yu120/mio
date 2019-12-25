@@ -1,12 +1,11 @@
 package io.mio.transport.netty;
 
-import io.mio.transport.Codec;
-import io.mio.transport.MioClient;
-import io.mio.serialize.Serialize;
 import io.mio.commons.*;
 import io.mio.commons.extension.Extension;
 import io.mio.commons.extension.ExtensionLoader;
 import io.mio.commons.extension.TypeReference;
+import io.mio.transport.Codec;
+import io.mio.transport.MioClient;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
@@ -43,7 +42,6 @@ public class NettyMioClient implements MioClient {
     private AbstractChannelPoolMap<InetSocketAddress, FixedChannelPool> channelPools;
 
     private NettyMioClientHandler clientHandler;
-    private Serialize serialize;
     private Codec<ChannelPipeline> codec;
 
     @Override
@@ -55,8 +53,7 @@ public class NettyMioClient implements MioClient {
         this.eventLoopGroup = new NioEventLoopGroup(clientConfig.getClientThread(), threadFactory);
         this.clientHandler = new NettyMioClientHandler();
 
-        // create serialize and codec
-        this.serialize = ExtensionLoader.getLoader(Serialize.class).getExtension(clientConfig.getSerialize());
+        // create codec
         this.codec = ExtensionLoader.getLoader(new TypeReference<Codec<ChannelPipeline>>() {
         }).getExtension(clientConfig.getCodec());
 
@@ -84,7 +81,7 @@ public class NettyMioClient implements MioClient {
                         @Override
                         public void channelCreated(Channel ch) throws Exception {
                             // client codec
-                            codec.client(clientConfig.getMaxContentLength(), serialize, ch.pipeline());
+                            codec.client(clientConfig.getMaxContentLength(), ch.pipeline());
                             // heartbeat detection
                             if (clientConfig.getHeartbeat() > 0) {
                                 ch.pipeline().addLast(new IdleStateHandler(0, 0,

@@ -23,6 +23,10 @@ public class MioMessage implements Serializable {
      */
     private Map<String, Object> headers;
     /**
+     * The header parameters data
+     */
+    private byte[] header;
+    /**
      * Body data
      */
     private byte[] data;
@@ -58,6 +62,10 @@ public class MioMessage implements Serializable {
         } else {
             this.headers = new LinkedHashMap<>(headers);
         }
+    }
+
+    public MioMessage(byte[] headerData, byte[] data) {
+
     }
 
     /**
