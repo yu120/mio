@@ -1,5 +1,6 @@
 package io.mio.netty.http;
 
+import io.mio.commons.MioConstants;
 import io.mio.commons.MioMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -22,9 +23,12 @@ public class NettyHttpServerEncoder extends MessageToMessageEncoder<MioMessage> 
     protected void encode(ChannelHandlerContext ctx, MioMessage msg, List<Object> out) throws Exception {
         // convert data to ByteBuf
         ByteBuf content = Unpooled.wrappedBuffer(msg.getData());
+        // setter response status
+        Object status = msg.getHeaders().getOrDefault(MioConstants.RESPONSE_STATUS_KEY, HttpResponseStatus.OK.code());
+        HttpResponseStatus httpResponseStatus = HttpResponseStatus.valueOf((int) status);
 
         // server send response encoder
-        FullHttpMessage httpMessage = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, content);
+        FullHttpMessage httpMessage = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, httpResponseStatus, content);
 
         // set auto header parameter
         HttpHeaders httpHeaders = httpMessage.headers();

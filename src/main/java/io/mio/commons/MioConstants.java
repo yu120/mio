@@ -4,7 +4,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * MioConstants
@@ -36,42 +35,21 @@ public class MioConstants {
     public static final int BASE_READ_LENGTH = HEAD_BYTE + HEADER_LENGTH_BYTE + HEADER_DATA_LENGTH_BYTE;
 
     /**
-     * HTTP uri key by header
+     * HTTP uri key
      */
     public static final String URI_KEY = "uri";
+    /**
+     * HTTP query parameters key
+     */
     public static final String PARAMETERS_KEY = "parameters";
     /**
-     * HTTP request method key by header
+     * HTTP request method key
      */
-    public static final String REQUEST_METHOD_KEY = "Request-Method";
+    public static final String REQUEST_METHOD_KEY = "method";
     /**
-     * The mio io
+     * HTTP response status key
      */
-    public static final String MIO_ID_KEY = "mio-id";
-
-    private static final int BITS = 20;
-    private static final long MAX_COUNT_PER_MILLIS = 1 << BITS;
-    private static final AtomicLong OFFSET = new AtomicLong(0);
-
-    /**
-     * Get request-id based on currentTimeMillis (distributed is not supported)
-     *
-     * @return currentTimeMillis * (2^20) + offset.incrementAndGet()
-     */
-    public static long getRequestId() {
-        long currentTime = System.currentTimeMillis();
-        long count = OFFSET.incrementAndGet();
-        while (count >= MAX_COUNT_PER_MILLIS) {
-            synchronized (MioConstants.class) {
-                if (OFFSET.get() >= MAX_COUNT_PER_MILLIS) {
-                    OFFSET.set(0);
-                }
-            }
-            count = OFFSET.incrementAndGet();
-        }
-
-        return (currentTime << BITS) + count;
-    }
+    public static final String RESPONSE_STATUS_KEY = "status";
 
     /**
      * The new {@link ThreadFactory} instance
