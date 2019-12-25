@@ -1,15 +1,12 @@
-package io.mio.filter.support;
+package io.mio.transport;
 
 import io.mio.commons.ClientConfig;
 import io.mio.commons.MioException;
 import io.mio.commons.MioMessage;
-import io.mio.commons.extension.Extension;
-import io.mio.filter.Filter;
 import io.mio.filter.FilterContext;
 import io.mio.filter.MioRequest;
 import io.mio.filter.MioResponse;
-import io.mio.transport.MioClient;
-import io.mio.transport.MioTransport;
+import io.mio.serialize.Serialize;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -17,27 +14,25 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * TransportFilter
+ * MioConsumer
  *
  * @author lry
  */
 @Slf4j
-@Extension(value = "transport", order = 5000)
-public class TransportFilter implements Filter {
+public class MioConsumer {
 
+    private Serialize serialize;
     private ConcurrentMap<String, MioClient> clients = new ConcurrentHashMap<>();
 
-    @Override
-    public void doFilter(FilterContext context, MioRequest request, MioResponse response) throws MioException {
+    public void consumer(FilterContext context, MioRequest request, MioResponse response) throws MioException {
         MioClient mioClient = getAndCreateClient(context.getClientConfig());
-        MioMessage requestMioMessage = new MioMessage(request.getHeaders(), request.getHeader(), request.getData());
+
+        MioMessage requestMessage = new MioMessage(request.getHeaders(), null, null);
+        wrapperSerialize(request, requestMessage);
 
         try {
-            MioMessage responseMioMessage = mioClient.request(requestMioMessage);
-
-            // build response
-            response.setHeaders(responseMioMessage.getHeaders());
-            response.setData(responseMioMessage.getData());
+            MioMessage responseMessage = mioClient.request(requestMessage);
+            wrapperDeserialize(response, responseMessage);
         } catch (Throwable t) {
             throw new MioException(0, "Transport request exception", t);
         }
@@ -45,7 +40,6 @@ public class TransportFilter implements Filter {
         context.doFilter(context, request, response);
     }
 
-    @Override
     public void destroy() {
         for (Map.Entry<String, MioClient> entry : clients.entrySet()) {
             try {
@@ -54,6 +48,25 @@ public class TransportFilter implements Filter {
             } catch (Exception e) {
                 log.error("Destroy client[{}] exception", entry.getKey(), e);
             }
+        }
+    }
+
+    private void wrapperSerialize(MioRequest request, MioMessage message) {
+        try {
+            message.setHeader(serialize.serialize(request.getHeaders()));
+            message.setData(serialize.serialize(request.getData()));
+        } catch (Exception e) {
+            throw new MioException(0, "serialize exception", e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void wrapperDeserialize(MioResponse response, MioMessage message) {
+        try {
+            response.setHeaders(serialize.deserialize(message.getHeader(), Map.class));
+            response.setData(serialize.deserialize(message.getData(), null));
+        } catch (Exception e) {
+            throw new MioException(0, "serialize exception", e);
         }
     }
 

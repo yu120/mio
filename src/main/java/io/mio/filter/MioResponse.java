@@ -14,7 +14,6 @@ import java.util.Map;
 public class MioResponse implements Serializable {
 
     private Map<String, Object> headers;
-    private byte[] header;
-    private byte[] data;
+    private Object data;
 
 }
