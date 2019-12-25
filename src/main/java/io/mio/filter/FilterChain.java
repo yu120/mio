@@ -14,13 +14,13 @@ import java.util.List;
  */
 public class FilterChain {
 
-    private List<MioFilter> filters = new ArrayList<>();
+    private List<Filter> filters = new ArrayList<>();
 
     /**
      * The initialize filter
      */
     public void initialize() {
-        List<MioFilter> scanFilters = ExtensionLoader.getLoader(MioFilter.class).getExtensions();
+        List<Filter> scanFilters = ExtensionLoader.getLoader(Filter.class).getExtensions();
         if (!scanFilters.isEmpty()) {
             // sort by order filter
             scanFilters.sort((o1, o2) -> {
@@ -30,7 +30,7 @@ public class FilterChain {
             });
 
             // initialize and add filter
-            for (MioFilter scanFilter : scanFilters) {
+            for (Filter scanFilter : scanFilters) {
                 scanFilter.initialize();
                 filters.add(scanFilter);
             }
@@ -46,7 +46,7 @@ public class FilterChain {
      * @throws MioException MioException
      */
     public void filter(final FilterContext context, final MioRequest request, final MioResponse response) throws MioException {
-        for (MioFilter filter : filters) {
+        for (Filter filter : filters) {
             filter.filter(context, request, response);
         }
     }
@@ -55,7 +55,7 @@ public class FilterChain {
      * The destroy filter
      */
     public void destroy() {
-        for (MioFilter filter : filters) {
+        for (Filter filter : filters) {
             // destroy filter
             filter.destroy();
         }

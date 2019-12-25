@@ -4,12 +4,12 @@ import io.mio.commons.MioException;
 import io.mio.commons.extension.SPI;
 
 /**
- * MioFilter
+ * Filter
  *
  * @author lry
  */
 @SPI(single = true)
-public interface MioFilter {
+public interface Filter {
 
     /**
      * The initialize filter

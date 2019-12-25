@@ -3,19 +3,19 @@ package io.mio.filter.support;
 import io.mio.commons.MioException;
 import io.mio.commons.extension.Extension;
 import io.mio.filter.FilterContext;
-import io.mio.filter.MioFilter;
+import io.mio.filter.Filter;
 import io.mio.filter.MioRequest;
 import io.mio.filter.MioResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * LogMioFilter
+ * LogFilter
  *
  * @author lry
  */
 @Slf4j
 @Extension("log")
-public class LogMioFilter implements MioFilter {
+public class LogFilter implements Filter {
 
     @Override
     public void filter(FilterContext context, MioRequest request, MioResponse response) throws MioException {
