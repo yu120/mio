@@ -21,7 +21,7 @@ public class NettyHttpCodec implements Codec<ChannelPipeline> {
         pipeline.addLast(new HttpObjectAggregator(maxContentLength));
 
         pipeline.addLast(new NettyHttpDecoder());
-        pipeline.addLast(new NettyHttpEncoder(true));
+        pipeline.addLast(new NettyHttpServerEncoder());
     }
 
     @Override
@@ -30,7 +30,7 @@ public class NettyHttpCodec implements Codec<ChannelPipeline> {
         pipeline.addLast(new HttpResponseDecoder());
         pipeline.addLast(new HttpObjectAggregator(maxContentLength));
 
-        pipeline.addLast(new NettyHttpEncoder(false));
+        pipeline.addLast(new NettyHttpClientEncoder());
         pipeline.addLast(new NettyHttpDecoder());
     }
 
