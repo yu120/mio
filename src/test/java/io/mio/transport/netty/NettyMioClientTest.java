@@ -19,7 +19,7 @@ public class NettyMioClientTest {
         for (int i = 0; i < 1000; i++) {
             Map<String, Object> headers = new HashMap<>();
             headers.put("msg", "头部参数" + i);
-            MioMessage mioMessage = new MioMessage(headers, (i + "-hello").getBytes(StandardCharsets.UTF_8));
+            MioMessage mioMessage = new MioMessage(headers, null, (i + "-hello").getBytes(StandardCharsets.UTF_8));
             mioMessage.setRemoteAddress(socketAddress);
             MioMessage response = mioClient.request(mioMessage);
             System.out.println("客户端收到响应:" + response);

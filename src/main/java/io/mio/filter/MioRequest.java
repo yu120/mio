@@ -14,6 +14,7 @@ import java.util.Map;
 public class MioRequest implements Serializable {
 
     private Map<String, Object> headers;
+    private byte[] header;
     private byte[] data;
 
 }

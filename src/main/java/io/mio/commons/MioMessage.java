@@ -52,20 +52,17 @@ public class MioMessage implements Serializable {
      * @param headers header parameters
      * @param data    data byte[]
      */
-    public MioMessage(Map<String, Object> headers, byte[] data) {
-        this.data = data;
-        if (data != null) {
-            this.dataLength = data.length;
-        }
+    public MioMessage(Map<String, Object> headers, byte[] header, byte[] data) {
         if (headers == null || headers.isEmpty()) {
             this.headers = new LinkedHashMap<>();
         } else {
             this.headers = new LinkedHashMap<>(headers);
         }
-    }
-
-    public MioMessage(byte[] header, byte[] data) {
-
+        this.header = header;
+        this.data = data;
+        if (data != null) {
+            this.dataLength = data.length;
+        }
     }
 
     /**

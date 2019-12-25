@@ -30,7 +30,7 @@ public class TransportFilter implements Filter {
     @Override
     public void doFilter(FilterContext context, MioRequest request, MioResponse response) throws MioException {
         MioClient mioClient = getAndCreateClient(context.getClientConfig());
-        MioMessage requestMioMessage = new MioMessage(request.getHeaders(), request.getData());
+        MioMessage requestMioMessage = new MioMessage(request.getHeaders(), request.getHeader(), request.getData());
 
         try {
             MioMessage responseMioMessage = mioClient.request(requestMioMessage);
