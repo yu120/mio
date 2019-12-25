@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 @Extension("netty")
 public class NettyMioServer implements MioServer {
 
+    private ServerConfig serverConfig;
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
 
@@ -43,6 +44,8 @@ public class NettyMioServer implements MioServer {
 
     @Override
     public void initialize(ServerConfig serverConfig, final MioCallback<MioMessage> mioCallback) {
+        this.serverConfig = serverConfig;
+
         ThreadFactory bossThreadFactory = MioConstants.newThreadFactory("mio-server-boss", true);
         ThreadFactory workerThreadFactory = MioConstants.newThreadFactory("mio-server-worker", true);
 
@@ -140,7 +143,8 @@ public class NettyMioServer implements MioServer {
         // shutdown worker thread pool
         if (workerGroup != null) {
             try {
-                workerGroup.shutdownGracefully();
+                workerGroup.shutdownGracefully(0,
+                        serverConfig.getShutdownTimeoutMillis(), TimeUnit.MILLISECONDS);
             } catch (Exception e) {
                 log.error("Shutdown server workerGroup exception", e);
             }
@@ -149,7 +153,8 @@ public class NettyMioServer implements MioServer {
         // shutdown boss thread pool
         if (bossGroup != null) {
             try {
-                bossGroup.shutdownGracefully();
+                bossGroup.shutdownGracefully(0,
+                        serverConfig.getShutdownTimeoutMillis(), TimeUnit.MILLISECONDS);
             } catch (Exception e) {
                 log.error("Shutdown server bossGroup exception", e);
             }

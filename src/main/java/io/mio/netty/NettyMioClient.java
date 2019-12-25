@@ -166,7 +166,8 @@ public class NettyMioClient implements MioClient {
         // shutdown eventLoopGroup
         if (eventLoopGroup != null) {
             try {
-                eventLoopGroup.shutdownGracefully();
+                eventLoopGroup.shutdownGracefully(0,
+                        clientConfig.getShutdownTimeoutMillis(), TimeUnit.MILLISECONDS);
             } catch (Exception e) {
                 log.error("Shutdown client eventLoopGroup exception", e);
             }

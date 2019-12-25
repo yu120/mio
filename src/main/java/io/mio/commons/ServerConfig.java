@@ -62,4 +62,9 @@ public class ServerConfig implements Serializable {
      */
     private int heartbeat = 60 * 1000;
 
+    /**
+     * The timeout millis(ms) to shutdown
+     */
+    private int shutdownTimeoutMillis = 10 * 1000;
+
 }

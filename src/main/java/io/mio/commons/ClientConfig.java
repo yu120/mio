@@ -49,5 +49,9 @@ public class ClientConfig implements Serializable {
      * The timeout millis(ms) to establish connection
      */
     private int connectTimeoutMillis = 10 * 1000;
+    /**
+     * The timeout millis(ms) to shutdown
+     */
+    private int shutdownTimeoutMillis = 10 * 1000;
 
 }
