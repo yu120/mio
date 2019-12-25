@@ -2,7 +2,6 @@ package io.mio.serialize;
 
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
-import io.mio.Serialize;
 import io.mio.commons.extension.Extension;
 
 import java.io.ByteArrayInputStream;
