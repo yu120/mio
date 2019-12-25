@@ -5,8 +5,6 @@ import io.mio.MioClient;
 import io.mio.Serialize;
 import io.mio.commons.*;
 import io.mio.commons.extension.Extension;
-import io.mio.compress.Compress;
-import io.mio.compress.GzipCompress;
 import io.mio.netty.mio.NettyMioCode;
 import io.mio.serialize.Hessian2Serialize;
 import io.netty.bootstrap.Bootstrap;
@@ -46,7 +44,6 @@ public class NettyMioClient implements MioClient {
 
     private NettyMioClientHandler clientHandler;
     private Serialize serialize;
-    private Compress compress;
     private Codec<ChannelPipeline> codec;
 
     @Override
@@ -58,7 +55,6 @@ public class NettyMioClient implements MioClient {
         this.eventLoopGroup = new NioEventLoopGroup(clientConfig.getClientThread(), threadFactory);
         this.clientHandler = new NettyMioClientHandler();
         this.serialize = new Hessian2Serialize();
-        this.compress = new GzipCompress();
         this.codec = new NettyMioCode();
 
         try {
