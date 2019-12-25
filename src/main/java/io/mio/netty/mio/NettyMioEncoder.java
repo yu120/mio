@@ -45,7 +45,7 @@ public class NettyMioEncoder extends MessageToByteEncoder<MioMessage> {
         msg.wrapper(channel.localAddress(), channel.remoteAddress());
         msg.setDataLength(dataLength);
         int headerDataLength = headerLength + dataLength;
-        if ((MioConstants.BASE_READ_LENGTH + headerDataLength) > maxContentLength) {
+        if (headerDataLength > maxContentLength) {
             throw new MioException(MioException.CONTENT_OUT_LIMIT, "The content out of limit", dataLength);
         }
 
