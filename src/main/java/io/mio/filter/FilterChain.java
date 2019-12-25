@@ -13,7 +13,11 @@ import java.util.List;
  * @author lry
  */
 @Getter
-public class FilterChain {
+public enum FilterChain {
+
+    // ===
+
+    INSTANCE;
 
     private List<Filter> filters = new ArrayList<>();
 

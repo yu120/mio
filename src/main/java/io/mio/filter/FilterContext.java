@@ -16,8 +16,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Data
 public class FilterContext implements Serializable {
 
-    private AtomicInteger index = new AtomicInteger(0);
     private int filterSize;
+    private AtomicInteger index;
     private List<Filter> filters;
     private ClientConfig clientConfig;
 
@@ -28,8 +28,9 @@ public class FilterContext implements Serializable {
      * @param clientConfig {@link ClientConfig}
      */
     public void initialize(FilterChain filterChain, ClientConfig clientConfig) {
+        this.filterSize = filterChain.getFilters().size();
+        this.index = new AtomicInteger(0);
         this.filters = filterChain.getFilters();
-        this.filterSize = filters.size();
         this.clientConfig = clientConfig;
     }
 
@@ -47,8 +48,8 @@ public class FilterContext implements Serializable {
             return;
         }
 
-        Filter filter = filters.get(currentIndex);
-        filter.doFilter(context, request, response);
+        Filter currentFilter = filters.get(currentIndex);
+        currentFilter.doFilter(context, request, response);
     }
 
 }
