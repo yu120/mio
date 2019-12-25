@@ -1,6 +1,8 @@
 package io.mio;
 
 import io.mio.commons.ClientConfig;
+import io.mio.commons.MioCallback;
+import io.mio.commons.MioMessage;
 import io.mio.commons.ServerConfig;
 import io.mio.commons.extension.ExtensionLoader;
 
@@ -15,10 +17,13 @@ public class MioTransport {
      * The create server
      *
      * @param serverConfig {@link ServerConfig}
+     * @param mioCallback  {@link MioCallback<MioMessage>}
      * @return {@link MioServer}
      */
-    public static MioServer createServer(ServerConfig serverConfig) {
-        return ExtensionLoader.getLoader(MioServer.class).getExtension(serverConfig.getTransport());
+    public static MioServer createServer(final ServerConfig serverConfig, final MioCallback<MioMessage> mioCallback) {
+        MioServer mioServer = ExtensionLoader.getLoader(MioServer.class).getExtension(serverConfig.getTransport());
+        mioServer.initialize(serverConfig, mioCallback);
+        return mioServer;
     }
 
     /**
@@ -28,7 +33,9 @@ public class MioTransport {
      * @return {@link MioClient}
      */
     public static MioClient createClient(ClientConfig clientConfig) {
-        return ExtensionLoader.getLoader(MioClient.class).getExtension(clientConfig.getTransport());
+        MioClient mioClient = ExtensionLoader.getLoader(MioClient.class).getExtension(clientConfig.getTransport());
+        mioClient.initialize(clientConfig);
+        return mioClient;
     }
 
 }

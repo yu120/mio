@@ -29,10 +29,6 @@ public class ServerConfig implements Serializable {
      */
     private int port = 9999;
     /**
-     * The server process hold(blocking waiting to be closed)
-     */
-    private boolean hold = true;
-    /**
      * The server transport
      */
     private String transport = "netty";

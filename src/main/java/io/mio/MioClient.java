@@ -19,7 +19,7 @@ public interface MioClient {
      *
      * @param clientConfig {@link ClientConfig}
      */
-    void initialize(ClientConfig clientConfig);
+    void initialize(final ClientConfig clientConfig);
 
     /**
      * The send request

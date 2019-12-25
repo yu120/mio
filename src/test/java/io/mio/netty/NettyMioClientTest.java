@@ -15,7 +15,6 @@ public class NettyMioClientTest {
     public static void main(String[] args) throws Throwable {
         ClientConfig clientConfig = new ClientConfig();
         MioClient mioClient = MioTransport.createClient(clientConfig);
-        mioClient.initialize(clientConfig);
         InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 9999);
         for (int i = 0; i < 1000; i++) {
             Map<String, Object> headers = new HashMap<>();

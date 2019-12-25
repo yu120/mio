@@ -43,7 +43,7 @@ public class NettyMioServer implements MioServer {
     private Codec<ChannelPipeline> codec;
 
     @Override
-    public void initialize(ServerConfig serverConfig, final MioCallback<MioMessage> mioCallback) {
+    public void initialize(final ServerConfig serverConfig, final MioCallback<MioMessage> mioCallback) {
         this.serverConfig = serverConfig;
 
         ThreadFactory bossThreadFactory = MioConstants.newThreadFactory("mio-server-boss", true);
@@ -93,9 +93,6 @@ public class NettyMioServer implements MioServer {
 
             log.info("The server started success:{}", serverConfig);
             Runtime.getRuntime().addShutdownHook(new Thread(NettyMioServer.this::destroy));
-            if (serverConfig.isHold()) {
-                serverChannel.closeFuture().sync();
-            }
         } catch (Exception e) {
             log.error("The server initialize exception", e);
         }

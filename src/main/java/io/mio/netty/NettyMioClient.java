@@ -47,7 +47,7 @@ public class NettyMioClient implements MioClient {
     private Codec<ChannelPipeline> codec;
 
     @Override
-    public void initialize(ClientConfig clientConfig) {
+    public void initialize(final ClientConfig clientConfig) {
         ThreadFactory threadFactory = MioConstants.newThreadFactory("mio-client-worker", true);
 
         // create group and handler

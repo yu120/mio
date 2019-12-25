@@ -12,8 +12,7 @@ public class NettyMioServerTest {
 
     public static void main(String[] args) throws Exception {
         ServerConfig serverConfig = new ServerConfig();
-        MioServer mioServer = MioTransport.createServer(serverConfig);
-        mioServer.initialize(serverConfig, new MioCallback<MioMessage>() {
+        MioServer mioServer = MioTransport.createServer(serverConfig, new MioCallback<MioMessage>() {
             @Override
             public void onProcessor(Consumer<MioMessage> context, MioMessage request) {
                 System.out.println("服务端收到：" + request);
@@ -27,6 +26,9 @@ public class NettyMioServerTest {
                 super.onFailure(t);
             }
         });
+        while (true) {
+            Thread.sleep(10000);
+        }
     }
 
 }

@@ -19,7 +19,7 @@ public interface MioServer {
      * @param serverConfig {@link ServerConfig}
      * @param mioCallback  {@link MioCallback}
      */
-    void initialize(ServerConfig serverConfig, final MioCallback<MioMessage> mioCallback);
+    void initialize(final ServerConfig serverConfig, final MioCallback<MioMessage> mioCallback);
 
     /**
      * The send request
