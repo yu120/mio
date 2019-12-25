@@ -25,6 +25,15 @@ public class ClientConfig implements Serializable {
      */
     private int port = 9999;
     /**
+     * The server codec
+     */
+    private String codec = "mio";
+    /**
+     * The server header serialize
+     */
+    private String serialize = "hessian2";
+
+    /**
      * The number of maximal active connections
      */
     private int maxConnections = 20000;

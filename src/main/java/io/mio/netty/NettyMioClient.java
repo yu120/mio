@@ -5,8 +5,8 @@ import io.mio.MioClient;
 import io.mio.Serialize;
 import io.mio.commons.*;
 import io.mio.commons.extension.Extension;
-import io.mio.netty.mio.NettyMioCodec;
-import io.mio.serialize.Hessian2Serialize;
+import io.mio.commons.extension.ExtensionLoader;
+import io.mio.commons.extension.TypeReference;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
@@ -54,8 +54,11 @@ public class NettyMioClient implements MioClient {
         this.clientConfig = clientConfig;
         this.eventLoopGroup = new NioEventLoopGroup(clientConfig.getClientThread(), threadFactory);
         this.clientHandler = new NettyMioClientHandler();
-        this.serialize = new Hessian2Serialize();
-        this.codec = new NettyMioCodec();
+
+        // create serialize and codec
+        this.serialize = ExtensionLoader.getLoader(Serialize.class).getExtension(clientConfig.getSerialize());
+        this.codec = ExtensionLoader.getLoader(new TypeReference<Codec<ChannelPipeline>>() {
+        }).getExtension(clientConfig.getCodec());
 
         try {
             // create client bootstrap
