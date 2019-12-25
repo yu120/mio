@@ -28,6 +28,7 @@ public class ServerConfig implements Serializable {
      * The server bind port
      */
     private int port = 9999;
+
     /**
      * The server transport
      */

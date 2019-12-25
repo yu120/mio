@@ -24,6 +24,7 @@ public class ClientConfig implements Serializable {
      * The server bind port
      */
     private int port = 9999;
+
     /**
      * The client transport
      */
@@ -53,6 +54,7 @@ public class ClientConfig implements Serializable {
      * The timeout millis(ms) to establish connection
      */
     private int connectTimeoutMillis = 10 * 1000;
+
     /**
      * The timeout millis(ms) to shutdown
      */
