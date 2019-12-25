@@ -116,8 +116,8 @@ public class NettyMioClient implements MioClient {
         // send callback
         callback(mioMessage, new MioCallback<MioMessage>() {
             @Override
-            public void onSuccess(MioMessage result) {
-                mioFuture.onSuccess(result);
+            public void onSuccess(MioMessage response) {
+                mioFuture.onSuccess(response);
             }
 
             @Override

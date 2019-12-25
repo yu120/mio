@@ -39,9 +39,9 @@ public class MioCallback<V> {
     /**
      * Asynchronous notification after client success.
      *
-     * @param result result
+     * @param response response message
      */
-    public void onSuccess(V result) {
+    public void onSuccess(V response) {
 
     }
 
@@ -57,10 +57,10 @@ public class MioCallback<V> {
     /**
      * Asynchronous notification after server success.
      *
-     * @param consumer {@link Consumer<V>}
-     * @param result   result
+     * @param context request context {@link Consumer<V>}
+     * @param request request message
      */
-    public void onProcessor(Consumer<V> consumer, V result) {
+    public void onProcessor(Consumer<V> context, V request) {
 
     }
 
