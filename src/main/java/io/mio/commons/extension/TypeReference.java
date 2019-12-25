@@ -11,19 +11,23 @@ import java.lang.reflect.Type;
  */
 public abstract class TypeReference<T> {
 
-    private Class<T> type;
+    private Class<T> classType;
 
     @SuppressWarnings("unchecked")
     public TypeReference() {
-        Type t = this.getClass().getGenericSuperclass();
-        if (t instanceof ParameterizedType) {
-            Type[] args = ((ParameterizedType) t).getActualTypeArguments();
-            this.type = (Class<T>) args[0];
+        Type superClass = this.getClass().getGenericSuperclass();
+        if (superClass instanceof ParameterizedType) {
+            Type parameterizedType = ((ParameterizedType) superClass).getActualTypeArguments()[0];
+            if (parameterizedType instanceof ParameterizedType) {
+                classType = (Class<T>) ((ParameterizedType) parameterizedType).getRawType();
+            } else {
+                classType = (Class<T>) parameterizedType;
+            }
         }
     }
 
-    public Class<T> getType() {
-        return type;
+    public Class<T> getClassType() {
+        return classType;
     }
 
 }

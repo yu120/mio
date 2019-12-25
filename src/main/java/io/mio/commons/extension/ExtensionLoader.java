@@ -163,11 +163,11 @@ public class ExtensionLoader<T> {
     }
 
     public static <T> ExtensionLoader<T> getLoader(TypeReference<T> type) {
-        return getLoader(type.getType(), Thread.currentThread().getContextClassLoader());
+        return getLoader(type.getClassType(), Thread.currentThread().getContextClassLoader());
     }
 
     public static <T> ExtensionLoader<T> getLoader(TypeReference<T> type, ClassLoader classLoader) {
-        return getLoader(type.getType(), classLoader);
+        return getLoader(type.getClassType(), classLoader);
     }
 
     @SuppressWarnings("unchecked")
