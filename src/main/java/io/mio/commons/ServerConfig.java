@@ -36,6 +36,10 @@ public class ServerConfig implements Serializable {
      * The server codec
      */
     private String codec = "mio";
+    /**
+     * The server header serialize
+     */
+    private String serialize = "hessian";
 
     /**
      * The server socket backlog size
