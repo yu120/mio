@@ -11,13 +11,15 @@ import java.util.function.Consumer;
 public class NettyMioServerTest {
 
     public static void main(String[] args) throws Exception {
+        ServerConfig serverConfig = new ServerConfig();
+        serverConfig.setCodec("http");
         MioServer mioServer = ExtensionLoader.getLoader(MioServer.class).getExtension();
-        mioServer.initialize(new ServerConfig(), new MioCallback<MioMessage>() {
+        mioServer.initialize(serverConfig, new MioCallback<MioMessage>() {
             @Override
             public void onProcessor(Consumer<MioMessage> consumer, MioMessage result) {
                 System.out.println("服务端收到：" + result);
                 // 当服务端完成写操作后，关闭与客户端的连接
-                MioMessage mioMessage = new MioMessage(result.getHeaders(), result.getData());
+                MioMessage mioMessage = new MioMessage(null, "你好".getBytes());
                 consumer.accept(mioMessage);
             }
 

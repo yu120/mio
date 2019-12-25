@@ -34,9 +34,6 @@ public class NettyHttpServerEncoder extends MessageToMessageEncoder<MioMessage> 
             }
         }
 
-        // server encoder
-        httpHeaders.set(HttpHeaderNames.CONTENT_ENCODING, HttpHeaderValues.GZIP_DEFLATE);
-
         // set must be header parameter
         httpHeaders.set(HttpHeaderNames.CONTENT_LENGTH, httpMessage.content().readableBytes());
         httpHeaders.set(HttpHeaderNames.HOST, ((InetSocketAddress) ctx.channel().localAddress()).getHostString());

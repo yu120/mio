@@ -22,11 +22,13 @@ public class NettyHttpClientEncoder extends MessageToMessageEncoder<MioMessage> 
 
     @Override
     protected void encode(ChannelHandlerContext ctx, MioMessage msg, List<Object> out) throws Exception {
-        // client send request encoder
+        // setter request method
         Object requestMethod = msg.getHeaders().getOrDefault(MioConstants.REQUEST_METHOD_KEY, HttpMethod.POST.name());
         HttpMethod httpMethod = HttpMethod.valueOf(String.valueOf(requestMethod));
+        // setter uri
         Object path = msg.getHeaders().getOrDefault(MioConstants.URI_KEY, "/");
         String uri = new URI(String.valueOf(path)).toASCIIString();
+        // setter content
         ByteBuf content = Unpooled.wrappedBuffer(msg.getData());
         FullHttpMessage httpMessage = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, httpMethod, uri, content);
 
@@ -37,9 +39,6 @@ public class NettyHttpClientEncoder extends MessageToMessageEncoder<MioMessage> 
                 httpHeaders.add(entry.getKey(), entry.getValue());
             }
         }
-
-        // client encoder
-        httpHeaders.set(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP_DEFLATE);
 
         // set must be header parameter
         httpHeaders.set(HttpHeaderNames.HOST, ((InetSocketAddress) ctx.channel().localAddress()).getHostString());
