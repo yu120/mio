@@ -64,7 +64,7 @@ public class MioMessage implements Serializable {
         }
     }
 
-    public MioMessage(byte[] headerData, byte[] data) {
+    public MioMessage(byte[] header, byte[] data) {
 
     }
 
