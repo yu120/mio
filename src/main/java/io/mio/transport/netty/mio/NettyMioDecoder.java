@@ -15,7 +15,7 @@ import java.util.List;
  *
  * <pre>
  * ===============================================================================================================
- * [Protocol]： head(1 byte) + headerLength(4 byte) + headerDataLength(4 byte) + header(M byte) + data(N byte)
+ * [Protocol]： magic(1 byte) + attachmentLength(4 byte) + dataLength(4 byte) + attachment(M byte) + data(N byte)
  * ===============================================================================================================
  * Consider:
  * 6.crc data(crc), cyclic redundancy detection.The XOR algorithm is used to
@@ -31,10 +31,9 @@ public class NettyMioDecoder extends ByteToMessageDecoder {
 
     private int maxContentLength;
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf buffer, List<Object> out) throws Exception {
-        Channel channel = ctx.channel();
+        final Channel channel = ctx.channel();
 
         // Step 1：Readable length must be greater than basic length
         if (buffer.readableBytes() < MioConstants.BASE_READ_LENGTH) {
@@ -55,7 +54,7 @@ public class NettyMioDecoder extends ByteToMessageDecoder {
 
             // Step 3.2：标记包头开始的index（把当前读指针保存起来）
             buffer.markReaderIndex();
-            if (buffer.readByte() == MioConstants.HEAD_DATA) {
+            if (buffer.readByte() == MioConstants.MAGIC_DATA) {
                 // 读到了协议的开始标志，则结束while循环
                 break;
             } else {
@@ -72,27 +71,26 @@ public class NettyMioDecoder extends ByteToMessageDecoder {
         }
 
         // Step 4：读取后续数据总长度（循环中读取完包头）
-        int headerLength = buffer.readInt();
-        int contentLength = buffer.readInt();
-        int dataLength = contentLength - headerLength;
+        int attachmentLength = buffer.readInt();
+        int dataLength = buffer.readInt();
 
         // Step 5：判断请求数据包数据是否到齐
-        if (buffer.readableBytes() < contentLength) {
+        if (buffer.readableBytes() < attachmentLength + dataLength) {
             // Restore read pointer
             buffer.readerIndex(beginReaderIndex);
             return;
         }
 
-        // Step 6：Read head meta length and head meta data
-        byte[] header = new byte[headerLength];
-        buffer.readBytes(header);
+        // Step 6：Read attachment data
+        byte[] attachment = new byte[attachmentLength];
+        buffer.readBytes(attachment);
 
         // Step 7：Read body data
         byte[] data = new byte[dataLength];
         buffer.readBytes(data);
 
         // Step 8：Add to output
-        final MioMessage mioMessage = new MioMessage(null, header, data);
+        final MioMessage mioMessage = new MioMessage(null, attachment, data);
         mioMessage.wrapper(channel.localAddress(), channel.remoteAddress());
         out.add(mioMessage);
     }

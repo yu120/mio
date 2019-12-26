@@ -14,7 +14,7 @@ import lombok.AllArgsConstructor;
  *
  * <pre>
  * ===============================================================================================================
- * [Protocol]： head(1 byte) + headerLength(4 byte) + headerDataLength(4 byte) + header(M byte) + data(N byte)
+ * [Protocol]： magic(1 byte) + attachmentLength(4 byte) + dataLength(4 byte) + attachment(M byte) + data(N byte)
  * ===============================================================================================================
  * Consider:
  * 6.crc data(crc), cyclic redundancy detection.The XOR algorithm is used to
@@ -32,27 +32,25 @@ public class NettyMioEncoder extends MessageToByteEncoder<MioMessage> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, final MioMessage msg, ByteBuf out) throws Exception {
-        Channel channel = ctx.channel();
+        final Channel channel = ctx.channel();
 
-        // serialize header data
-        int headerLength = msg.getHeader().length;
+        int attachmentLength = msg.getAttachment().length;
         int dataLength = msg.getData().length;
 
         // wrapper local and remote address
         msg.wrapper(channel.localAddress(), channel.remoteAddress());
-        int headerDataLength = headerLength + dataLength;
-        if (headerDataLength > maxContentLength) {
+        if (attachmentLength + dataLength > maxContentLength) {
             throw new MioException(MioException.CONTENT_OUT_LIMIT, "The content out of limit", dataLength);
         }
 
         // Step 1： command head
-        out.writeByte(MioConstants.HEAD_DATA);
+        out.writeByte(MioConstants.MAGIC_DATA);
         // Step 2：head meta length
-        out.writeInt(headerLength);
+        out.writeInt(attachmentLength);
         // Step 3：all content data length
-        out.writeInt(headerDataLength);
+        out.writeInt(dataLength);
         // Step 4：head meta data
-        out.writeBytes(msg.getHeader());
+        out.writeBytes(msg.getAttachment());
         // Step 5：body data
         out.writeBytes(msg.getData());
     }

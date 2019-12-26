@@ -23,11 +23,11 @@ public class MioMessage implements Serializable {
      */
     private Map<String, Object> headers;
     /**
-     * The header parameters data
+     * The attachment data
      */
-    private byte[] header;
+    private byte[] attachment;
     /**
-     * Body data
+     * The body data
      */
     private byte[] data;
 
@@ -45,16 +45,17 @@ public class MioMessage implements Serializable {
      * <p>
      * Tips: need set contentLength,metaLength,meta.
      *
-     * @param headers header parameters
-     * @param data    data byte[]
+     * @param headers    header parameters
+     * @param attachment attachment data
+     * @param data       body data
      */
-    public MioMessage(Map<String, Object> headers, byte[] header, byte[] data) {
+    public MioMessage(Map<String, Object> headers, byte[] attachment, byte[] data) {
         if (headers == null || headers.isEmpty()) {
             this.headers = new LinkedHashMap<>();
         } else {
             this.headers = new LinkedHashMap<>(headers);
         }
-        this.header = header;
+        this.attachment = attachment;
         this.data = data;
     }
 

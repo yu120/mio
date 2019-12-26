@@ -15,7 +15,7 @@ public class MioConstants {
     /**
      * Command head data（Fixed: 0x76）
      */
-    public static final byte HEAD_DATA = 0x76;
+    public static final byte MAGIC_DATA = 0x76;
 
     /**
      * Command head（byte，1 bytes）
