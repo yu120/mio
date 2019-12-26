@@ -34,7 +34,7 @@ public class MioMessage implements Serializable {
      */
     private byte[] attachment;
     /**
-     * The body data
+     * The data
      */
     private byte[] data;
 
