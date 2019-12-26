@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class ClusterFactory {
 
-    public List<Cluster> discover(MioRequest request) {
+    public List<Cluster> select(MioRequest request) {
         return null;
     }
 

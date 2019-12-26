@@ -22,7 +22,7 @@ public class Caller {
         final MioRpcContext mioRpcContext = new MioRpcContext();
         mioRpcContext.setFilterChain(FilterChain.INSTANCE);
         mioRpcContext.setRegistries(directoryFactory.discover(request));
-        mioRpcContext.setClusters(clusterFactory.discover(request));
+        mioRpcContext.setClusters(clusterFactory.select(request));
 
         mioRpcContext.doFilter(request, response);
         return response;
