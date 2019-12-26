@@ -43,15 +43,15 @@ public class NettyMioEncoder extends MessageToByteEncoder<MioMessage> {
             throw new MioException(MioException.CONTENT_OUT_LIMIT, "The content out of limit", dataLength);
         }
 
-        // Step 1： command head
+        // Step 1：write magic
         out.writeByte(MioConstants.MAGIC_DATA);
-        // Step 2：head meta length
+        // Step 2：write attachment length
         out.writeInt(attachmentLength);
-        // Step 3：all content data length
+        // Step 3：write data length
         out.writeInt(dataLength);
-        // Step 4：head meta data
+        // Step 4：write attachment data
         out.writeBytes(msg.getAttachment());
-        // Step 5：body data
+        // Step 5：write data
         out.writeBytes(msg.getData());
     }
 

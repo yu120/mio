@@ -85,11 +85,11 @@ public class NettyMioDecoder extends ByteToMessageDecoder {
         byte[] attachment = new byte[attachmentLength];
         buffer.readBytes(attachment);
 
-        // Step 7：Read body data
+        // Step 7：Read data
         byte[] data = new byte[dataLength];
         buffer.readBytes(data);
 
-        // Step 8：Add to output
+        // Step 8：build to output
         final MioMessage mioMessage = new MioMessage(null, attachment, data);
         mioMessage.wrapper(channel.localAddress(), channel.remoteAddress());
         out.add(mioMessage);
