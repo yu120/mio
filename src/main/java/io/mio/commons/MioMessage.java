@@ -30,10 +30,6 @@ public class MioMessage implements Serializable {
      * Body data
      */
     private byte[] data;
-    /**
-     * Data length(Header data length + Data length)
-     */
-    private int dataLength;
 
     /**
      * The local net socket address
@@ -60,9 +56,6 @@ public class MioMessage implements Serializable {
         }
         this.header = header;
         this.data = data;
-        if (data != null) {
-            this.dataLength = data.length;
-        }
     }
 
     /**

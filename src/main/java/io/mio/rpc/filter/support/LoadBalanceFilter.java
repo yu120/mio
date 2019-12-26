@@ -22,7 +22,7 @@ public class LoadBalanceFilter implements Filter {
     public void doFilter(MioRpcContext context, MioRequest request, MioResponse response) throws MioException {
         try {
             // setter LoadBalance config
-            context.setClientConfig(new ClientConfig());
+//            context.setClientConfig(new ClientConfig());
         } catch (Throwable t) {
             throw new MioException(0, "LoadBalance request exception", t);
         }
