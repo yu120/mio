@@ -1,7 +1,12 @@
-package io.mio.rpc.filter;
+package io.mio.rpc;
 
 import io.mio.commons.ClientConfig;
 import io.mio.commons.MioException;
+import io.mio.rpc.cluster.Cluster;
+import io.mio.rpc.filter.Filter;
+import io.mio.rpc.filter.FilterChain;
+import io.mio.rpc.filter.MioRequest;
+import io.mio.rpc.filter.MioResponse;
 import io.mio.rpc.registry.Registry;
 import lombok.Data;
 
@@ -10,29 +15,32 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * FilterContext
+ * MioRpcContext
  *
  * @author lry
  */
 @Data
-public class FilterContext implements Serializable {
+public class MioRpcContext implements Serializable {
 
     private int filterSize;
     private AtomicInteger index;
     private List<Filter> filters;
+
     private List<Registry> registries;
+    private Registry remoteRegistry;
+
+    private List<Cluster> clusters;
+    private Cluster cluster;
 
     /**
      * The initialize filter
      *
      * @param filterChain {@link FilterChain}
-     * @param registries  {@link List<Registry>}
      */
-    public FilterContext(FilterChain filterChain, List<Registry> registries) {
+    public void setFilterChain(FilterChain filterChain) {
         this.filterSize = filterChain.getFilters().size();
-        this.index = new AtomicInteger(0);
         this.filters = filterChain.getFilters();
-        this.registries = registries;
+        this.index = new AtomicInteger(0);
     }
 
     /**

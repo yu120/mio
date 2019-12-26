@@ -3,8 +3,8 @@ package io.mio.rpc.filter.support;
 import io.mio.commons.ClientConfig;
 import io.mio.commons.MioException;
 import io.mio.commons.extension.Extension;
+import io.mio.rpc.MioRpcContext;
 import io.mio.rpc.filter.Filter;
-import io.mio.rpc.filter.FilterContext;
 import io.mio.rpc.filter.MioRequest;
 import io.mio.rpc.filter.MioResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class LoadBalanceFilter implements Filter {
 
     @Override
-    public void doFilter(FilterContext context, MioRequest request, MioResponse response) throws MioException {
+    public void doFilter(MioRpcContext context, MioRequest request, MioResponse response) throws MioException {
         try {
             // setter LoadBalance config
             context.setClientConfig(new ClientConfig());

@@ -1,13 +1,10 @@
 package io.mio.rpc;
 
+import io.mio.rpc.cluster.ClusterFactory;
 import io.mio.rpc.filter.FilterChain;
-import io.mio.rpc.filter.FilterContext;
 import io.mio.rpc.filter.MioRequest;
 import io.mio.rpc.filter.MioResponse;
-import io.mio.rpc.registry.Registry;
-import io.mio.rpc.registry.RegistryDirectory;
-
-import java.util.List;
+import io.mio.rpc.registry.DirectoryFactory;
 
 /**
  * Caller(Client)
@@ -16,15 +13,18 @@ import java.util.List;
  */
 public class Caller {
 
-    private RegistryDirectory registryDirectory;
+    private DirectoryFactory directoryFactory;
+    private ClusterFactory clusterFactory;
 
     public MioResponse call(MioRequest request) {
         final MioResponse response = new MioResponse();
 
-        final List<Registry> registries = registryDirectory.discover(request);
+        final MioRpcContext mioRpcContext = new MioRpcContext();
+        mioRpcContext.setFilterChain(FilterChain.INSTANCE);
+        mioRpcContext.setRegistries(directoryFactory.discover(request));
+        mioRpcContext.setClusters(clusterFactory.discover(request));
 
-        final FilterContext filterContext = new FilterContext(FilterChain.INSTANCE, registries);
-        filterContext.doFilter(request, response);
+        mioRpcContext.doFilter(request, response);
         return response;
     }
 

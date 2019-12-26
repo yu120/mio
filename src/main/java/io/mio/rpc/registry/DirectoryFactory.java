@@ -5,11 +5,11 @@ import io.mio.rpc.filter.MioRequest;
 import java.util.List;
 
 /**
- * RegistryDirectory
+ * DirectoryFactory
  *
  * @author lry
  */
-public class RegistryDirectory {
+public class DirectoryFactory {
 
     public List<Registry> discover(MioRequest request) {
         return null;

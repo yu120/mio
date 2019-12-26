@@ -3,7 +3,7 @@ package io.mio.transport;
 import io.mio.commons.ClientConfig;
 import io.mio.commons.MioException;
 import io.mio.commons.MioMessage;
-import io.mio.rpc.filter.FilterContext;
+import io.mio.rpc.MioRpcContext;
 import io.mio.rpc.filter.MioRequest;
 import io.mio.rpc.filter.MioResponse;
 import io.mio.serialize.Serialize;
@@ -24,7 +24,7 @@ public class MioConsumer {
     private Serialize serialize;
     private ConcurrentMap<String, MioClient> clients = new ConcurrentHashMap<>();
 
-    public void consumer(FilterContext context, MioRequest request, MioResponse response) throws MioException {
+    public void consumer(MioRpcContext context, MioRequest request, MioResponse response) throws MioException {
         MioClient mioClient = getAndCreateClient(null);
 
         MioMessage requestMessage = new MioMessage(request.getHeaders(), null, null);
