@@ -24,6 +24,13 @@ public class MioMessage implements Serializable {
     private Map<String, Object> headers;
     /**
      * The attachment data
+     * <p>
+     * 1.protocol version
+     * 2.status code
+     * 3.message type
+     * 4.request id
+     * 5.service name
+     * 6.group name
      */
     private byte[] attachment;
     /**
