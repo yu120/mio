@@ -41,7 +41,7 @@ public class NettyMioServerHandler extends SimpleChannelInboundHandler<MioMessag
         super();
         this.maxConnections = maxConnections;
         this.mioCallback = mioCallback;
-        this.channels = new ConcurrentHashMap<>(Math.min(maxConnections, 100));
+        this.channels = new ConcurrentHashMap<>(64);
     }
 
     @Override
