@@ -1,4 +1,4 @@
-package io.mio;
+package io.mio.rpc;
 
 /**
  * Callee(Server)

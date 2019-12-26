@@ -1,8 +1,7 @@
-package io.mio.filter;
+package io.mio.rpc.filter;
 
 import io.mio.commons.extension.Extension;
 import io.mio.commons.extension.ExtensionLoader;
-import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,19 +11,19 @@ import java.util.List;
  *
  * @author lry
  */
-@Getter
 public enum FilterChain {
 
     // ===
 
     INSTANCE;
 
+    private volatile boolean init = false;
     private List<Filter> filters = new ArrayList<>();
 
     /**
      * The initialize filter
      */
-    public void initialize() {
+    public synchronized void initialize() {
         List<Filter> scanFilters = ExtensionLoader.getLoader(Filter.class).getExtensions();
         if (!scanFilters.isEmpty()) {
             // sort by order filter
@@ -40,6 +39,20 @@ public enum FilterChain {
                 filters.add(scanFilter);
             }
         }
+
+        this.init = true;
+    }
+
+    public List<Filter> getFilters() {
+        if (!init) {
+            synchronized (this) {
+                if (!init) {
+                    initialize();
+                }
+            }
+        }
+
+        return filters;
     }
 
     /**

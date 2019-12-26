@@ -1,4 +1,4 @@
-package io.mio.filter;
+package io.mio.rpc.filter;
 
 import io.mio.commons.MioException;
 import io.mio.commons.extension.SPI;

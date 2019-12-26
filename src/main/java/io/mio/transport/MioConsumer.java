@@ -3,9 +3,9 @@ package io.mio.transport;
 import io.mio.commons.ClientConfig;
 import io.mio.commons.MioException;
 import io.mio.commons.MioMessage;
-import io.mio.filter.FilterContext;
-import io.mio.filter.MioRequest;
-import io.mio.filter.MioResponse;
+import io.mio.rpc.filter.FilterContext;
+import io.mio.rpc.filter.MioRequest;
+import io.mio.rpc.filter.MioResponse;
 import io.mio.serialize.Serialize;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,7 +25,7 @@ public class MioConsumer {
     private ConcurrentMap<String, MioClient> clients = new ConcurrentHashMap<>();
 
     public void consumer(FilterContext context, MioRequest request, MioResponse response) throws MioException {
-        MioClient mioClient = getAndCreateClient(context.getClientConfig());
+        MioClient mioClient = getAndCreateClient(null);
 
         MioMessage requestMessage = new MioMessage(request.getHeaders(), null, null);
         wrapperSerialize(request, requestMessage);
@@ -37,7 +37,7 @@ public class MioConsumer {
             throw new MioException(0, "Transport request exception", t);
         }
 
-        context.doFilter(context, request, response);
+        context.doFilter(request, response);
     }
 
     public void destroy() {
