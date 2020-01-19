@@ -59,7 +59,7 @@ public class ClientConfig implements Serializable {
      * The timeout millis(ms) to shutdown
      */
     private int shutdownTimeoutMillis = 10 * 1000;
-    private boolean sslEnabled = false;
+    private boolean sslEnabled = true;
     private String keyStore = "nettyClient.jks";
     private String trustStore = "nettyClient.jks";
     private String storePassword = "defaultPass";

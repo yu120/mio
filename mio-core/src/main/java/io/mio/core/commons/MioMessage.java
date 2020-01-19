@@ -1,10 +1,13 @@
 package io.mio.core.commons;
 
+import io.mio.core.utils.ByteUtils;
 import lombok.Data;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -16,6 +19,7 @@ import java.util.Map;
  * @author lry
  */
 @Data
+@ToString
 public class MioMessage implements Serializable {
 
     /**
@@ -77,4 +81,14 @@ public class MioMessage implements Serializable {
         this.remoteAddress = (InetSocketAddress) remoteAddress;
     }
 
+    @Override
+    public String toString() {
+        return "MioMessage{" +
+                "headers=" + headers +
+                ", attachment=" + Arrays.toString(attachment) +
+                ", data=" + ByteUtils.printHexBytes(data) +
+                ", localAddress=" + localAddress +
+                ", remoteAddress=" + remoteAddress +
+                '}';
+    }
 }
