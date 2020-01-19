@@ -1,6 +1,5 @@
 package io.mio.transport.netty4;
 
-import io.mio.core.transport.Codec;
 import io.mio.core.transport.MioServer;
 import io.mio.core.commons.*;
 import io.mio.core.extension.Extension;
@@ -14,7 +13,6 @@ import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -41,7 +39,7 @@ public class NettyMioServer implements MioServer {
 
     private Channel serverChannel;
     private NettyMioServerHandler serverHandler;
-    private Codec<ChannelPipeline> codec;
+    private NettyInitializer<ChannelPipeline> nettyInitializer;
 
     @Override
     public void initialize(final ServerConfig serverConfig, final MioCallback<MioMessage> mioCallback) {
@@ -66,8 +64,8 @@ public class NettyMioServer implements MioServer {
             this.workerGroup = new NioEventLoopGroup(serverConfig.getWorkerThread(), workerThreadFactory);
         }
 
-        // create codec
-        this.codec = ExtensionLoader.getLoader(new TypeReference<Codec<ChannelPipeline>>() {
+        // create nettyInitializer
+        this.nettyInitializer = ExtensionLoader.getLoader(new TypeReference<NettyInitializer<ChannelPipeline>>() {
         }).getExtension(serverConfig.getCodec());
 
         try {
@@ -85,8 +83,8 @@ public class NettyMioServer implements MioServer {
                     .childHandler(new ChannelInitializer<Channel>() {
                         @Override
                         protected void initChannel(Channel ch) throws Exception {
-                            // server codec
-                            codec.server(serverConfig.getMaxContentLength(), ch.pipeline());
+                            // server nettyInitializer
+                            nettyInitializer.server(serverConfig, ch.pipeline());
                             // heartbeat detection
                             if (serverConfig.getHeartbeat() > 0) {
                                 ch.pipeline().addLast(new IdleStateHandler(0, 0,

@@ -1,2 +1,0 @@
-io.mio.transport.netty4.mio.NettyMioCodec
-io.mio.transport.netty4.http.NettyHttpCodec

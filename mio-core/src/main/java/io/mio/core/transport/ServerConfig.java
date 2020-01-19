@@ -2,6 +2,7 @@ package io.mio.core.transport;
 
 import lombok.Data;
 
+import java.io.InputStream;
 import java.io.Serializable;
 
 /**
@@ -75,5 +76,13 @@ public class ServerConfig implements Serializable {
      * The timeout millis(ms) to shutdown
      */
     private int shutdownTimeoutMillis = 10 * 1000;
+
+    private String sslProtocol = "TLSv1";
+    private String keyStoreFormat = "JKS";
+    private InputStream keyStore;
+    private String keyStorePassword;
+    private String trustStoreFormat = "JKS";
+    private InputStream trustStore;
+    private String trustStorePassword;
 
 }

@@ -5,7 +5,6 @@ import io.mio.core.extension.Extension;
 import io.mio.core.extension.ExtensionLoader;
 import io.mio.core.extension.TypeReference;
 import io.mio.core.transport.ClientConfig;
-import io.mio.core.transport.Codec;
 import io.mio.core.transport.MioClient;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -43,7 +42,7 @@ public class NettyMioClient implements MioClient {
     private AbstractChannelPoolMap<InetSocketAddress, FixedChannelPool> channelPools;
 
     private NettyMioClientHandler clientHandler;
-    private Codec<ChannelPipeline> codec;
+    private NettyInitializer<ChannelPipeline> nettyInitializer;
 
     @Override
     public void initialize(final ClientConfig clientConfig) {
@@ -54,8 +53,8 @@ public class NettyMioClient implements MioClient {
         this.eventLoopGroup = new NioEventLoopGroup(clientConfig.getClientThread(), threadFactory);
         this.clientHandler = new NettyMioClientHandler();
 
-        // create codec
-        this.codec = ExtensionLoader.getLoader(new TypeReference<Codec<ChannelPipeline>>() {
+        // create nettyInitializer
+        this.nettyInitializer = ExtensionLoader.getLoader(new TypeReference<NettyInitializer<ChannelPipeline>>() {
         }).getExtension(clientConfig.getCodec());
 
         try {
@@ -81,8 +80,8 @@ public class NettyMioClient implements MioClient {
 
                         @Override
                         public void channelCreated(Channel ch) throws Exception {
-                            // client codec
-                            codec.client(clientConfig.getMaxContentLength(), ch.pipeline());
+                            // client nettyInitializer
+                            nettyInitializer.client(clientConfig, ch.pipeline());
                             // heartbeat detection
                             if (clientConfig.getHeartbeat() > 0) {
                                 ch.pipeline().addLast(new IdleStateHandler(0, 0,
