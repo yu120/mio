@@ -2,7 +2,6 @@ package io.mio.core.transport;
 
 import lombok.Data;
 
-import java.io.InputStream;
 import java.io.Serializable;
 
 /**
@@ -45,7 +44,7 @@ public class ServerConfig implements Serializable {
     /**
      * The server codec
      */
-    private String codec = "mio";
+    private String codec = "http";
     /**
      * The server header serialize
      */
@@ -77,15 +76,9 @@ public class ServerConfig implements Serializable {
      */
     private int shutdownTimeoutMillis = 10 * 1000;
 
-    public boolean sslEnabled;
-    private String sslProtocol = "TLSv1.2";
-
-    private String keyStoreFormat = "PKCS12";
-    private String keyStore;
-    private String keyStorePassword = "123456";
-
-    private String trustStoreFormat = "PKCS12";
-    private String trustStore;
-    private String trustStorePassword = "123456";
+    private boolean sslEnabled = true;
+    private String keyStore="nettyServer.jks";
+    private String trustStore="nettyServer.jks";
+    private String storePassword = "defaultPass";
 
 }

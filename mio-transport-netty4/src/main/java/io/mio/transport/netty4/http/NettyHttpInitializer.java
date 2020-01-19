@@ -9,11 +9,6 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.ssl.SslHandler;
 
 import javax.net.ssl.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.security.KeyStore;
 
 /**
  * NettyHttpInitializer
@@ -26,7 +21,11 @@ public class NettyHttpInitializer implements NettyInitializer<ChannelPipeline> {
     @Override
     public void server(ServerConfig serverConfig, ChannelPipeline pipeline) {
         if (serverConfig.isSslEnabled()) {
-            pipeline.addLast("sslHandler", getSslHandler(serverConfig));
+            SSLEngine engine = SslContextFactory.getServerContext(serverConfig.getKeyStore(),
+                    serverConfig.getTrustStore(), serverConfig.getStorePassword()).createSSLEngine();
+            engine.setUseClientMode(false);
+            engine.setNeedClientAuth(true);
+            pipeline.addLast(new SslHandler(engine));
         }
 
         pipeline.addLast(new HttpRequestDecoder());
@@ -39,67 +38,20 @@ public class NettyHttpInitializer implements NettyInitializer<ChannelPipeline> {
 
     @Override
     public void client(ClientConfig clientConfig, ChannelPipeline pipeline) {
+        if (clientConfig.isSslEnabled()) {
+            SSLEngine engine = SslContextFactory.getClientContext(clientConfig.getKeyStore(),
+                    clientConfig.getTrustStore(), clientConfig.getStorePassword()).createSSLEngine();
+            engine.setUseClientMode(true);
+            engine.setNeedClientAuth(true);
+            pipeline.addLast(new SslHandler(engine));
+        }
+
         pipeline.addLast(new HttpRequestEncoder());
         pipeline.addLast(new HttpResponseDecoder());
         pipeline.addLast(new HttpObjectAggregator(clientConfig.getMaxContentLength()));
 
         pipeline.addLast(new NettyHttpClientEncoder());
         pipeline.addLast(new NettyHttpDecoder());
-    }
-
-    /**
-     * Adds the ssl handler
-     */
-    private SslHandler getSslHandler(ServerConfig serverConfig) {
-        try {
-            SSLContext sslContext = createSslContext(serverConfig);
-            SSLEngine sslEngine = sslContext.createSSLEngine();
-            sslEngine.setUseClientMode(false);
-            sslEngine.setNeedClientAuth(false);
-            return new SslHandler(sslEngine);
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private SSLContext createSslContext(ServerConfig serverConfig) throws Exception {
-        TrustManager[] managers = null;
-        if (serverConfig.getTrustStore() != null) {
-            KeyStore ts = KeyStore.getInstance(serverConfig.getTrustStoreFormat());
-            ts.load(getStoreStream(serverConfig.getTrustStore()), serverConfig.getTrustStorePassword().toCharArray());
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init(ts);
-
-            managers = tmf.getTrustManagers();
-        }
-
-        KeyStore ks = KeyStore.getInstance(serverConfig.getKeyStoreFormat());
-        ks.load(getStoreStream(serverConfig.getKeyStore()), serverConfig.getKeyStorePassword().toCharArray());
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        kmf.init(ks, serverConfig.getKeyStorePassword().toCharArray());
-
-        SSLContext serverContext = SSLContext.getInstance(serverConfig.getSslProtocol());
-        serverContext.init(kmf.getKeyManagers(), managers, null);
-        return serverContext;
-    }
-
-    private InputStream getStoreStream(String storeFile) {
-        InputStream inputStream;
-
-        try {
-            inputStream = new FileInputStream(storeFile);
-        } catch (FileNotFoundException e1) {
-            inputStream = NettyHttpInitializer.class.getResourceAsStream(storeFile);
-            if (inputStream == null) {
-                try {
-                    inputStream = new FileInputStream(System.getProperty("user.home") + File.separator + storeFile);
-                } catch (FileNotFoundException e3) {
-                    throw new IllegalStateException(e3);
-                }
-            }
-        }
-
-        return inputStream;
     }
 
 }
