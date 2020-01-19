@@ -16,6 +16,12 @@
             <groupId>io.mio</groupId>
             <artifactId>mio-core</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
