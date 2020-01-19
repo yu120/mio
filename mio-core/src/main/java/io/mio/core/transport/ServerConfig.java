@@ -55,9 +55,9 @@ public class ServerConfig implements Serializable {
      */
     private int backlog = 1024;
     /**
-     * The server socket keepalive status
+     * The server socket tcpKeepalive status
      */
-    private boolean keepalive = true;
+    private boolean tcpKeepalive = true;
     /**
      * The support max channel number
      */

@@ -77,7 +77,7 @@ public class NettyMioServer implements MioServer {
                     .handler(new LoggingHandler(LogLevel.INFO))
                     // Set TCP buffer size
                     .option(ChannelOption.SO_BACKLOG, serverConfig.getBacklog())
-                    .childOption(ChannelOption.SO_KEEPALIVE, serverConfig.isKeepalive())
+                    .childOption(ChannelOption.SO_KEEPALIVE, serverConfig.isTcpKeepalive())
                     .childOption(ChannelOption.TCP_NODELAY, true)
                     .childOption(ChannelOption.SO_REUSEADDR, true)
                     // Using object pools, reusing buffers
