@@ -80,11 +80,11 @@ public class ServerConfig implements Serializable {
     public boolean sslEnabled;
     private String sslProtocol = "TLSv1.2";
 
-    private String keyStoreFormat = "JKS";
+    private String keyStoreFormat = "PKCS12";
     private String keyStore;
     private String keyStorePassword = "123456";
 
-    private String trustStoreFormat = "JKS";
+    private String trustStoreFormat = "PKCS12";
     private String trustStore;
     private String trustStorePassword = "123456";
 
