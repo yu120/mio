@@ -82,9 +82,9 @@ public class NettyMioServer implements MioServer {
                     .childOption(ChannelOption.SO_REUSEADDR, true)
                     // Using object pools, reusing buffers
                     .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                    .childHandler(new ChannelInitializer<NioSocketChannel>() {
+                    .childHandler(new ChannelInitializer<Channel>() {
                         @Override
-                        protected void initChannel(NioSocketChannel ch) throws Exception {
+                        protected void initChannel(Channel ch) throws Exception {
                             // server codec
                             codec.server(serverConfig.getMaxContentLength(), ch.pipeline());
                             // heartbeat detection
