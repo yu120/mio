@@ -14,7 +14,7 @@
         <guava.version>28.1-jre</guava.version>
         <slf4j.version>1.7.29</slf4j.version>
         <lombok.version>1.18.10</lombok.version>
-        
+
         <netty.version>4.1.43.Final</netty.version>
         <hessian.version>4.0.63</hessian.version>
 
@@ -50,17 +50,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Base Dependencies -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -68,15 +57,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Core Dependencies -->
-        <dependency>
-            <groupId>com.caucho</groupId>
-            <artifactId>hessian</artifactId>
-            <version>${hessian.version}</version>
-        </dependency>
-
         <!-- Test dependency -->
-
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
@@ -93,12 +74,6 @@
             <groupId>com.lmax</groupId>
             <artifactId>disruptor</artifactId>
             <version>${disruptor.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.corundumstudio.socketio</groupId>
-            <artifactId>netty-socketio</artifactId>
-            <version>1.7.12</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
