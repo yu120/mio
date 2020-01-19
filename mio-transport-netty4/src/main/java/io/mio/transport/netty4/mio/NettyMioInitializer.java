@@ -4,7 +4,11 @@ import io.mio.core.extension.Extension;
 import io.mio.core.transport.ClientConfig;
 import io.mio.transport.netty4.NettyInitializer;
 import io.mio.core.transport.ServerConfig;
+import io.mio.transport.netty4.http.SslContextFactory;
 import io.netty.channel.ChannelPipeline;
+import io.netty.handler.ssl.SslHandler;
+
+import javax.net.ssl.SSLEngine;
 
 /**
  * NettyMioInitializer

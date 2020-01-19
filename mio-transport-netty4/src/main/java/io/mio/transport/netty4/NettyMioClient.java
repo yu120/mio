@@ -6,6 +6,7 @@ import io.mio.core.extension.ExtensionLoader;
 import io.mio.core.extension.TypeReference;
 import io.mio.core.transport.ClientConfig;
 import io.mio.core.transport.MioClient;
+import io.mio.transport.netty4.http.SslContextFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
@@ -80,6 +81,8 @@ public class NettyMioClient implements MioClient {
 
                         @Override
                         public void channelCreated(Channel ch) throws Exception {
+                            // SSL
+                            SslContextFactory.client(clientConfig, ch.pipeline());
                             // client nettyInitializer
                             nettyInitializer.client(clientConfig, ch.pipeline());
                             // heartbeat detection

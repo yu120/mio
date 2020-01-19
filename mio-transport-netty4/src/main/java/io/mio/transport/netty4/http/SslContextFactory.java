@@ -1,5 +1,10 @@
 package io.mio.transport.netty4.http;
 
+import io.mio.core.transport.ClientConfig;
+import io.mio.core.transport.ServerConfig;
+import io.netty.channel.ChannelPipeline;
+import io.netty.handler.ssl.SslHandler;
+
 import javax.net.ssl.*;
 import java.io.*;
 import java.security.KeyStore;
@@ -20,6 +25,26 @@ public final class SslContextFactory {
      * 客户端上下文
      */
     private static SSLContext CLIENT_CONTEXT;
+
+    public static void server(ServerConfig serverConfig, ChannelPipeline pipeline) {
+        if (serverConfig.isSslEnabled()) {
+            SSLEngine engine = SslContextFactory.getServerContext(serverConfig.getKeyStore(),
+                    serverConfig.getTrustStore(), serverConfig.getStorePassword()).createSSLEngine();
+            engine.setUseClientMode(false);
+            engine.setNeedClientAuth(true);
+            pipeline.addLast(new SslHandler(engine));
+        }
+    }
+
+    public static void client(ClientConfig clientConfig, ChannelPipeline pipeline) {
+        if (clientConfig.isSslEnabled()) {
+            SSLEngine engine = SslContextFactory.getClientContext(clientConfig.getKeyStore(),
+                    clientConfig.getTrustStore(), clientConfig.getStorePassword()).createSSLEngine();
+            engine.setUseClientMode(true);
+            engine.setNeedClientAuth(true);
+            pipeline.addLast(new SslHandler(engine));
+        }
+    }
 
     public static SSLContext getServerContext(String pkPath, String caPath, String password) {
         if (SERVER_CONTEXT != null) {

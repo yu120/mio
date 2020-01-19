@@ -44,7 +44,7 @@ public class ServerConfig implements Serializable {
     /**
      * The server codec
      */
-    private String codec = "http";
+    private String codec = "mio";
     /**
      * The server header serialize
      */
