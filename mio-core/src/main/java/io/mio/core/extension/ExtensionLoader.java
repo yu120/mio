@@ -30,7 +30,7 @@ public class ExtensionLoader<T> {
     private ConcurrentMap<String, Class<T>> extensionClasses = null;
     private static ConcurrentMap<Class<?>, ExtensionLoader<?>> extensionLoaders = new ConcurrentHashMap<>();
     private static final List<String> PREFIX_LIST = Arrays.asList("META-INF/", "META-INF/mio/", "META-INF/services/");
-    private static final List<Class<? extends Annotation>> ANNOTATION_LIST = Arrays.asList(Extension.class);
+    private static final List<Class<? extends Annotation>> ANNOTATION_LIST = new ArrayList<>(Collections.singletonList(Extension.class));
 
     public static void addExtensionAnnotation(Class<? extends Annotation> annotationClass) {
         ANNOTATION_LIST.add(annotationClass);
