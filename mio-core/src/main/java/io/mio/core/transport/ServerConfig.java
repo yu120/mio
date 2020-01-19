@@ -14,12 +14,20 @@ public class ServerConfig implements Serializable {
 
     /**
      * The boss thread number
+     * <p>
+     * 0 = current_processors_amount * 2
      */
     private int bossThread = 0;
     /**
      * The work thread(IO thread) number
+     * <p>
+     * 0 = current_processors_amount * 2
      */
     private int workerThread = Math.min(Runtime.getRuntime().availableProcessors() + 1, 32);
+    /**
+     * The use linux native epoll
+     */
+    private boolean useLinuxNativeEpoll;
     /**
      * The server bind hostname
      */
