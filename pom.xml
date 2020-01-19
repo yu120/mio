@@ -27,6 +27,7 @@
         <module>mio-transport-netty4</module>
         <module>mio-transport-aio</module>
         <module>mio-rpc</module>
+        <module>mio-gateway</module>
     </modules>
 
     <dependencyManagement>
@@ -44,6 +45,16 @@
             <dependency>
                 <groupId>io.mio</groupId>
                 <artifactId>mio-transport-aio</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.mio</groupId>
+                <artifactId>mio-rpc</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.mio</groupId>
+                <artifactId>mio-gateway</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
