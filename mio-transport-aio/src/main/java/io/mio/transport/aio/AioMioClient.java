@@ -5,7 +5,7 @@ import io.mio.transport.aio.handler.ReadCompletionHandler;
 import io.mio.transport.aio.handler.WriteCompletionHandler;
 import io.mio.transport.aio.support.AioClientConfig;
 import io.mio.transport.aio.support.AioMioSession;
-import io.mio.core.commons.MioConstants;
+import io.mio.core.MioConstants;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

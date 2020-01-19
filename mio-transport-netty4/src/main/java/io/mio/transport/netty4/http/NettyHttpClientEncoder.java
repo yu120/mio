@@ -1,6 +1,6 @@
 package io.mio.transport.netty4.http;
 
-import io.mio.core.commons.MioConstants;
+import io.mio.core.MioConstants;
 import io.mio.core.commons.MioMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

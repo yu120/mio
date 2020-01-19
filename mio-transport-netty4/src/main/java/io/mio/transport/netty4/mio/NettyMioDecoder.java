@@ -1,6 +1,6 @@
 package io.mio.transport.netty4.mio;
 
-import io.mio.core.commons.MioConstants;
+import io.mio.core.MioConstants;
 import io.mio.core.commons.MioMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;

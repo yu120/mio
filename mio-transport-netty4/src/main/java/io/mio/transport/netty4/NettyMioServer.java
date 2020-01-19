@@ -1,5 +1,6 @@
 package io.mio.transport.netty4;
 
+import io.mio.core.MioConstants;
 import io.mio.core.transport.MioServer;
 import io.mio.core.commons.*;
 import io.mio.core.extension.Extension;

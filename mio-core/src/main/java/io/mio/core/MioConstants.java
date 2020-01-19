@@ -1,4 +1,4 @@
-package io.mio.core.commons;
+package io.mio.core;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;

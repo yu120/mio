@@ -3,7 +3,7 @@ package io.mio.transport.aio.filter;
 import io.mio.transport.aio.support.AioMioSession;
 import io.mio.transport.aio.support.EventState;
 import io.mio.transport.aio.NetFilter;
-import io.mio.core.commons.MioConstants;
+import io.mio.core.MioConstants;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.channels.AsynchronousSocketChannel;
