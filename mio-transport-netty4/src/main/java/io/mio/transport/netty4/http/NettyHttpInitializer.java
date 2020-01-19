@@ -9,6 +9,10 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.ssl.SslHandler;
 
 import javax.net.ssl.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.security.KeyStore;
 
 /**
@@ -19,11 +23,11 @@ import java.security.KeyStore;
 @Extension("http")
 public class NettyHttpInitializer implements NettyInitializer<ChannelPipeline> {
 
-    private SSLContext sslContext;
-
     @Override
     public void server(ServerConfig serverConfig, ChannelPipeline pipeline) {
-        addSslHandler(serverConfig, pipeline);
+        if (serverConfig.isSslEnabled()) {
+            pipeline.addLast("sslHandler", getSslHandler(serverConfig));
+        }
 
         pipeline.addLast(new HttpRequestDecoder());
         pipeline.addLast(new HttpResponseEncoder());
@@ -46,20 +50,15 @@ public class NettyHttpInitializer implements NettyInitializer<ChannelPipeline> {
     /**
      * Adds the ssl handler
      */
-    private void addSslHandler(ServerConfig serverConfig, ChannelPipeline pipeline) {
-        boolean isSsl = serverConfig.getKeyStore() != null;
-        if (isSsl) {
-            try {
-                sslContext = createSslContext(serverConfig);
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-        if (sslContext != null) {
-            SSLEngine engine = sslContext.createSSLEngine();
-            engine.setUseClientMode(false);
-            pipeline.addLast("ssl", new SslHandler(engine));
+    private SslHandler getSslHandler(ServerConfig serverConfig) {
+        try {
+            SSLContext sslContext = createSslContext(serverConfig);
+            SSLEngine sslEngine = sslContext.createSSLEngine();
+            sslEngine.setUseClientMode(false);
+            sslEngine.setNeedClientAuth(false);
+            return new SslHandler(sslEngine);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -67,21 +66,40 @@ public class NettyHttpInitializer implements NettyInitializer<ChannelPipeline> {
         TrustManager[] managers = null;
         if (serverConfig.getTrustStore() != null) {
             KeyStore ts = KeyStore.getInstance(serverConfig.getTrustStoreFormat());
-            ts.load(serverConfig.getTrustStore(), serverConfig.getTrustStorePassword().toCharArray());
+            ts.load(getStoreStream(serverConfig.getTrustStore()), serverConfig.getTrustStorePassword().toCharArray());
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(ts);
+
             managers = tmf.getTrustManagers();
         }
 
         KeyStore ks = KeyStore.getInstance(serverConfig.getKeyStoreFormat());
-        ks.load(serverConfig.getKeyStore(), serverConfig.getKeyStorePassword().toCharArray());
-
+        ks.load(getStoreStream(serverConfig.getKeyStore()), serverConfig.getKeyStorePassword().toCharArray());
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         kmf.init(ks, serverConfig.getKeyStorePassword().toCharArray());
 
         SSLContext serverContext = SSLContext.getInstance(serverConfig.getSslProtocol());
         serverContext.init(kmf.getKeyManagers(), managers, null);
         return serverContext;
+    }
+
+    private InputStream getStoreStream(String storeFile) {
+        InputStream inputStream;
+
+        try {
+            inputStream = new FileInputStream(storeFile);
+        } catch (FileNotFoundException e1) {
+            inputStream = NettyHttpInitializer.class.getResourceAsStream(storeFile);
+            if (inputStream == null) {
+                try {
+                    inputStream = new FileInputStream(System.getProperty("user.home") + File.separator + storeFile);
+                } catch (FileNotFoundException e3) {
+                    throw new IllegalStateException(e3);
+                }
+            }
+        }
+
+        return inputStream;
     }
 
 }

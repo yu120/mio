@@ -77,12 +77,15 @@ public class ServerConfig implements Serializable {
      */
     private int shutdownTimeoutMillis = 10 * 1000;
 
-    private String sslProtocol = "TLSv1";
+    public boolean sslEnabled;
+    private String sslProtocol = "TLSv1.2";
+
     private String keyStoreFormat = "JKS";
-    private InputStream keyStore;
-    private String keyStorePassword;
+    private String keyStore;
+    private String keyStorePassword = "123456";
+
     private String trustStoreFormat = "JKS";
-    private InputStream trustStore;
-    private String trustStorePassword;
+    private String trustStore;
+    private String trustStorePassword = "123456";
 
 }
