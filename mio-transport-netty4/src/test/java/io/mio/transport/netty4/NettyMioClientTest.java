@@ -1,6 +1,6 @@
 package io.mio.transport.netty4;
 
-import io.mio.core.commons.ClientConfig;
+import io.mio.core.transport.ClientConfig;
 import io.mio.core.commons.MioMessage;
 import io.mio.core.transport.MioClient;
 import io.mio.core.transport.MioTransport;

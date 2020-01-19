@@ -2,7 +2,7 @@ package io.mio.transport.netty4;
 
 import io.mio.core.commons.MioCallback;
 import io.mio.core.commons.MioMessage;
-import io.mio.core.commons.ServerConfig;
+import io.mio.core.transport.ServerConfig;
 import io.mio.core.transport.MioServer;
 import io.mio.core.transport.MioTransport;
 

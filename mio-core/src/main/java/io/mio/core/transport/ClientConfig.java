@@ -1,4 +1,4 @@
-package io.mio.core.commons;
+package io.mio.core.transport;
 
 import lombok.Data;
 

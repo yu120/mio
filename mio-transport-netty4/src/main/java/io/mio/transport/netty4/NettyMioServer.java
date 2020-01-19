@@ -6,6 +6,7 @@ import io.mio.core.commons.*;
 import io.mio.core.extension.Extension;
 import io.mio.core.extension.ExtensionLoader;
 import io.mio.core.extension.TypeReference;
+import io.mio.core.transport.ServerConfig;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;

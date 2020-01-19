@@ -4,6 +4,7 @@ import io.mio.core.commons.*;
 import io.mio.core.extension.Extension;
 import io.mio.core.extension.ExtensionLoader;
 import io.mio.core.extension.TypeReference;
+import io.mio.core.transport.ClientConfig;
 import io.mio.core.transport.Codec;
 import io.mio.core.transport.MioClient;
 import io.netty.bootstrap.Bootstrap;

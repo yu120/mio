@@ -1,6 +1,5 @@
 package io.mio.core.transport;
 
-import io.mio.core.commons.ClientConfig;
 import io.mio.core.commons.MioCallback;
 import io.mio.core.commons.MioFuture;
 import io.mio.core.commons.MioMessage;
