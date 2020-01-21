@@ -2,7 +2,6 @@ package io.mio.core.commons;
 
 import io.mio.core.utils.ByteUtils;
 import lombok.Data;
-import lombok.ToString;
 
 import java.io.Serializable;
 import java.net.InetSocketAddress;
@@ -19,7 +18,6 @@ import java.util.Map;
  * @author lry
  */
 @Data
-@ToString
 public class MioMessage implements Serializable {
 
     /**

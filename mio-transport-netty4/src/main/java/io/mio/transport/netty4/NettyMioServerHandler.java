@@ -2,6 +2,7 @@ package io.mio.transport.netty4;
 
 import io.mio.core.commons.MioCallback;
 import io.mio.core.MioConstants;
+import io.mio.core.commons.MioException;
 import io.mio.core.commons.MioMessage;
 import io.mio.core.commons.StandardThreadExecutor;
 import io.mio.core.transport.ServerConfig;
@@ -79,15 +80,22 @@ public class NettyMioServerHandler extends SimpleChannelInboundHandler<MioMessag
          * When there is a write operation, you do not need to release the reference of MSG manually.
          * You need to release the reference of MSG manually when only read operation is available.
          */
-        if (standardThreadExecutor == null) {
-            mioCallback.onProcessor(mioMessage -> ctx.channel().writeAndFlush(mioMessage), msg);
-        } else {
-            try {
-                standardThreadExecutor.execute(() ->
-                        mioCallback.onProcessor(mioMessage -> ctx.channel().writeAndFlush(mioMessage), msg));
-            } catch (RejectedExecutionException e) {
-                log.error("Biz thread pool rejected", e);
+        try {
+            if (standardThreadExecutor == null) {
+                mioCallback.onProcessor(mioMessage -> ctx.channel().writeAndFlush(mioMessage), msg);
+            } else {
+                try {
+                    standardThreadExecutor.execute(() ->
+                            mioCallback.onProcessor(mioMessage -> ctx.channel().writeAndFlush(mioMessage), msg));
+                } catch (RejectedExecutionException e) {
+                    throw new MioException(MioException.SERVER_REJECTED, "Biz thread pool rejected");
+                }
             }
+        } catch (Throwable t) {
+            String channelKey = getChannelKey(ctx.channel());
+            log.error("Biz exception:{}", channelKey, t);
+            MioMessage mioMessage = new MioMessage(null, "".getBytes(), "你好".getBytes());
+            ctx.channel().writeAndFlush(mioMessage);
         }
     }
 
