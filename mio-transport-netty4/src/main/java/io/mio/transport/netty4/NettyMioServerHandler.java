@@ -3,12 +3,14 @@ package io.mio.transport.netty4;
 import io.mio.core.commons.MioCallback;
 import io.mio.core.MioConstants;
 import io.mio.core.commons.MioMessage;
+import io.mio.core.commons.StandardThreadExecutor;
+import io.mio.core.transport.ServerConfig;
 import io.netty.channel.*;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.*;
 
 /**
  * NettyMioServerHandler
@@ -36,12 +38,21 @@ public class NettyMioServerHandler extends SimpleChannelInboundHandler<MioMessag
      * The all client channel
      */
     private ConcurrentMap<String, Channel> channels;
+    private StandardThreadExecutor standardThreadExecutor;
 
-    public NettyMioServerHandler(int maxConnections, MioCallback<MioMessage> mioCallback) {
+    public NettyMioServerHandler(ServerConfig serverConfig, MioCallback<MioMessage> mioCallback) {
         super();
-        this.maxConnections = maxConnections;
+        this.maxConnections = serverConfig.getMaxConnections();
         this.mioCallback = mioCallback;
         this.channels = new ConcurrentHashMap<>(64);
+
+        if (serverConfig.isBizThread()) {
+            String threadName = String.format("server-%s:%s", serverConfig.getHostname(), serverConfig.getPort());
+            this.standardThreadExecutor = new StandardThreadExecutor(
+                    serverConfig.getBizCoreThreads(), serverConfig.getBizMaxThreads(),
+                    serverConfig.getBizKeepAliveTime(), TimeUnit.MILLISECONDS, serverConfig.getBizQueueCapacity(),
+                    MioConstants.newThreadFactory(threadName, true));
+        }
     }
 
     @Override
@@ -68,7 +79,16 @@ public class NettyMioServerHandler extends SimpleChannelInboundHandler<MioMessag
          * When there is a write operation, you do not need to release the reference of MSG manually.
          * You need to release the reference of MSG manually when only read operation is available.
          */
-        mioCallback.onProcessor(mioMessage -> ctx.channel().writeAndFlush(mioMessage), msg);
+        if (standardThreadExecutor == null) {
+            mioCallback.onProcessor(mioMessage -> ctx.channel().writeAndFlush(mioMessage), msg);
+        } else {
+            try {
+                standardThreadExecutor.execute(() ->
+                        mioCallback.onProcessor(mioMessage -> ctx.channel().writeAndFlush(mioMessage), msg));
+            } catch (RejectedExecutionException e) {
+                log.error("Biz thread pool rejected", e);
+            }
+        }
     }
 
     @Override

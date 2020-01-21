@@ -77,8 +77,14 @@ public class ServerConfig implements Serializable {
     private int shutdownTimeoutMillis = 10 * 1000;
 
     private boolean sslEnabled = true;
-    private String keyStore="nettyServer.jks";
-    private String trustStore="nettyServer.jks";
+    private String keyStore = "nettyServer.jks";
+    private String trustStore = "nettyServer.jks";
     private String storePassword = "defaultPass";
+
+    private boolean bizThread = true;
+    private int bizCoreThreads = 20;
+    private int bizMaxThreads = 200;
+    private long bizKeepAliveTime = 60 * 1000L;
+    private int bizQueueCapacity = bizMaxThreads;
 
 }

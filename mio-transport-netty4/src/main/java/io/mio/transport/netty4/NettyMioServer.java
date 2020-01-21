@@ -52,7 +52,7 @@ public class NettyMioServer implements MioServer {
         ThreadFactory workerThreadFactory = MioConstants.newThreadFactory("mio-server-worker", true);
 
         // create handler
-        this.serverHandler = new NettyMioServerHandler(serverConfig.getMaxConnections(), mioCallback);
+        this.serverHandler = new NettyMioServerHandler(serverConfig, mioCallback);
 
         // create socket channel type and handler
         Class<? extends ServerChannel> channelClass;
