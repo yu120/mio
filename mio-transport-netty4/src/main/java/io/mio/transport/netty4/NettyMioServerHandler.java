@@ -7,7 +7,6 @@ import io.mio.core.commons.MioMessage;
 import io.mio.core.commons.StandardThreadExecutor;
 import io.mio.core.transport.ServerConfig;
 import io.netty.channel.*;
-import io.netty.util.concurrent.DefaultThreadFactory;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -94,7 +93,7 @@ public class NettyMioServerHandler extends SimpleChannelInboundHandler<MioMessag
         } catch (Throwable t) {
             String channelKey = getChannelKey(ctx.channel());
             log.error("Biz exception:{}", channelKey, t);
-            MioMessage mioMessage = new MioMessage(null, "".getBytes(), "你好".getBytes());
+            MioMessage mioMessage = new MioMessage(null, "你好".getBytes());
             ctx.channel().writeAndFlush(mioMessage);
         }
     }

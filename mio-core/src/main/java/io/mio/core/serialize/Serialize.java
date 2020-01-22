@@ -9,7 +9,7 @@ import java.io.IOException;
  *
  * @author lry
  */
-@SPI("hessian2")
+@SPI(value = "hessian2", single = true)
 public interface Serialize {
 
     /**

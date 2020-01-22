@@ -2,6 +2,8 @@ package io.mio.transport.netty4.mio;
 
 import io.mio.core.MioConstants;
 import io.mio.core.commons.MioMessage;
+import io.mio.core.serialize.Serialize;
+import io.mio.core.utils.ByteUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -14,9 +16,9 @@ import java.util.List;
  * NettyMioDecoder
  *
  * <pre>
- * ===============================================================================================================
- * [Protocol]： magic(1 byte) + attachmentLength(4 byte) + dataLength(4 byte) + attachment(M byte) + data(N byte)
- * ===============================================================================================================
+ * ====================================================================================================================
+ * [Protocol]：magic(1 byte) + version(1 byte) + length(4 byte) + body(data+exception+attachments, N byte)+ xor(1 byte)
+ * ====================================================================================================================
  * Consider:
  * 6.crc data(crc), cyclic redundancy detection.The XOR algorithm is used to
  * calculate whether the whole packet has errors during transmission
@@ -30,6 +32,7 @@ import java.util.List;
 public class NettyMioDecoder extends ByteToMessageDecoder {
 
     private int maxContentLength;
+    private Serialize serialize;
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf buffer, List<Object> out) throws Exception {
@@ -70,27 +73,28 @@ public class NettyMioDecoder extends ByteToMessageDecoder {
             }
         }
 
-        // Step 4：读取后续数据总长度（循环中读取完包头）
-        int attachmentLength = buffer.readInt();
-        int dataLength = buffer.readInt();
-
-        // Step 5：判断请求数据包数据是否到齐
-        if (buffer.readableBytes() < attachmentLength + dataLength) {
+        // Step 4：Read version,length, and check content length
+        byte version = buffer.readByte();
+        int length = buffer.readInt();
+        // 判断请求数据包的剩余数据是否到齐
+        if (buffer.readableBytes() < length + MioConstants.XOR_BYTE) {
             // Restore read pointer
             buffer.readerIndex(beginReaderIndex);
             return;
         }
 
-        // Step 6：Read attachment data
-        byte[] attachment = new byte[attachmentLength];
-        buffer.readBytes(attachment);
+        // Step 5：Read attachments data
+        byte[] body = new byte[length];
+        buffer.readBytes(body);
 
-        // Step 7：Read data
-        byte[] data = new byte[dataLength];
-        buffer.readBytes(data);
+        // Step 6: Read and check xor
+        if (buffer.readByte() != ByteUtils.xor(version, length, body)) {
+            return;
+        }
 
-        // Step 8：build to output
-        final MioMessage mioMessage = new MioMessage(null, attachment, data);
+        // Step 7：build to output
+        final MioMessage mioMessage = serialize.deserialize(body, MioMessage.class);
+        mioMessage.setVersion(version);
         mioMessage.wrapper(channel.localAddress(), channel.remoteAddress());
         out.add(mioMessage);
     }

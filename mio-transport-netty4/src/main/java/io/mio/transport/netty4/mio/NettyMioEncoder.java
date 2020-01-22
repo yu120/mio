@@ -3,6 +3,8 @@ package io.mio.transport.netty4.mio;
 import io.mio.core.MioConstants;
 import io.mio.core.commons.MioException;
 import io.mio.core.commons.MioMessage;
+import io.mio.core.serialize.Serialize;
+import io.mio.core.utils.ByteUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -13,9 +15,9 @@ import lombok.AllArgsConstructor;
  * NettyMioEncoder
  *
  * <pre>
- * ===============================================================================================================
- * [Protocol]： magic(1 byte) + attachmentLength(4 byte) + dataLength(4 byte) + attachment(M byte) + data(N byte)
- * ===============================================================================================================
+ * ====================================================================================================================
+ * [Protocol]：magic(1 byte) + version(1 byte) + length(4 byte) + body(data+exception+attachments, N byte)+ xor(1 byte)
+ * ====================================================================================================================
  * Consider:
  * 6.crc data(crc), cyclic redundancy detection.The XOR algorithm is used to
  * calculate whether the whole packet has errors during transmission
@@ -29,30 +31,33 @@ import lombok.AllArgsConstructor;
 public class NettyMioEncoder extends MessageToByteEncoder<MioMessage> {
 
     private int maxContentLength;
+    private Serialize serialize;
 
     @Override
     protected void encode(ChannelHandlerContext ctx, final MioMessage msg, ByteBuf out) throws Exception {
-        final Channel channel = ctx.channel();
+        byte[] body = serialize.serialize(msg);
 
-        int attachmentLength = msg.getAttachment().length;
-        int dataLength = msg.getData().length;
+        final Channel channel = ctx.channel();
+        int length = body.length;
+        int contentLength = MioConstants.BASE_READ_LENGTH + length + MioConstants.XOR_BYTE;
+        byte xor = ByteUtils.xor(msg.getVersion(), length, body);
 
         // wrapper local and remote address
         msg.wrapper(channel.localAddress(), channel.remoteAddress());
-        if (attachmentLength + dataLength > maxContentLength) {
-            throw new MioException(MioException.CONTENT_OUT_LIMIT, "The content out of limit", dataLength);
+        if (contentLength > maxContentLength) {
+            throw new MioException(MioException.CONTENT_OUT_LIMIT, "The content out of limit", contentLength);
         }
 
         // Step 1：write magic
         out.writeByte(MioConstants.MAGIC_DATA);
-        // Step 2：write attachment length
-        out.writeInt(attachmentLength);
-        // Step 3：write data length
-        out.writeInt(dataLength);
-        // Step 4：write attachment data
-        out.writeBytes(msg.getAttachment());
-        // Step 5：write data
-        out.writeBytes(msg.getData());
+        // Step 2：write version
+        out.writeByte(msg.getVersion());
+        // Step 3：write length
+        out.writeInt(length);
+        // Step 4：write data
+        out.writeBytes(body);
+        // Step 5：write xor
+        out.writeByte(xor);
     }
 
 }

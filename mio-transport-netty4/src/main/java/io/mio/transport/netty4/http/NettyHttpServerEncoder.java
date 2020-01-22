@@ -2,11 +2,13 @@ package io.mio.transport.netty4.http;
 
 import io.mio.core.MioConstants;
 import io.mio.core.commons.MioMessage;
+import io.mio.core.serialize.Serialize;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.http.*;
+import lombok.AllArgsConstructor;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -17,14 +19,19 @@ import java.util.Map;
  *
  * @author lry
  */
+@AllArgsConstructor
 public class NettyHttpServerEncoder extends MessageToMessageEncoder<MioMessage> {
+
+    private final Serialize serialize;
 
     @Override
     protected void encode(ChannelHandlerContext ctx, MioMessage msg, List<Object> out) throws Exception {
+        byte[] body = serialize.serialize(msg);
+
         // convert data to ByteBuf
-        ByteBuf content = Unpooled.wrappedBuffer(msg.getData());
+        ByteBuf content = Unpooled.wrappedBuffer(body);
         // setter response status
-        Object status = msg.getHeaders().getOrDefault(MioConstants.RESPONSE_STATUS_KEY, HttpResponseStatus.OK.code());
+        Object status = msg.getAttachments().getOrDefault(MioConstants.RESPONSE_STATUS_KEY, HttpResponseStatus.OK.code());
         HttpResponseStatus httpResponseStatus = HttpResponseStatus.valueOf((int) status);
 
         // server send response encoder
@@ -33,7 +40,7 @@ public class NettyHttpServerEncoder extends MessageToMessageEncoder<MioMessage> 
         // set auto header parameter
         HttpHeaders httpHeaders = httpMessage.headers();
         if (!httpHeaders.isEmpty()) {
-            for (Map.Entry<String, Object> entry : msg.getHeaders().entrySet()) {
+            for (Map.Entry<String, Object> entry : msg.getAttachments().entrySet()) {
                 httpHeaders.add(entry.getKey(), entry.getValue());
             }
         }

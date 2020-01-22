@@ -17,7 +17,7 @@ public class NettyMioServerTest {
             public void onProcessor(Consumer<MioMessage> context, MioMessage request) {
                 System.out.println("服务端收到：" + request);
                 // 当服务端完成写操作后，关闭与客户端的连接
-                MioMessage mioMessage = new MioMessage(null, "".getBytes(), "你好".getBytes());
+                MioMessage mioMessage = new MioMessage(null, "你好".getBytes());
                 context.accept(mioMessage);
             }
 

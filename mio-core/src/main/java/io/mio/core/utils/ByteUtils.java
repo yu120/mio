@@ -144,4 +144,24 @@ public class ByteUtils {
                 | (src[offset + 3] & 0xFF));
     }
 
+    /**
+     * 使用cmd,len,data进行异或运算
+     *
+     * @param version  cmd byte
+     * @param len  length byte[2]
+     * @param data data byte[N]
+     * @return byte
+     */
+    public static byte xor(byte version, int len, byte[] data) {
+        byte tempByte = version;
+        for (byte tempLen : hexInt(len)) {
+            tempByte ^= tempLen;
+        }
+        for (byte tempData : data) {
+            tempByte ^= tempData;
+        }
+
+        return tempByte;
+    }
+
 }

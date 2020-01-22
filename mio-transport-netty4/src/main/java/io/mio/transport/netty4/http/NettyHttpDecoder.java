@@ -2,6 +2,7 @@ package io.mio.transport.netty4.http;
 
 import io.mio.core.MioConstants;
 import io.mio.core.commons.MioMessage;
+import io.mio.core.serialize.Serialize;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -10,6 +11,7 @@ import io.netty.handler.codec.http.FullHttpMessage;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import lombok.AllArgsConstructor;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,7 +22,10 @@ import java.util.Map;
  *
  * @author lry
  */
+@AllArgsConstructor
 public class NettyHttpDecoder extends MessageToMessageDecoder<FullHttpMessage> {
+
+    private final Serialize serialize;
 
     @Override
     protected void decode(ChannelHandlerContext ctx, FullHttpMessage msg, List<Object> out) throws Exception {
@@ -44,10 +49,10 @@ public class NettyHttpDecoder extends MessageToMessageDecoder<FullHttpMessage> {
         }
 
         // parse body data
-        byte[] data = readByteBuf(msg.content());
+        byte[] body = readByteBuf(msg.content());
 
         // build message
-        final MioMessage mioMessage = new MioMessage(headers, null, data);
+        final MioMessage mioMessage = serialize.deserialize(body, MioMessage.class);
         mioMessage.wrapper(channel.localAddress(), channel.remoteAddress());
         out.add(mioMessage);
     }

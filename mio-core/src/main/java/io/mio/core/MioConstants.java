@@ -13,26 +13,30 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MioConstants {
 
     /**
-     * Command head data（Fixed: 0x76）
+     * Command head data(Fixed: 0x76)
      */
     public static final byte MAGIC_DATA = 0x76;
 
     /**
-     * Command head（byte，1 bytes）
+     * Magic length(byte，1 byte)
      */
-    private static final int HEAD_BYTE = 1;
+    private static final int MAGIC_BYTE = 1;
     /**
-     * Message head content length size(int，4 bytes）
+     * Version length(byte，1 byte)
      */
-    private static final int HEADER_LENGTH_BYTE = 4;
+    private static final int VERSION_BYTE = 1;
     /**
-     * Content all data length size(int，4 bytes）
+     * Data length(int，4 byte）
      */
-    private static final int HEADER_DATA_LENGTH_BYTE = 4;
+    private static final int LENGTH_BYTE = 4;
+    /**
+     * Xor byte length(byte, 1 byte)
+     */
+    public static final int XOR_BYTE = 1;
     /**
      * Read basic length (read only after reaching)
      */
-    public static final int BASE_READ_LENGTH = HEAD_BYTE + HEADER_LENGTH_BYTE + HEADER_DATA_LENGTH_BYTE;
+    public static final int BASE_READ_LENGTH = MAGIC_BYTE + VERSION_BYTE + LENGTH_BYTE;
 
     /**
      * HTTP uri key

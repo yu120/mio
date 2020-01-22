@@ -1,14 +1,18 @@
 package io.mio.core.commons;
 
-import io.mio.core.utils.ByteUtils;
+import io.mio.core.serialize.Serialize;
+import io.mio.core.utils.ExceptionUtils;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * MioMessage
@@ -18,14 +22,19 @@ import java.util.Map;
  * @author lry
  */
 @Data
+@NoArgsConstructor
 public class MioMessage implements Serializable {
 
     /**
-     * The header parameters
+     * The data
      */
-    private Map<String, Object> headers;
+    private Object data;
     /**
-     * The attachment data
+     * The exception data
+     */
+    private Exception exception;
+    /**
+     * The attachments data
      * <p>
      * 1.protocol version
      * 2.status code
@@ -34,37 +43,35 @@ public class MioMessage implements Serializable {
      * 5.service name
      * 6.group name
      */
-    private byte[] attachment;
-    /**
-     * The data
-     */
-    private byte[] data;
+    private Map<String, Object> attachments;
 
+    /**
+     * The RPC version
+     */
+    private transient byte version;
     /**
      * The local net socket address
      */
-    private InetSocketAddress localAddress;
+    private transient InetSocketAddress localAddress;
     /**
      * The remote net socket address
      */
-    private InetSocketAddress remoteAddress;
+    private transient InetSocketAddress remoteAddress;
 
     /**
      * The build new {@link MioMessage}
      * <p>
      * Tips: need set contentLength,metaLength,meta.
      *
-     * @param headers    header parameters
-     * @param attachment attachment data
-     * @param data       body data
+     * @param attachments attachments data
+     * @param data        body data
      */
-    public MioMessage(Map<String, Object> headers, byte[] attachment, byte[] data) {
-        if (headers == null || headers.isEmpty()) {
-            this.headers = new LinkedHashMap<>();
+    public MioMessage(Map<String, Object> attachments, byte[] data) {
+        if (attachments == null || attachments.isEmpty()) {
+            this.attachments = new LinkedHashMap<>();
         } else {
-            this.headers = new LinkedHashMap<>(headers);
+            this.attachments = new LinkedHashMap<>(attachments);
         }
-        this.attachment = attachment;
         this.data = data;
     }
 
@@ -79,14 +86,12 @@ public class MioMessage implements Serializable {
         this.remoteAddress = (InetSocketAddress) remoteAddress;
     }
 
-    @Override
-    public String toString() {
-        return "MioMessage{" +
-                "headers=" + headers +
-                ", attachment=" + Arrays.toString(attachment) +
-                ", data=" + ByteUtils.printHexBytes(data) +
-                ", localAddress=" + localAddress +
-                ", remoteAddress=" + remoteAddress +
-                '}';
+    public byte[] toBody(Function<Object, byte[]> function) {
+        if (exception == null) {
+            return (data instanceof byte[]) ? (byte[]) data : function.apply(data);
+        } else {
+            return ExceptionUtils.toString(exception).getBytes(StandardCharsets.UTF_8);
+        }
     }
+
 }
