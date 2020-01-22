@@ -14,7 +14,6 @@ import io.netty.channel.*;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
@@ -45,14 +44,14 @@ public class NettyMioServer implements MioServer {
     private NettyInitializer<ChannelPipeline> nettyInitializer;
 
     @Override
-    public void initialize(final ServerConfig serverConfig, final MioCallback<MioMessage> mioCallback) {
+    public void initialize(final ServerConfig serverConfig, final MioProcessor<MioMessage> mioProcessor) {
         this.serverConfig = serverConfig;
 
         ThreadFactory bossThreadFactory = MioConstants.newThreadFactory("mio-server-boss", true);
         ThreadFactory workerThreadFactory = MioConstants.newThreadFactory("mio-server-worker", true);
 
         // create handler
-        this.serverHandler = new NettyMioServerHandler(serverConfig, mioCallback);
+        this.serverHandler = new NettyMioServerHandler(serverConfig, mioProcessor);
 
         // create socket channel type and handler
         Class<? extends ServerChannel> channelClass;

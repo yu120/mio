@@ -54,14 +54,4 @@ public class MioCallback<V> {
 
     }
 
-    /**
-     * Asynchronous notification after server success.
-     *
-     * @param context request context {@link Consumer<V>}
-     * @param request request message
-     */
-    public void onProcessor(Consumer<V> context, V request) {
-
-    }
-
 }

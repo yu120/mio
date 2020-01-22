@@ -1,7 +1,7 @@
 package io.mio.core.transport;
 
-import io.mio.core.commons.MioCallback;
 import io.mio.core.commons.MioMessage;
+import io.mio.core.commons.MioProcessor;
 import io.mio.core.extension.SPI;
 
 /**
@@ -16,9 +16,9 @@ public interface MioServer {
      * The initialize server
      *
      * @param serverConfig {@link ServerConfig}
-     * @param mioCallback  {@link MioCallback}
+     * @param mioProcessor  {@link MioProcessor}
      */
-    void initialize(final ServerConfig serverConfig, final MioCallback<MioMessage> mioCallback);
+    void initialize(final ServerConfig serverConfig, final MioProcessor<MioMessage> mioProcessor);
 
     /**
      * The send request

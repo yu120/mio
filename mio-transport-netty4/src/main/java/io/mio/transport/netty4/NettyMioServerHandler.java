@@ -1,10 +1,7 @@
 package io.mio.transport.netty4;
 
-import io.mio.core.commons.MioCallback;
+import io.mio.core.commons.*;
 import io.mio.core.MioConstants;
-import io.mio.core.commons.MioException;
-import io.mio.core.commons.MioMessage;
-import io.mio.core.commons.StandardThreadExecutor;
 import io.mio.core.transport.ServerConfig;
 import io.netty.channel.*;
 import lombok.Getter;
@@ -31,19 +28,19 @@ public class NettyMioServerHandler extends SimpleChannelInboundHandler<MioMessag
      */
     private final int maxConnections;
     /**
-     * The global callback function
+     * The global processor function
      */
-    private final MioCallback<MioMessage> mioCallback;
+    private final MioProcessor<MioMessage> mioProcessor;
     /**
      * The all client channel
      */
     private ConcurrentMap<String, Channel> channels;
     private StandardThreadExecutor standardThreadExecutor;
 
-    public NettyMioServerHandler(ServerConfig serverConfig, MioCallback<MioMessage> mioCallback) {
+    public NettyMioServerHandler(ServerConfig serverConfig, MioProcessor<MioMessage> mioProcessor) {
         super();
         this.maxConnections = serverConfig.getMaxConnections();
-        this.mioCallback = mioCallback;
+        this.mioProcessor = mioProcessor;
         this.channels = new ConcurrentHashMap<>(64);
 
         if (serverConfig.isBizThread()) {
@@ -81,11 +78,11 @@ public class NettyMioServerHandler extends SimpleChannelInboundHandler<MioMessag
          */
         try {
             if (standardThreadExecutor == null) {
-                mioCallback.onProcessor(mioMessage -> ctx.channel().writeAndFlush(mioMessage), msg);
+                mioProcessor.onProcessor(mioMessage -> ctx.channel().writeAndFlush(mioMessage), msg);
             } else {
                 try {
                     standardThreadExecutor.execute(() ->
-                            mioCallback.onProcessor(mioMessage -> ctx.channel().writeAndFlush(mioMessage), msg));
+                            mioProcessor.onProcessor(mioMessage -> ctx.channel().writeAndFlush(mioMessage), msg));
                 } catch (RejectedExecutionException e) {
                     throw new MioException(MioException.SERVER_REJECTED, "Biz thread pool rejected");
                 }
@@ -113,7 +110,7 @@ public class NettyMioServerHandler extends SimpleChannelInboundHandler<MioMessag
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         ctx.channel().close();
-        mioCallback.onFailure(cause);
+        mioProcessor.onFailure(cause);
     }
 
     @Override

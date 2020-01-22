@@ -1,7 +1,7 @@
 package io.mio.core.transport;
 
-import io.mio.core.commons.MioCallback;
 import io.mio.core.commons.MioMessage;
+import io.mio.core.commons.MioProcessor;
 import io.mio.core.extension.ExtensionLoader;
 
 /**
@@ -15,12 +15,12 @@ public class MioTransport {
      * The create server
      *
      * @param serverConfig {@link ServerConfig}
-     * @param mioCallback  {@link MioCallback<MioMessage>}
+     * @param mioProcessor {@link MioProcessor<MioMessage>}
      * @return {@link MioServer}
      */
-    public static MioServer createServer(final ServerConfig serverConfig, final MioCallback<MioMessage> mioCallback) {
+    public static MioServer createServer(final ServerConfig serverConfig, final MioProcessor<MioMessage> mioProcessor) {
         MioServer mioServer = ExtensionLoader.getLoader(MioServer.class).getExtension(serverConfig.getTransport());
-        mioServer.initialize(serverConfig, mioCallback);
+        mioServer.initialize(serverConfig, mioProcessor);
         return mioServer;
     }
 
