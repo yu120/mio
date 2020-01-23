@@ -53,6 +53,10 @@ public class ServerConfig implements Serializable {
      * The compress type
      */
     private String compress = "gzip";
+    /**
+     * The compress data min length(byte, default：10kb)
+     */
+    private int compressMinLength = 10 * 1024;
 
     /**
      * The server socket backlog size
