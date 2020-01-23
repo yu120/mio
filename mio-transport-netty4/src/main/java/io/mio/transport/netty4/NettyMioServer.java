@@ -103,9 +103,8 @@ public class NettyMioServer implements MioServer {
 
             // bind port
             SocketAddress socketAddress = MioConstants.buildSocketAddress(serverConfig.getHostname(), serverConfig.getPort());
-            ChannelFuture channelFuture = serverBootstrap.bind(socketAddress);
-            channelFuture.syncUninterruptibly();
-            serverChannel = channelFuture.channel();
+            ChannelFuture channelFuture = serverBootstrap.bind(socketAddress).syncUninterruptibly();
+            this.serverChannel = channelFuture.channel();
 
             // add shutdown hook
             log.info("The server started success:{}", serverConfig);
