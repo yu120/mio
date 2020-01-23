@@ -2,24 +2,28 @@ package io.mio.transport.netty4;
 
 import io.mio.core.MioConstants;
 import io.mio.core.commons.*;
+import io.mio.core.compress.Compress;
 import io.mio.core.extension.Extension;
 import io.mio.core.extension.ExtensionLoader;
 import io.mio.core.extension.TypeReference;
+import io.mio.core.serialize.Serialize;
 import io.mio.core.transport.ClientConfig;
 import io.mio.core.transport.MioClient;
 import io.mio.transport.netty4.http.SslContextFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.pool.AbstractChannelPoolHandler;
 import io.netty.channel.pool.AbstractChannelPoolMap;
 import io.netty.channel.pool.FixedChannelPool;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 @Extension("netty")
 public class NettyMioClient implements MioClient {
 
-    public static final AttributeKey<MioCallback<MioMessage>> MIO_CALLBACK_KEY = AttributeKey.valueOf("MIO_CALLBACK");
+    private final AttributeKey<MioCallback<MioMessage>> mioCallbackKey = AttributeKey.valueOf("MIO_CALLBACK");
 
     private ClientConfig clientConfig;
     private EventLoopGroup eventLoopGroup;
@@ -48,26 +52,36 @@ public class NettyMioClient implements MioClient {
 
     @Override
     public void initialize(final ClientConfig clientConfig) {
-        ThreadFactory threadFactory = MioConstants.newThreadFactory("mio-client-worker", true);
-
-        // create group and handler
         this.clientConfig = clientConfig;
-        this.eventLoopGroup = new NioEventLoopGroup(clientConfig.getClientThread(), threadFactory);
-        this.clientHandler = new NettyMioClientHandler();
-
-        // create nettyInitializer
+        this.clientHandler = new NettyMioClientHandler(mioCallbackKey);
         this.nettyInitializer = ExtensionLoader.getLoader(new TypeReference<NettyInitializer<ChannelPipeline>>() {
         }).getExtension(clientConfig.getCodec());
+
+        // create socket channel type and thread group
+        Class<? extends SocketChannel> channelClass;
+        ThreadFactory threadFactory = MioConstants.newThreadFactory("mio-client-worker", true);
+        if (clientConfig.isUseLinuxNativeEpoll()) {
+            channelClass = EpollSocketChannel.class;
+            this.eventLoopGroup = new EpollEventLoopGroup(clientConfig.getClientThread(), threadFactory);
+        } else {
+            channelClass = NioSocketChannel.class;
+            this.eventLoopGroup = new NioEventLoopGroup(clientConfig.getClientThread(), threadFactory);
+        }
+
+        // create serialize and compress
+        Serialize serialize = ExtensionLoader.getLoader(Serialize.class).getExtension(clientConfig.getSerialize());
+        Compress compress = ExtensionLoader.getLoader(Compress.class).getExtension(clientConfig.getCompress());
 
         try {
             // create client bootstrap
             Bootstrap bootstrap = new Bootstrap()
                     .group(eventLoopGroup)
+                    .channel(channelClass)
+                    .handler(new LoggingHandler(LogLevel.INFO))
                     .option(ChannelOption.SO_KEEPALIVE, true)
                     .option(ChannelOption.TCP_NODELAY, true)
                     .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, clientConfig.getConnectTimeoutMillis())
-                    .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                    .channel(NioSocketChannel.class);
+                    .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
 
             // create fixed channel pool
             this.channelPools = new AbstractChannelPoolMap<InetSocketAddress, FixedChannelPool>() {
@@ -85,7 +99,8 @@ public class NettyMioClient implements MioClient {
                             // SSL
                             SslContextFactory.client(clientConfig, ch.pipeline());
                             // client nettyInitializer
-                            nettyInitializer.client(clientConfig, ch.pipeline());
+                            nettyInitializer.initialize(false, clientConfig.getMaxContentLength(),
+                                    serialize, compress, ch.pipeline());
                             // heartbeat detection
                             if (clientConfig.getHeartbeat() > 0) {
                                 ch.pipeline().addLast(new IdleStateHandler(0, 0,
@@ -98,7 +113,7 @@ public class NettyMioClient implements MioClient {
                 }
             };
 
-            // add ShutdownHook
+            // add shutdown hook
             log.info("The client started success:{}", clientConfig);
             Runtime.getRuntime().addShutdownHook(new Thread(NettyMioClient.this::destroy));
         } catch (Exception e) {
@@ -141,7 +156,7 @@ public class NettyMioClient implements MioClient {
 
         try {
             mioMessage.wrapper(channel.localAddress(), channel.remoteAddress());
-            channel.attr(MIO_CALLBACK_KEY).set(mioCallback.listener(t -> channelPool.release(channel)));
+            channel.attr(mioCallbackKey).set(mioCallback.listener(t -> channelPool.release(channel)));
             // write and flush
             channel.writeAndFlush(mioMessage);
         } catch (Exception e) {

@@ -3,6 +3,7 @@ package io.mio.transport.netty4.mio;
 import io.mio.core.MioConstants;
 import io.mio.core.commons.MioException;
 import io.mio.core.commons.MioMessage;
+import io.mio.core.compress.Compress;
 import io.mio.core.serialize.Serialize;
 import io.mio.core.utils.ByteUtils;
 import io.netty.buffer.ByteBuf;
@@ -32,10 +33,16 @@ public class NettyMioEncoder extends MessageToByteEncoder<MioMessage> {
 
     private int maxContentLength;
     private Serialize serialize;
+    private Compress compress;
 
     @Override
     protected void encode(ChannelHandlerContext ctx, final MioMessage msg, ByteBuf out) throws Exception {
         byte[] body = serialize.serialize(msg);
+
+        // compress data
+        if (compress != null) {
+            body = compress.compress(body);
+        }
 
         final Channel channel = ctx.channel();
         int length = body.length;

@@ -17,6 +17,10 @@ public class ClientConfig implements Serializable {
      */
     private int clientThread = Math.min(Runtime.getRuntime().availableProcessors() + 1, 32);
     /**
+     * True is use linux native epoll
+     */
+    private boolean useLinuxNativeEpoll;
+    /**
      * The server bind hostname
      */
     private String hostname;
@@ -37,6 +41,10 @@ public class ClientConfig implements Serializable {
      * The server header serialize
      */
     private String serialize = "hessian2";
+    /**
+     * The compress type
+     */
+    private String compress = "gzip";
 
     /**
      * The number of maximal active connections
@@ -54,14 +62,26 @@ public class ClientConfig implements Serializable {
      * The timeout millis(ms) to establish connection
      */
     private int connectTimeoutMillis = 10 * 1000;
-
     /**
      * The timeout millis(ms) to shutdown
      */
     private int shutdownTimeoutMillis = 10 * 1000;
+
+    /**
+     * True is enable ssl
+     */
     private boolean sslEnabled = true;
+    /**
+     * The key store file path
+     */
     private String keyStore = "nettyClient.jks";
+    /**
+     * The trust store file path
+     */
     private String trustStore = "nettyClient.jks";
+    /**
+     * The store password
+     */
     private String storePassword = "defaultPass";
 
 }

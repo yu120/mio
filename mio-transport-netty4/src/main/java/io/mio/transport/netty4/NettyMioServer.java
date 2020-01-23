@@ -1,6 +1,8 @@
 package io.mio.transport.netty4;
 
 import io.mio.core.MioConstants;
+import io.mio.core.compress.Compress;
+import io.mio.core.serialize.Serialize;
 import io.mio.core.transport.MioServer;
 import io.mio.core.commons.*;
 import io.mio.core.extension.Extension;
@@ -46,17 +48,15 @@ public class NettyMioServer implements MioServer {
     @Override
     public void initialize(final ServerConfig serverConfig, final MioProcessor<MioMessage> mioProcessor) {
         this.serverConfig = serverConfig;
+        this.serverHandler = new NettyMioServerHandler(serverConfig, mioProcessor);
+        this.nettyInitializer = ExtensionLoader.getLoader(new TypeReference<NettyInitializer<ChannelPipeline>>() {
+        }).getExtension(serverConfig.getCodec());
 
+        // create socket channel type and thread group
+        Class<? extends ServerChannel> channelClass;
         ThreadFactory bossThreadFactory = MioConstants.newThreadFactory("mio-server-boss", true);
         ThreadFactory workerThreadFactory = MioConstants.newThreadFactory("mio-server-worker", true);
-
-        // create handler
-        this.serverHandler = new NettyMioServerHandler(serverConfig, mioProcessor);
-
-        // create socket channel type and handler
-        Class<? extends ServerChannel> channelClass;
         if (serverConfig.isUseLinuxNativeEpoll()) {
-            // select socket channel type
             channelClass = EpollServerSocketChannel.class;
             this.bossGroup = new EpollEventLoopGroup(serverConfig.getBossThread(), bossThreadFactory);
             this.workerGroup = new EpollEventLoopGroup(serverConfig.getWorkerThread(), workerThreadFactory);
@@ -66,11 +66,12 @@ public class NettyMioServer implements MioServer {
             this.workerGroup = new NioEventLoopGroup(serverConfig.getWorkerThread(), workerThreadFactory);
         }
 
-        // create nettyInitializer
-        this.nettyInitializer = ExtensionLoader.getLoader(new TypeReference<NettyInitializer<ChannelPipeline>>() {
-        }).getExtension(serverConfig.getCodec());
+        // create serialize and compress
+        Serialize serialize = ExtensionLoader.getLoader(Serialize.class).getExtension(serverConfig.getSerialize());
+        Compress compress = ExtensionLoader.getLoader(Compress.class).getExtension(serverConfig.getCompress());
 
         try {
+            // create server bootstrap
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(bossGroup, workerGroup)
                     .channel(channelClass)
@@ -88,7 +89,8 @@ public class NettyMioServer implements MioServer {
                             // SSL
                             SslContextFactory.server(serverConfig, ch.pipeline());
                             // server nettyInitializer
-                            nettyInitializer.server(serverConfig, ch.pipeline());
+                            nettyInitializer.initialize(true, serverConfig.getMaxContentLength(),
+                                    serialize, compress, ch.pipeline());
                             // heartbeat detection
                             if (serverConfig.getHeartbeat() > 0) {
                                 ch.pipeline().addLast(new IdleStateHandler(0, 0,
@@ -99,11 +101,13 @@ public class NettyMioServer implements MioServer {
                         }
                     });
 
+            // bind port
             SocketAddress socketAddress = MioConstants.buildSocketAddress(serverConfig.getHostname(), serverConfig.getPort());
             ChannelFuture channelFuture = serverBootstrap.bind(socketAddress);
             channelFuture.syncUninterruptibly();
             serverChannel = channelFuture.channel();
 
+            // add shutdown hook
             log.info("The server started success:{}", serverConfig);
             Runtime.getRuntime().addShutdownHook(new Thread(NettyMioServer.this::destroy));
         } catch (Exception e) {

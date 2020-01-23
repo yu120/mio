@@ -1,8 +1,8 @@
 package io.mio.transport.netty4;
 
+import io.mio.core.compress.Compress;
 import io.mio.core.extension.SPI;
-import io.mio.core.transport.ClientConfig;
-import io.mio.core.transport.ServerConfig;
+import io.mio.core.serialize.Serialize;
 
 /**
  * NettyInitializer
@@ -13,19 +13,12 @@ import io.mio.core.transport.ServerConfig;
 public interface NettyInitializer<A> {
 
     /**
-     * The server decode and encode
+     * The initialize
      *
-     * @param serverConfig {@link ServerConfig}
-     * @param attachment   {@link A}
+     * @param maxContentLength max content length
+     * @param serialize        {@link Serialize}
+     * @param compress         {@link Compress}
      */
-    void server(ServerConfig serverConfig, A attachment);
-
-    /**
-     * The client decode and encode
-     *
-     * @param clientConfig {@link ClientConfig}
-     * @param attachment   {@link A}
-     */
-    void client(ClientConfig clientConfig, A attachment);
+    void initialize(boolean server, int maxContentLength, Serialize serialize, Compress compress, A attachment);
 
 }

@@ -7,6 +7,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.util.AttributeKey;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -19,8 +21,11 @@ import lombok.extern.slf4j.Slf4j;
  * @author lry
  */
 @Slf4j
+@AllArgsConstructor
 @ChannelHandler.Sharable
 public class NettyMioClientHandler extends SimpleChannelInboundHandler<MioMessage> {
+
+    private final AttributeKey<MioCallback<MioMessage>> mioCallbackKey;
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
@@ -32,7 +37,7 @@ public class NettyMioClientHandler extends SimpleChannelInboundHandler<MioMessag
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, final MioMessage msg) throws Exception {
         Channel channel = ctx.channel();
-        MioCallback<MioMessage> mioCallback = channel.attr(NettyMioClient.MIO_CALLBACK_KEY).getAndSet(null);
+        MioCallback<MioMessage> mioCallback = channel.attr(mioCallbackKey).getAndSet(null);
         mioCallback.notifyListener().onSuccess(msg);
     }
 
@@ -51,7 +56,7 @@ public class NettyMioClientHandler extends SimpleChannelInboundHandler<MioMessag
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, final Throwable cause) throws Exception {
         Channel channel = ctx.channel();
-        MioCallback<MioMessage> mioCallback = channel.attr(NettyMioClient.MIO_CALLBACK_KEY).getAndSet(null);
+        MioCallback<MioMessage> mioCallback = channel.attr(mioCallbackKey).getAndSet(null);
         mioCallback.notifyListener().onFailure(cause);
     }
 

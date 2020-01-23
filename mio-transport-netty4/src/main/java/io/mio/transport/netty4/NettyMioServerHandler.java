@@ -87,10 +87,10 @@ public class NettyMioServerHandler extends SimpleChannelInboundHandler<MioMessag
                     throw new MioException(MioException.SERVER_REJECTED, "Biz thread pool rejected");
                 }
             }
-        } catch (Throwable t) {
-            String channelKey = getChannelKey(ctx.channel());
-            log.error("Biz exception:{}", channelKey, t);
-            MioMessage mioMessage = new MioMessage(null, "你好".getBytes());
+        } catch (RejectedExecutionException e) {
+        } catch (Exception t) {
+            log.error("Biz exception:{}", getChannelKey(ctx.channel()), t);
+            MioMessage mioMessage = new MioMessage(t);
             ctx.channel().writeAndFlush(mioMessage);
         }
     }

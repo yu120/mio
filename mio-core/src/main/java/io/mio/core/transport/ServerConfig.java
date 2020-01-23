@@ -25,7 +25,7 @@ public class ServerConfig implements Serializable {
      */
     private int workerThread = Math.min(Runtime.getRuntime().availableProcessors() + 1, 32);
     /**
-     * The use linux native epoll
+     * True is use linux native epoll
      */
     private boolean useLinuxNativeEpoll;
     /**
@@ -49,6 +49,10 @@ public class ServerConfig implements Serializable {
      * The server header serialize
      */
     private String serialize = "hessian2";
+    /**
+     * The compress type
+     */
+    private String compress = "gzip";
 
     /**
      * The server socket backlog size
@@ -70,21 +74,47 @@ public class ServerConfig implements Serializable {
      * The heartbeat time(ms)
      */
     private int heartbeat = 60 * 1000;
-
     /**
      * The timeout millis(ms) to shutdown
      */
     private int shutdownTimeoutMillis = 10 * 1000;
 
+    /**
+     * True is enable ssl
+     */
     private boolean sslEnabled = true;
-    private String keyStore = "nettyServer.jks";
-    private String trustStore = "nettyServer.jks";
+    /**
+     * The key store file path
+     */
+    private String keyStore = "nettyClient.jks";
+    /**
+     * The trust store file path
+     */
+    private String trustStore = "nettyClient.jks";
+    /**
+     * The store password
+     */
     private String storePassword = "defaultPass";
 
+    /**
+     * True is enable biz thread pool
+     */
     private boolean bizThread = true;
+    /**
+     * The biz core thread pool size
+     */
     private int bizCoreThreads = 20;
+    /**
+     * The biz max thread pool size
+     */
     private int bizMaxThreads = 200;
+    /**
+     * The biz keep alive time(ms)
+     */
     private long bizKeepAliveTime = 60 * 1000L;
+    /**
+     * The biz thread pool queue capacity
+     */
     private int bizQueueCapacity = bizMaxThreads;
 
 }

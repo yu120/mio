@@ -1,11 +1,9 @@
 package io.mio.core.commons;
 
-import io.mio.core.serialize.Serialize;
 import io.mio.core.utils.ExceptionUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -58,21 +56,31 @@ public class MioMessage implements Serializable {
      */
     private transient InetSocketAddress remoteAddress;
 
+    public MioMessage(Exception exception) {
+        this(null, exception, null);
+    }
+
+    public MioMessage(Object data, Map<String, Object> attachments) {
+        this(data, null, attachments);
+    }
+
     /**
      * The build new {@link MioMessage}
      * <p>
      * Tips: need set contentLength,metaLength,meta.
      *
-     * @param attachments attachments data
      * @param data        body data
+     * @param exception   exception
+     * @param attachments attachments data
      */
-    public MioMessage(Map<String, Object> attachments, byte[] data) {
+    private MioMessage(Object data, Exception exception, Map<String, Object> attachments) {
+        this.data = data;
+        this.exception = exception;
         if (attachments == null || attachments.isEmpty()) {
             this.attachments = new LinkedHashMap<>();
         } else {
             this.attachments = new LinkedHashMap<>(attachments);
         }
-        this.data = data;
     }
 
     /**
