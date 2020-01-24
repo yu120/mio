@@ -90,7 +90,7 @@ public class NettyMioServerHandler extends SimpleChannelInboundHandler<MioMessag
         } catch (RejectedExecutionException e) {
         } catch (Exception t) {
             log.error("Biz exception:{}", getChannelKey(ctx.channel()), t);
-            MioMessage mioMessage = new MioMessage(t);
+            MioMessage mioMessage = new MioMessage(null, null);
             ctx.channel().writeAndFlush(mioMessage);
         }
     }

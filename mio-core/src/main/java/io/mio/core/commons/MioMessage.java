@@ -1,16 +1,13 @@
 package io.mio.core.commons;
 
-import io.mio.core.utils.ExceptionUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 /**
  * MioMessage
@@ -27,10 +24,6 @@ public class MioMessage implements Serializable {
      * The data
      */
     private Object data;
-    /**
-     * The exception data
-     */
-    private Exception exception;
     /**
      * The attachments data
      * <p>
@@ -56,26 +49,16 @@ public class MioMessage implements Serializable {
      */
     private transient InetSocketAddress remoteAddress;
 
-    public MioMessage(Exception exception) {
-        this(null, exception, null);
-    }
-
-    public MioMessage(Object data, Map<String, Object> attachments) {
-        this(data, null, attachments);
-    }
-
     /**
      * The build new {@link MioMessage}
      * <p>
      * Tips: need set contentLength,metaLength,meta.
      *
      * @param data        body data
-     * @param exception   exception
      * @param attachments attachments data
      */
-    private MioMessage(Object data, Exception exception, Map<String, Object> attachments) {
+    public MioMessage(Object data, Map<String, Object> attachments) {
         this.data = data;
-        this.exception = exception;
         if (attachments == null || attachments.isEmpty()) {
             this.attachments = new LinkedHashMap<>();
         } else {
@@ -92,14 +75,6 @@ public class MioMessage implements Serializable {
     public void wrapper(SocketAddress localAddress, SocketAddress remoteAddress) {
         this.localAddress = (InetSocketAddress) localAddress;
         this.remoteAddress = (InetSocketAddress) remoteAddress;
-    }
-
-    public byte[] toBody(Function<Object, byte[]> function) {
-        if (exception == null) {
-            return (data instanceof byte[]) ? (byte[]) data : function.apply(data);
-        } else {
-            return ExceptionUtils.toString(exception).getBytes(StandardCharsets.UTF_8);
-        }
     }
 
 }
