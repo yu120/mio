@@ -11,11 +11,11 @@ import java.io.Writer;
  */
 public class ExceptionUtils {
 
-    public static String toString(Throwable e) {
-        return toString(null, e);
+    public static String toStack(Throwable e) {
+        return toStack(null, e);
     }
 
-    public static String toString(String msg, Throwable e) {
+    public static String toStack(String msg, Throwable e) {
         UnsafeStringWriter w = new UnsafeStringWriter();
         if (msg != null) {
             w.write(msg + "\n");
