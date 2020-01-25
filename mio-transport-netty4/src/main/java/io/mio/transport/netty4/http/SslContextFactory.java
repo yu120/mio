@@ -46,7 +46,7 @@ public final class SslContextFactory {
         }
     }
 
-    public static SSLContext getServerContext(String pkPath, String caPath, String password) {
+    private static SSLContext getServerContext(String pkPath, String caPath, String password) {
         if (SERVER_CONTEXT != null) {
             return SERVER_CONTEXT;
         }
@@ -54,7 +54,7 @@ public final class SslContextFactory {
         return SERVER_CONTEXT = getContext(pkPath, caPath, password);
     }
 
-    public static SSLContext getClientContext(String pkPath, String caPath, String password) {
+    private static SSLContext getClientContext(String pkPath, String caPath, String password) {
         if (CLIENT_CONTEXT != null) {
             return CLIENT_CONTEXT;
         }
@@ -62,7 +62,7 @@ public final class SslContextFactory {
         return CLIENT_CONTEXT = getContext(pkPath, caPath, password);
     }
 
-    public static SSLContext getContext(String pkPath, String caPath, String password) {
+    private static SSLContext getContext(String pkPath, String caPath, String password) {
         if (CLIENT_CONTEXT != null) {
             return CLIENT_CONTEXT;
         }
@@ -132,4 +132,5 @@ public final class SslContextFactory {
 
         return inputStream;
     }
+
 }
