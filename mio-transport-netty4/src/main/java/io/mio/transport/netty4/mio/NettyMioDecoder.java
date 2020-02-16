@@ -18,7 +18,18 @@ import java.util.List;
  *
  * <pre>
  * ====================================================================================================================
- * [Protocol]：magic(1 byte) + version(1 byte) + length(4 byte) + body(data+exception+attachments, N byte)+ xor(1 byte)
+ * [Protocol]
+ * ====================================================================================================================
+ * [*] magic(1 bit)
+ * [*] protocol version(1 bit)
+ * [*] message event(1 bit,eg: heartbeat,normal,exception)
+ * [*] request/response(1 bit)
+ * [*] serialization id (1 bit)
+ * status (2 bits)
+ * message id(1 bit)
+ * [*] data length(4 bits)
+ * [*] data(attachments+data+exception, N bits)
+ * [*] xor(1 bit)
  * ====================================================================================================================
  * Consider:
  * 6.crc data(crc), cyclic redundancy detection.The XOR algorithm is used to
@@ -90,7 +101,8 @@ public class NettyMioDecoder extends ByteToMessageDecoder {
         buffer.readBytes(body);
 
         // Step 6: Read and check xor
-        if (buffer.readByte() != ByteUtils.xor(version, length, body)) {
+        byte[] xorArray = ByteUtils.concat(ByteUtils.concat(version, ByteUtils.int2bytesBig(length)), body);
+        if (buffer.readByte() != ByteUtils.xor(xorArray)) {
             return;
         }
 

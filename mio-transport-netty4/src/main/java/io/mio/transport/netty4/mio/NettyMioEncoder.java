@@ -47,7 +47,8 @@ public class NettyMioEncoder extends MessageToByteEncoder<MioMessage> {
         final Channel channel = ctx.channel();
         int length = body.length;
         int contentLength = MioConstants.BASE_READ_LENGTH + length + MioConstants.XOR_BYTE;
-        byte xor = ByteUtils.xor(msg.getVersion(), length, body);
+        byte[] xorArray = ByteUtils.concat(ByteUtils.concat(msg.getVersion(), ByteUtils.int2bytesBig(length)), body);
+        byte xor = ByteUtils.xor(xorArray);
 
         // wrapper local and remote address
         msg.wrapper(channel.localAddress(), channel.remoteAddress());
