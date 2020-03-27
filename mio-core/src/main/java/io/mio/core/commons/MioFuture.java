@@ -18,6 +18,7 @@ public class MioFuture<V> {
     private final Object lock = new Object();
     private volatile FutureState state = FutureState.DOING;
     private final long createTime = System.currentTimeMillis();
+    private long processTime;
 
     private V result = null;
     private Throwable cause = null;
@@ -29,6 +30,7 @@ public class MioFuture<V> {
      * @param result {@link V}
      */
     public void onSuccess(V result) {
+        this.processTime = System.currentTimeMillis() - createTime;
         this.result = result;
         done();
     }
@@ -39,6 +41,7 @@ public class MioFuture<V> {
      * @param cause {@link Throwable}
      */
     public void onFailure(Throwable cause) {
+        this.processTime = System.currentTimeMillis() - createTime;
         this.cause = cause;
         done();
     }
@@ -195,6 +198,7 @@ public class MioFuture<V> {
      * The cancel by timeout
      */
     private void timeoutSoCancel() {
+        this.processTime = System.currentTimeMillis() - createTime;
         synchronized (lock) {
             if (state != FutureState.DOING) {
                 return;
@@ -231,6 +235,10 @@ public class MioFuture<V> {
         } catch (Throwable t) {
             log.error("Notify listener exception", t);
         }
+    }
+
+    public long getProcessTime() {
+        return processTime;
     }
 
     /**
