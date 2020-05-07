@@ -13,6 +13,7 @@ import io.mio.transport.netty4.http.SslContextFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
+import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -45,6 +46,17 @@ public class NettyMioServer implements MioServer {
     private NettyMioServerHandler serverHandler;
     private NettyInitializer<ChannelPipeline> nettyInitializer;
 
+    private static boolean IS_LINUX_PLATFORM = false;
+
+    static {
+        String osName = System.getProperty("os.name");
+        if (osName != null && osName.toLowerCase().contains("linux")) {
+            if (osName.toLowerCase().contains("linux")) {
+                IS_LINUX_PLATFORM = true;
+            }
+        }
+    }
+
     @Override
     public void initialize(final ServerConfig serverConfig, final MioProcessor<MioMessage> mioProcessor) {
         this.serverConfig = serverConfig;
@@ -56,7 +68,7 @@ public class NettyMioServer implements MioServer {
         Class<? extends ServerChannel> channelClass;
         ThreadFactory bossThreadFactory = MioConstants.newThreadFactory("mio-server-boss", true);
         ThreadFactory workerThreadFactory = MioConstants.newThreadFactory("mio-server-worker", true);
-        if (serverConfig.isUseLinuxNativeEpoll()) {
+        if (IS_LINUX_PLATFORM && serverConfig.isUseLinuxNativeEpoll() && Epoll.isAvailable()) {
             channelClass = EpollServerSocketChannel.class;
             this.bossGroup = new EpollEventLoopGroup(serverConfig.getBossThread(), bossThreadFactory);
             this.workerGroup = new EpollEventLoopGroup(serverConfig.getWorkerThread(), workerThreadFactory);
