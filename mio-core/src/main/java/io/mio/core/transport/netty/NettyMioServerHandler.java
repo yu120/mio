@@ -48,13 +48,12 @@ public class NettyMioServerHandler extends SimpleChannelInboundHandler<MioMessag
         this.maxConnections = serverConfig.getMaxConnections();
         this.mioProcessor = mioProcessor;
         this.channels = new ConcurrentHashMap<>(64);
-
         if (serverConfig.isBizThread()) {
             String threadName = String.format("server-%s:%s", serverConfig.getHostname(), serverConfig.getPort());
-            this.standardThreadExecutor = new StandardThreadExecutor(
-                    serverConfig.getBizCoreThreads(), serverConfig.getBizMaxThreads(),
-                    serverConfig.getBizKeepAliveTime(), TimeUnit.MILLISECONDS, serverConfig.getBizQueueCapacity(),
-                    new ThreadFactoryBuilder().setNameFormat(threadName).setDaemon(true).build());
+            ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat(threadName).setDaemon(true).build();
+            this.standardThreadExecutor = new StandardThreadExecutor(serverConfig.getBizCoreThreads(),
+                    serverConfig.getBizMaxThreads(), serverConfig.getBizKeepAliveTime(),
+                    TimeUnit.MILLISECONDS, serverConfig.getBizQueueCapacity(), threadFactory);
         }
     }
 
