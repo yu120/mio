@@ -44,10 +44,10 @@ import java.util.concurrent.TimeUnit;
 @Extension("netty")
 public class NettyMioClient implements MioClient {
 
-    private final AttributeKey<MioCallback<MioMessage>> mioCallbackKey = AttributeKey.valueOf("MIO_CALLBACK");
+    private final AttributeKey<MioCallback<MioMessage>> callbackKey = AttributeKey.valueOf("MIO_CALLBACK");
 
     private ClientConfig clientConfig;
-    private EventLoopGroup eventLoopGroup;
+    private EventLoopGroup workGroup;
     private AbstractChannelPoolMap<InetSocketAddress, FixedChannelPool> channelPools;
 
     private NettyMioClientHandler clientHandler;
@@ -56,7 +56,7 @@ public class NettyMioClient implements MioClient {
     @Override
     public void initialize(final ClientConfig clientConfig) {
         this.clientConfig = clientConfig;
-        this.clientHandler = new NettyMioClientHandler(mioCallbackKey);
+        this.clientHandler = new NettyMioClientHandler(callbackKey);
         this.initializer = ExtensionLoader.getLoader(NettyInitializer.class).getExtension(clientConfig.getCodec());
 
         // create socket channel type and thread group
@@ -64,10 +64,10 @@ public class NettyMioClient implements MioClient {
         ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("mio-client-worker").setDaemon(true).build();
         if (clientConfig.isUseLinuxNativeEpoll()) {
             channelClass = EpollSocketChannel.class;
-            this.eventLoopGroup = new EpollEventLoopGroup(clientConfig.getClientThread(), threadFactory);
+            this.workGroup = new EpollEventLoopGroup(clientConfig.getClientThread(), threadFactory);
         } else {
             channelClass = NioSocketChannel.class;
-            this.eventLoopGroup = new NioEventLoopGroup(clientConfig.getClientThread(), threadFactory);
+            this.workGroup = new NioEventLoopGroup(clientConfig.getClientThread(), threadFactory);
         }
 
         // create serialize and compress
@@ -77,7 +77,7 @@ public class NettyMioClient implements MioClient {
         try {
             // create client bootstrap
             Bootstrap bootstrap = new Bootstrap()
-                    .group(eventLoopGroup)
+                    .group(workGroup)
                     .channel(channelClass)
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .option(ChannelOption.SO_KEEPALIVE, true)
@@ -155,7 +155,7 @@ public class NettyMioClient implements MioClient {
 
         try {
             message.wrapper(channel.localAddress(), channel.remoteAddress());
-            channel.attr(mioCallbackKey).set(callback.listener(t -> channelPool.release(channel)));
+            channel.attr(callbackKey).set(callback.listener(t -> channelPool.release(channel)));
             // write and flush
             channel.writeAndFlush(message);
         } catch (Exception e) {
@@ -177,9 +177,9 @@ public class NettyMioClient implements MioClient {
         }
 
         // shutdown eventLoopGroup
-        if (eventLoopGroup != null) {
+        if (workGroup != null) {
             try {
-                eventLoopGroup.shutdownGracefully(0,
+                workGroup.shutdownGracefully(0,
                         clientConfig.getShutdownTimeoutMillis(), TimeUnit.MILLISECONDS);
             } catch (Exception e) {
                 log.error("Shutdown client eventLoopGroup exception", e);

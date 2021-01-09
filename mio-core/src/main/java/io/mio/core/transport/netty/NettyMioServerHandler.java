@@ -36,22 +36,22 @@ public class NettyMioServerHandler extends SimpleChannelInboundHandler<MioMessag
     /**
      * The global processor function
      */
-    private final MioProcessor<MioMessage> mioProcessor;
+    private final MioProcessor<MioMessage> processor;
     /**
      * The all client channel
      */
     private ConcurrentMap<String, Channel> channels;
-    private StandardThreadExecutor standardThreadExecutor;
+    private StandardThreadExecutor threadExecutor;
 
-    public NettyMioServerHandler(ServerConfig serverConfig, MioProcessor<MioMessage> mioProcessor) {
+    public NettyMioServerHandler(ServerConfig serverConfig, MioProcessor<MioMessage> processor) {
         super();
         this.maxConnections = serverConfig.getMaxConnections();
-        this.mioProcessor = mioProcessor;
-        this.channels = new ConcurrentHashMap<>(64);
+        this.processor = processor;
+        this.channels = new ConcurrentHashMap<>(Math.min(serverConfig.getMaxConnections(), 100));
         if (serverConfig.isBizThread()) {
             String threadName = String.format("server-%s:%s", serverConfig.getHostname(), serverConfig.getPort());
             ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat(threadName).setDaemon(true).build();
-            this.standardThreadExecutor = new StandardThreadExecutor(serverConfig.getBizCoreThreads(),
+            this.threadExecutor = new StandardThreadExecutor(serverConfig.getBizCoreThreads(),
                     serverConfig.getBizMaxThreads(), serverConfig.getBizKeepAliveTime(),
                     TimeUnit.MILLISECONDS, serverConfig.getBizQueueCapacity(), threadFactory);
         }
@@ -59,15 +59,17 @@ public class NettyMioServerHandler extends SimpleChannelInboundHandler<MioMessag
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        String channelKey = getChannelKey(ctx.channel());
+        Channel channel = ctx.channel();
+        String channelKey = getChannelKey(channel);
+
         int channelSize = channels.size();
-        if (channelSize >= maxConnections) {
+        if (channelSize > maxConnections) {
             // Exceeding the maximum number of connections limit, direct close connection
             log.warn("Server connected channel out of limit: limit={}, current={}, channel={}",
                     maxConnections, channelSize, channelKey);
-            ctx.channel().close();
+            channel.close();
         } else {
-            channels.put(channelKey, ctx.channel());
+            channels.put(channelKey, channel);
             log.debug("Server channel registered:{}", channelKey);
             super.channelRegistered(ctx);
         }
@@ -75,25 +77,22 @@ public class NettyMioServerHandler extends SimpleChannelInboundHandler<MioMessag
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, MioMessage msg) throws Exception {
-        /*
-         * Notify results outwards.
-         * When there is a write operation, you do not need to release the reference of MSG manually.
-         * You need to release the reference of MSG manually when only read operation is available.
-         */
+        Channel channel = ctx.channel();
+        String channelKey = getChannelKey(channel);
+
         try {
-            if (standardThreadExecutor == null) {
-                mioProcessor.onProcessor(mioMessage -> ctx.channel().writeAndFlush(mioMessage), msg);
+            if (threadExecutor == null) {
+                processor.onProcessor(channel::writeAndFlush, msg);
             } else {
-                standardThreadExecutor.execute(() -> mioProcessor.onProcessor(
-                        mioMessage -> ctx.channel().writeAndFlush(mioMessage), msg));
+                threadExecutor.execute(() -> processor.onProcessor(channel::writeAndFlush, msg));
             }
         } catch (Throwable t) {
             if (t instanceof RejectedExecutionException) {
-                log.warn("Thread pool rejected:{}", getChannelKey(ctx.channel()), t);
-                ctx.channel().writeAndFlush(new MioMessage(MioMessage.THREAD_POOL_REJECTED, ExceptionUtils.toStack(t)));
+                log.warn("Server processor thread pool[{}] rejected:{}", channelKey, t.getMessage());
+                channel.writeAndFlush(new MioMessage(MioMessage.THREAD_POOL_REJECTED, ExceptionUtils.toStack(t)));
             } else {
-                log.error("Service error:{}", getChannelKey(ctx.channel()), t);
-                ctx.channel().writeAndFlush(new MioMessage(MioMessage.SERVICE_ERROR, ExceptionUtils.toStack(t)));
+                log.error("Server processor error:{}", channelKey, t);
+                channel.writeAndFlush(new MioMessage(MioMessage.SERVICE_ERROR, ExceptionUtils.toStack(t)));
             }
         }
     }
@@ -112,7 +111,7 @@ public class NettyMioServerHandler extends SimpleChannelInboundHandler<MioMessag
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        mioProcessor.onFailure(cause);
+        processor.onFailure(cause);
         ctx.channel().writeAndFlush(new MioMessage(MioMessage.SERVER_ERROR, ExceptionUtils.toStack(cause)));
         log.error("Server error:{}", getChannelKey(ctx.channel()), cause);
         super.exceptionCaught(ctx, cause);

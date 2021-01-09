@@ -37,8 +37,8 @@ public class NettyMioClientHandler extends SimpleChannelInboundHandler<MioMessag
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, final MioMessage msg) throws Exception {
         Channel channel = ctx.channel();
-        MioCallback<MioMessage> mioCallback = channel.attr(mioCallbackKey).getAndSet(null);
-        mioCallback.notifyListener().onSuccess(msg);
+        MioCallback<MioMessage> callback = channel.attr(mioCallbackKey).getAndSet(null);
+        callback.notifyListener().onSuccess(msg);
     }
 
     @Override
@@ -56,8 +56,8 @@ public class NettyMioClientHandler extends SimpleChannelInboundHandler<MioMessag
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, final Throwable cause) throws Exception {
         Channel channel = ctx.channel();
-        MioCallback<MioMessage> mioCallback = channel.attr(mioCallbackKey).getAndSet(null);
-        mioCallback.notifyListener().onFailure(cause);
+        MioCallback<MioMessage> callback = channel.attr(mioCallbackKey).getAndSet(null);
+        callback.notifyListener().onFailure(cause);
     }
 
     @Override

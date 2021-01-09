@@ -43,9 +43,9 @@ import java.util.List;
 @AllArgsConstructor
 public class NettyMioDecoder extends ByteToMessageDecoder {
 
-    private int maxContentLength;
-    private Serialize serialize;
-    private Compress compress;
+    private final int maxContentLength;
+    private final Serialize serialize;
+    private final Compress compress;
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf buffer, List<Object> out) throws Exception {

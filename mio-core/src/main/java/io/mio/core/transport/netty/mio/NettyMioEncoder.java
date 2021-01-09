@@ -31,9 +31,9 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class NettyMioEncoder extends MessageToByteEncoder<MioMessage> {
 
-    private int maxContentLength;
-    private Serialize serialize;
-    private Compress compress;
+    private final int maxContentLength;
+    private final Serialize serialize;
+    private final Compress compress;
 
     @Override
     protected void encode(ChannelHandlerContext ctx, final MioMessage msg, ByteBuf out) throws Exception {

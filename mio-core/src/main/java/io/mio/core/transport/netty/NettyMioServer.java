@@ -24,6 +24,7 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
@@ -110,8 +111,15 @@ public class NettyMioServer implements MioServer {
                         }
                     });
 
+            // calculate socket address
+            SocketAddress socketAddress;
+            if (serverConfig.getHostname() == null || serverConfig.getHostname().length() == 0) {
+                socketAddress = new InetSocketAddress(serverConfig.getPort());
+            } else {
+                socketAddress = new InetSocketAddress(serverConfig.getHostname(), serverConfig.getPort());
+            }
+
             // bind port
-            SocketAddress socketAddress = MioConstants.buildSocketAddress(serverConfig.getHostname(), serverConfig.getPort());
             ChannelFuture channelFuture = serverBootstrap.bind(socketAddress).syncUninterruptibly();
             this.serverChannel = channelFuture.channel();
 
@@ -127,13 +135,13 @@ public class NettyMioServer implements MioServer {
     public void send(MioMessage message) throws Throwable {
         String key = String.format("%s->%s", MioConstants.getSocketAddressKey(message.getLocalAddress()),
                 MioConstants.getSocketAddressKey(message.getRemoteAddress()));
-        Channel clientChannel = serverHandler.getChannels().get(key);
-        if (clientChannel == null) {
+        Channel channel = serverHandler.getChannels().get(key);
+        if (channel == null) {
             throw new MioException(MioException.NOT_FOUND_CLIENT, "Not found client:" + key);
         }
 
         // send
-        clientChannel.writeAndFlush(message);
+        channel.writeAndFlush(message);
     }
 
     @Override
