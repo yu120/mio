@@ -124,15 +124,15 @@ public class NettyMioClient implements MioClient {
     }
 
     @Override
-    public MioMessage request(final MioMessage mioMessage) throws Throwable {
-        return submit(mioMessage).get();
+    public MioMessage request(final MioMessage message) throws Throwable {
+        return submit(message).get();
     }
 
     @Override
-    public MioFuture<MioMessage> submit(final MioMessage mioMessage) throws Throwable {
+    public MioFuture<MioMessage> submit(final MioMessage message) throws Throwable {
         final MioFuture<MioMessage> mioFuture = new MioFuture<>();
         // send callback
-        callback(mioMessage, new MioCallback<MioMessage>() {
+        callback(message, new MioCallback<MioMessage>() {
             @Override
             public void onSuccess(MioMessage response) {
                 mioFuture.onSuccess(response);
@@ -148,19 +148,19 @@ public class NettyMioClient implements MioClient {
     }
 
     @Override
-    public void callback(final MioMessage mioMessage, final MioCallback<MioMessage> mioCallback) throws Throwable {
-        log.debug("The callback request: {}", mioMessage);
-        final FixedChannelPool channelPool = channelPools.get(mioMessage.getRemoteAddress());
+    public void callback(final MioMessage message, final MioCallback<MioMessage> callback) throws Throwable {
+        log.debug("The callback request: {}", message);
+        final FixedChannelPool channelPool = channelPools.get(message.getRemoteAddress());
         final Channel channel = channelPool.acquire().get();
         if (channel == null) {
             throw new MioException(MioException.CHANNEL_NULL, "Acquire get channel null");
         }
 
         try {
-            mioMessage.wrapper(channel.localAddress(), channel.remoteAddress());
-            channel.attr(mioCallbackKey).set(mioCallback.listener(t -> channelPool.release(channel)));
+            message.wrapper(channel.localAddress(), channel.remoteAddress());
+            channel.attr(mioCallbackKey).set(callback.listener(t -> channelPool.release(channel)));
             // write and flush
-            channel.writeAndFlush(mioMessage);
+            channel.writeAndFlush(message);
         } catch (Exception e) {
             // return channel to pool
             channelPool.release(channel);

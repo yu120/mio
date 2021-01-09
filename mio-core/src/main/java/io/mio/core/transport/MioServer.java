@@ -16,17 +16,17 @@ public interface MioServer {
      * The initialize server
      *
      * @param serverConfig {@link ServerConfig}
-     * @param mioProcessor  {@link MioProcessor}
+     * @param processor  {@link MioProcessor}
      */
-    void initialize(final ServerConfig serverConfig, final MioProcessor<MioMessage> mioProcessor);
+    void initialize(final ServerConfig serverConfig, final MioProcessor<MioMessage> processor);
 
     /**
      * The send request
      *
-     * @param mioMessage {@link MioMessage}
+     * @param message {@link MioMessage}
      * @throws Throwable exception {@link Throwable}
      */
-    void send(final MioMessage mioMessage) throws Throwable;
+    void send(final MioMessage message) throws Throwable;
 
     /**
      * The destroy server

@@ -23,29 +23,29 @@ public interface MioClient {
     /**
      * The send request
      *
-     * @param mioMessage {@link MioMessage}
+     * @param message {@link MioMessage}
      * @return {@link MioMessage}
      * @throws Throwable exception {@link Throwable}
      */
-    MioMessage request(final MioMessage mioMessage) throws Throwable;
+    MioMessage request(final MioMessage message) throws Throwable;
 
     /**
      * The send submit
      *
-     * @param mioMessage {@link MioMessage}
+     * @param message {@link MioMessage}
      * @return {@link MioFuture}
      * @throws Throwable exception {@link Throwable}
      */
-    MioFuture<MioMessage> submit(final MioMessage mioMessage) throws Throwable;
+    MioFuture<MioMessage> submit(final MioMessage message) throws Throwable;
 
     /**
      * The send callback
      *
-     * @param mioMessage  {@link MioMessage}
-     * @param mioCallback {@link MioCallback}
+     * @param message  {@link MioMessage}
+     * @param callback {@link MioCallback}
      * @throws Throwable exception {@link Throwable}
      */
-    void callback(final MioMessage mioMessage, final MioCallback<MioMessage> mioCallback) throws Throwable;
+    void callback(final MioMessage message, final MioCallback<MioMessage> callback) throws Throwable;
 
     /**
      * The destroy client

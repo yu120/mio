@@ -60,9 +60,9 @@ public class NettyMioServer implements MioServer {
     }
 
     @Override
-    public void initialize(final ServerConfig serverConfig, final MioProcessor<MioMessage> mioProcessor) {
+    public void initialize(final ServerConfig serverConfig, final MioProcessor<MioMessage> processor) {
         this.serverConfig = serverConfig;
-        this.serverHandler = new NettyMioServerHandler(serverConfig, mioProcessor);
+        this.serverHandler = new NettyMioServerHandler(serverConfig, processor);
         this.initializer = ExtensionLoader.getLoader(NettyInitializer.class).getExtension(serverConfig.getCodec());
 
         // create socket channel type and thread group
@@ -127,16 +127,16 @@ public class NettyMioServer implements MioServer {
     }
 
     @Override
-    public void send(MioMessage mioMessage) throws Throwable {
-        String key = String.format("%s->%s", MioConstants.getSocketAddressKey(mioMessage.getLocalAddress()),
-                MioConstants.getSocketAddressKey(mioMessage.getRemoteAddress()));
+    public void send(MioMessage message) throws Throwable {
+        String key = String.format("%s->%s", MioConstants.getSocketAddressKey(message.getLocalAddress()),
+                MioConstants.getSocketAddressKey(message.getRemoteAddress()));
         Channel clientChannel = serverHandler.getChannels().get(key);
         if (clientChannel == null) {
             throw new MioException(MioException.NOT_FOUND_CLIENT, "Not found client:" + key);
         }
 
         // send
-        clientChannel.writeAndFlush(mioMessage);
+        clientChannel.writeAndFlush(message);
     }
 
     @Override
