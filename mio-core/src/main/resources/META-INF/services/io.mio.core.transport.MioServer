@@ -1,1 +1,1 @@
-io.mio.core.transport.netty4.NettyMioServer
+io.mio.core.transport.netty.NettyMioServer

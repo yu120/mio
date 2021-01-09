@@ -1,4 +1,4 @@
-package io.mio.core.transport.netty4;
+package io.mio.core.transport.netty;
 
 import io.mio.core.MioConstants;
 import io.mio.core.commons.MioCallback;
@@ -11,7 +11,7 @@ import io.mio.core.extension.ExtensionLoader;
 import io.mio.core.serialize.Serialize;
 import io.mio.core.transport.ClientConfig;
 import io.mio.core.transport.MioClient;
-import io.mio.core.transport.netty4.http.SslContextFactory;
+import io.mio.core.transport.netty.http.SslContextFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;

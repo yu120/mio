@@ -1,4 +1,4 @@
-package io.mio.core.transport.netty4;
+package io.mio.core.transport.netty;
 
 import io.mio.core.compress.Compress;
 import io.mio.core.extension.SPI;

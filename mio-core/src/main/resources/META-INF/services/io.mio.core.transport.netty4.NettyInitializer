@@ -1,2 +1,0 @@
-io.mio.core.transport.netty4.mio.NettyMioInitializer
-io.mio.core.transport.netty4.http.NettyHttpInitializer

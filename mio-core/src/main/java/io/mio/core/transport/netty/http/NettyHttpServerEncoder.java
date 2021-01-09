@@ -1,4 +1,4 @@
-package io.mio.core.transport.netty4.http;
+package io.mio.core.transport.netty.http;
 
 import io.mio.core.MioConstants;
 import io.mio.core.commons.MioMessage;
@@ -11,7 +11,6 @@ import io.netty.handler.codec.http.*;
 import lombok.AllArgsConstructor;
 
 import java.net.InetSocketAddress;
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +20,7 @@ import java.util.Map;
  * @author lry
  */
 @AllArgsConstructor
-public class NettyHttpClientEncoder extends MessageToMessageEncoder<MioMessage> {
+public class NettyHttpServerEncoder extends MessageToMessageEncoder<MioMessage> {
 
     private final Serialize serialize;
 
@@ -29,15 +28,14 @@ public class NettyHttpClientEncoder extends MessageToMessageEncoder<MioMessage> 
     protected void encode(ChannelHandlerContext ctx, MioMessage msg, List<Object> out) throws Exception {
         byte[] body = serialize.serialize(msg);
 
-        // setter request method
-        Object requestMethod = msg.getAttachments().getOrDefault(MioConstants.REQUEST_METHOD_KEY, HttpMethod.POST.name());
-        HttpMethod httpMethod = HttpMethod.valueOf(String.valueOf(requestMethod));
-        // setter uri
-        Object path = msg.getAttachments().getOrDefault(MioConstants.URI_KEY, "/");
-        String uri = new URI(String.valueOf(path)).toASCIIString();
-        // setter content
+        // convert data to ByteBuf
         ByteBuf content = Unpooled.wrappedBuffer(body);
-        FullHttpMessage httpMessage = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, httpMethod, uri, content);
+        // setter response status
+        Object status = msg.getAttachments().getOrDefault(MioConstants.RESPONSE_STATUS_KEY, HttpResponseStatus.OK.code());
+        HttpResponseStatus httpResponseStatus = HttpResponseStatus.valueOf((int) status);
+
+        // server send response encoder
+        FullHttpMessage httpMessage = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, httpResponseStatus, content);
 
         // set auto header parameter
         HttpHeaders httpHeaders = httpMessage.headers();
@@ -48,8 +46,8 @@ public class NettyHttpClientEncoder extends MessageToMessageEncoder<MioMessage> 
         }
 
         // set must be header parameter
-        httpHeaders.set(HttpHeaderNames.HOST, ((InetSocketAddress) ctx.channel().localAddress()).getHostString());
         httpHeaders.set(HttpHeaderNames.CONTENT_LENGTH, httpMessage.content().readableBytes());
+        httpHeaders.set(HttpHeaderNames.HOST, ((InetSocketAddress) ctx.channel().localAddress()).getHostString());
         if (!httpHeaders.contains(HttpHeaderNames.CONTENT_TYPE.toString())) {
             httpHeaders.set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON);
         }
