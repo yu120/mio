@@ -13,26 +13,26 @@ import io.netty.handler.codec.http.*;
  * @author lry
  */
 @Extension("http")
-public class NettyHttpInitializer implements NettyInitializer<ChannelPipeline> {
+public class NettyHttpInitializer implements NettyInitializer {
 
     @Override
-    public void server(int maxContentLength, Serialize serialize, Compress compress, ChannelPipeline attachment) {
-        attachment.addLast(new HttpRequestDecoder());
-        attachment.addLast(new HttpResponseEncoder());
-        attachment.addLast(new HttpObjectAggregator(maxContentLength));
-
-        attachment.addLast(new NettyHttpDecoder(serialize));
-        attachment.addLast(new NettyHttpServerEncoder(serialize));
+    public void server(int maxContentLength, Serialize serialize, Compress compress, Object attachment) {
+        ChannelPipeline ch = (ChannelPipeline) attachment;
+        ch.addLast(new HttpRequestDecoder());
+        ch.addLast(new HttpResponseEncoder());
+        ch.addLast(new HttpObjectAggregator(maxContentLength));
+        ch.addLast(new NettyHttpDecoder(serialize));
+        ch.addLast(new NettyHttpServerEncoder(serialize));
     }
 
     @Override
-    public void client(int maxContentLength, Serialize serialize, Compress compress, ChannelPipeline attachment) {
-        attachment.addLast(new HttpRequestEncoder());
-        attachment.addLast(new HttpResponseDecoder());
-        attachment.addLast(new HttpObjectAggregator(maxContentLength));
-
-        attachment.addLast(new NettyHttpClientEncoder(serialize));
-        attachment.addLast(new NettyHttpDecoder(serialize));
+    public void client(int maxContentLength, Serialize serialize, Compress compress, Object attachment) {
+        ChannelPipeline ch = (ChannelPipeline) attachment;
+        ch.addLast(new HttpRequestEncoder());
+        ch.addLast(new HttpResponseDecoder());
+        ch.addLast(new HttpObjectAggregator(maxContentLength));
+        ch.addLast(new NettyHttpClientEncoder(serialize));
+        ch.addLast(new NettyHttpDecoder(serialize));
     }
 
 }

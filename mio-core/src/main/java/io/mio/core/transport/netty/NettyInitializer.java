@@ -10,7 +10,7 @@ import io.mio.core.serialize.Serialize;
  * @author lry
  */
 @SPI("mio")
-public interface NettyInitializer<A> {
+public interface NettyInitializer {
 
     /**
      * The initialize
@@ -19,8 +19,8 @@ public interface NettyInitializer<A> {
      * @param serialize        {@link Serialize}
      * @param compress         {@link Compress}
      */
-    void server(int maxContentLength, Serialize serialize, Compress compress, A attachment);
+    void server(int maxContentLength, Serialize serialize, Compress compress, Object attachment);
 
-    void client(int maxContentLength, Serialize serialize, Compress compress, A attachment);
+    void client(int maxContentLength, Serialize serialize, Compress compress, Object attachment);
 
 }

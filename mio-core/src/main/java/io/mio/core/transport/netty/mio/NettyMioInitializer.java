@@ -12,18 +12,20 @@ import io.netty.channel.ChannelPipeline;
  * @author lry
  */
 @Extension("mio")
-public class NettyMioInitializer implements NettyInitializer<ChannelPipeline> {
+public class NettyMioInitializer implements NettyInitializer {
 
     @Override
-    public void server(int maxContentLength, Serialize serialize, Compress compress, ChannelPipeline attachment) {
-        attachment.addLast(new NettyMioDecoder(maxContentLength, serialize, compress));
-        attachment.addLast(new NettyMioEncoder(maxContentLength, serialize, compress));
+    public void server(int maxContentLength, Serialize serialize, Compress compress, Object attachment) {
+        ChannelPipeline ch = (ChannelPipeline) attachment;
+        ch.addLast(new NettyMioDecoder(maxContentLength, serialize, compress));
+        ch.addLast(new NettyMioEncoder(maxContentLength, serialize, compress));
     }
 
     @Override
-    public void client(int maxContentLength, Serialize serialize, Compress compress, ChannelPipeline attachment) {
-        attachment.addLast(new NettyMioEncoder(maxContentLength, serialize, compress));
-        attachment.addLast(new NettyMioDecoder(maxContentLength, serialize, compress));
+    public void client(int maxContentLength, Serialize serialize, Compress compress, Object attachment) {
+        ChannelPipeline ch = (ChannelPipeline) attachment;
+        ch.addLast(new NettyMioEncoder(maxContentLength, serialize, compress));
+        ch.addLast(new NettyMioDecoder(maxContentLength, serialize, compress));
     }
 
 }

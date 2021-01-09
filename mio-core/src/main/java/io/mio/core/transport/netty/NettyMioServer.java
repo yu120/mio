@@ -46,7 +46,7 @@ public class NettyMioServer implements MioServer {
 
     private Channel serverChannel;
     private NettyMioServerHandler serverHandler;
-    private NettyInitializer<ChannelPipeline> initializer;
+    private NettyInitializer initializer;
 
     private static boolean IS_LINUX_PLATFORM = false;
 
@@ -63,9 +63,7 @@ public class NettyMioServer implements MioServer {
     public void initialize(final ServerConfig serverConfig, final MioProcessor<MioMessage> mioProcessor) {
         this.serverConfig = serverConfig;
         this.serverHandler = new NettyMioServerHandler(serverConfig, mioProcessor);
-        this.initializer = ExtensionLoader.getLoader(
-                new ExtensionLoader.TypeReference<NettyInitializer<ChannelPipeline>>() {
-                }).getExtension(serverConfig.getCodec());
+        this.initializer = ExtensionLoader.getLoader(NettyInitializer.class).getExtension(serverConfig.getCodec());
 
         // create socket channel type and thread group
         Class<? extends ServerChannel> channelClass;

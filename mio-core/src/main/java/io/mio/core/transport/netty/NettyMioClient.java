@@ -1,7 +1,6 @@
 package io.mio.core.transport.netty;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.mio.core.MioConstants;
 import io.mio.core.MioCallback;
 import io.mio.core.MioException;
 import io.mio.core.MioFuture;
@@ -18,7 +17,6 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollSocketChannel;
@@ -54,14 +52,13 @@ public class NettyMioClient implements MioClient {
     private AbstractChannelPoolMap<InetSocketAddress, FixedChannelPool> channelPools;
 
     private NettyMioClientHandler clientHandler;
-    private NettyInitializer<ChannelPipeline> initializer;
+    private NettyInitializer initializer;
 
     @Override
     public void initialize(final ClientConfig clientConfig) {
         this.clientConfig = clientConfig;
         this.clientHandler = new NettyMioClientHandler(mioCallbackKey);
-        this.initializer = ExtensionLoader.getLoader(new ExtensionLoader.TypeReference<NettyInitializer<ChannelPipeline>>() {
-        }).getExtension(clientConfig.getCodec());
+        this.initializer = ExtensionLoader.getLoader(NettyInitializer.class).getExtension(clientConfig.getCodec());
 
         // create socket channel type and thread group
         Class<? extends SocketChannel> channelClass;
