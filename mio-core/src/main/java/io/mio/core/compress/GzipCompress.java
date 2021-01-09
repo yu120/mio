@@ -22,6 +22,7 @@ public class GzipCompress implements Compress {
             try (GZIPOutputStream gzip = new GZIPOutputStream(out)) {
                 gzip.write(data);
             }
+
             return out.toByteArray();
         }
     }
@@ -31,11 +32,12 @@ public class GzipCompress implements Compress {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             try (ByteArrayInputStream in = new ByteArrayInputStream(data)) {
                 try (GZIPInputStream inputStream = new GZIPInputStream(in)) {
-                    byte[] buffer = new byte[2048];
                     int n;
+                    byte[] buffer = new byte[2048];
                     while ((n = inputStream.read(buffer)) >= 0) {
                         out.write(buffer, 0, n);
                     }
+
                     return out.toByteArray();
                 }
             }
