@@ -84,23 +84,6 @@ public class ServerConfig implements Serializable {
     private int shutdownTimeoutMillis = 10 * 1000;
 
     /**
-     * True is enable ssl
-     */
-    private boolean sslEnabled = true;
-    /**
-     * The key store file path
-     */
-    private String keyStore = "nettyClient.jks";
-    /**
-     * The trust store file path
-     */
-    private String trustStore = "nettyClient.jks";
-    /**
-     * The store password
-     */
-    private String storePassword = "defaultPass";
-
-    /**
      * True is enable biz thread pool
      */
     private boolean bizThread = true;
