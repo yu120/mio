@@ -104,9 +104,8 @@ public class NettyMioClient implements MioClient {
                         public void channelCreated(Channel ch) throws Exception {
                             // SSL
                             SslContextFactory.client(clientConfig, ch.pipeline());
-                            // client nettyInitializer
-                            initializer.initialize(false, clientConfig.getMaxContentLength(),
-                                    serialize, compress, ch.pipeline());
+                            // client initializer
+                            initializer.client(clientConfig.getMaxContentLength(), serialize, compress, ch.pipeline());
                             // heartbeat detection
                             if (clientConfig.getHeartbeat() > 0) {
                                 ch.pipeline().addLast(new IdleStateHandler(0, 0,

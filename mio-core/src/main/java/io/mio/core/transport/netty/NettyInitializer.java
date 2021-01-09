@@ -19,6 +19,8 @@ public interface NettyInitializer<A> {
      * @param serialize        {@link Serialize}
      * @param compress         {@link Compress}
      */
-    void initialize(boolean server, int maxContentLength, Serialize serialize, Compress compress, A attachment);
+    void server(int maxContentLength, Serialize serialize, Compress compress, A attachment);
+
+    void client(int maxContentLength, Serialize serialize, Compress compress, A attachment);
 
 }

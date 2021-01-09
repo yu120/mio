@@ -103,9 +103,8 @@ public class NettyMioServer implements MioServer {
                         protected void initChannel(Channel ch) throws Exception {
                             // SSL
                             SslContextFactory.server(serverConfig, ch.pipeline());
-                            // server nettyInitializer
-                            initializer.initialize(true, serverConfig.getMaxContentLength(),
-                                    serialize, compress, ch.pipeline());
+                            // server initializer
+                            initializer.server(serverConfig.getMaxContentLength(), serialize, compress, ch.pipeline());
                             // heartbeat detection
                             if (serverConfig.getHeartbeat() > 0) {
                                 ch.pipeline().addLast(new IdleStateHandler(0, 0,

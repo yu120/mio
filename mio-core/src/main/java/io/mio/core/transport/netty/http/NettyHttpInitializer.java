@@ -16,23 +16,23 @@ import io.netty.handler.codec.http.*;
 public class NettyHttpInitializer implements NettyInitializer<ChannelPipeline> {
 
     @Override
-    public void initialize(boolean server, int maxContentLength, Serialize serialize,
-                           Compress compress, ChannelPipeline attachment) {
-        if (server) {
-            attachment.addLast(new HttpRequestDecoder());
-            attachment.addLast(new HttpResponseEncoder());
-            attachment.addLast(new HttpObjectAggregator(maxContentLength));
+    public void server(int maxContentLength, Serialize serialize, Compress compress, ChannelPipeline attachment) {
+        attachment.addLast(new HttpRequestDecoder());
+        attachment.addLast(new HttpResponseEncoder());
+        attachment.addLast(new HttpObjectAggregator(maxContentLength));
 
-            attachment.addLast(new NettyHttpDecoder(serialize));
-            attachment.addLast(new NettyHttpServerEncoder(serialize));
-        } else {
-            attachment.addLast(new HttpRequestEncoder());
-            attachment.addLast(new HttpResponseDecoder());
-            attachment.addLast(new HttpObjectAggregator(maxContentLength));
+        attachment.addLast(new NettyHttpDecoder(serialize));
+        attachment.addLast(new NettyHttpServerEncoder(serialize));
+    }
 
-            attachment.addLast(new NettyHttpClientEncoder(serialize));
-            attachment.addLast(new NettyHttpDecoder(serialize));
-        }
+    @Override
+    public void client(int maxContentLength, Serialize serialize, Compress compress, ChannelPipeline attachment) {
+        attachment.addLast(new HttpRequestEncoder());
+        attachment.addLast(new HttpResponseDecoder());
+        attachment.addLast(new HttpObjectAggregator(maxContentLength));
+
+        attachment.addLast(new NettyHttpClientEncoder(serialize));
+        attachment.addLast(new NettyHttpDecoder(serialize));
     }
 
 }
