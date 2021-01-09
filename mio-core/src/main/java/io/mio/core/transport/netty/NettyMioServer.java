@@ -46,7 +46,7 @@ public class NettyMioServer implements MioServer {
 
     private Channel serverChannel;
     private NettyMioServerHandler serverHandler;
-    private NettyInitializer<ChannelPipeline> nettyInitializer;
+    private NettyInitializer<ChannelPipeline> initializer;
 
     private static boolean IS_LINUX_PLATFORM = false;
 
@@ -63,7 +63,7 @@ public class NettyMioServer implements MioServer {
     public void initialize(final ServerConfig serverConfig, final MioProcessor<MioMessage> mioProcessor) {
         this.serverConfig = serverConfig;
         this.serverHandler = new NettyMioServerHandler(serverConfig, mioProcessor);
-        this.nettyInitializer = ExtensionLoader.getLoader(
+        this.initializer = ExtensionLoader.getLoader(
                 new ExtensionLoader.TypeReference<NettyInitializer<ChannelPipeline>>() {
                 }).getExtension(serverConfig.getCodec());
 
@@ -104,7 +104,7 @@ public class NettyMioServer implements MioServer {
                             // SSL
                             SslContextFactory.server(serverConfig, ch.pipeline());
                             // server nettyInitializer
-                            nettyInitializer.initialize(true, serverConfig.getMaxContentLength(),
+                            initializer.initialize(true, serverConfig.getMaxContentLength(),
                                     serialize, compress, ch.pipeline());
                             // heartbeat detection
                             if (serverConfig.getHeartbeat() > 0) {

@@ -54,13 +54,13 @@ public class NettyMioClient implements MioClient {
     private AbstractChannelPoolMap<InetSocketAddress, FixedChannelPool> channelPools;
 
     private NettyMioClientHandler clientHandler;
-    private NettyInitializer<ChannelPipeline> nettyInitializer;
+    private NettyInitializer<ChannelPipeline> initializer;
 
     @Override
     public void initialize(final ClientConfig clientConfig) {
         this.clientConfig = clientConfig;
         this.clientHandler = new NettyMioClientHandler(mioCallbackKey);
-        this.nettyInitializer = ExtensionLoader.getLoader(new ExtensionLoader.TypeReference<NettyInitializer<ChannelPipeline>>() {
+        this.initializer = ExtensionLoader.getLoader(new ExtensionLoader.TypeReference<NettyInitializer<ChannelPipeline>>() {
         }).getExtension(clientConfig.getCodec());
 
         // create socket channel type and thread group
@@ -105,7 +105,7 @@ public class NettyMioClient implements MioClient {
                             // SSL
                             SslContextFactory.client(clientConfig, ch.pipeline());
                             // client nettyInitializer
-                            nettyInitializer.initialize(false, clientConfig.getMaxContentLength(),
+                            initializer.initialize(false, clientConfig.getMaxContentLength(),
                                     serialize, compress, ch.pipeline());
                             // heartbeat detection
                             if (clientConfig.getHeartbeat() > 0) {
