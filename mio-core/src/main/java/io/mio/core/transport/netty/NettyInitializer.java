@@ -13,14 +13,23 @@ import io.mio.core.serialize.Serialize;
 public interface NettyInitializer {
 
     /**
-     * The initialize
+     * Netty server initializer
      *
      * @param maxContentLength max content length
      * @param serialize        {@link Serialize}
      * @param compress         {@link Compress}
+     * @param attachment       object attachment
      */
     void server(int maxContentLength, Serialize serialize, Compress compress, Object attachment);
 
+    /**
+     * Netty client initializer
+     *
+     * @param maxContentLength max content length
+     * @param serialize        {@link Serialize}
+     * @param compress         {@link Compress}
+     * @param attachment       object attachment
+     */
     void client(int maxContentLength, Serialize serialize, Compress compress, Object attachment);
 
 }
