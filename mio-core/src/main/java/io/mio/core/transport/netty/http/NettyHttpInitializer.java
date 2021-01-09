@@ -22,7 +22,7 @@ public class NettyHttpInitializer implements NettyInitializer {
         ch.addLast(new HttpResponseEncoder());
         ch.addLast(new HttpObjectAggregator(maxContentLength));
         ch.addLast(new NettyHttpDecoder(serialize));
-        ch.addLast(new NettyHttpServerEncoder(serialize));
+        ch.addLast(new NettyHttpEncoder(true, serialize));
     }
 
     @Override
@@ -31,7 +31,7 @@ public class NettyHttpInitializer implements NettyInitializer {
         ch.addLast(new HttpRequestEncoder());
         ch.addLast(new HttpResponseDecoder());
         ch.addLast(new HttpObjectAggregator(maxContentLength));
-        ch.addLast(new NettyHttpClientEncoder(serialize));
+        ch.addLast(new NettyHttpEncoder(false, serialize));
         ch.addLast(new NettyHttpDecoder(serialize));
     }
 

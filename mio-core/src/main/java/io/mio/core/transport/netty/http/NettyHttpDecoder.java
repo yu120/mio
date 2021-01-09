@@ -19,6 +19,9 @@ import java.util.Map;
 
 /**
  * NettyHttpDecoder
+ * <p>
+ * 1.server request decode
+ * 2.client response decode
  *
  * @author lry
  */
