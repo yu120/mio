@@ -1,7 +1,7 @@
 package io.mio.core.transport;
 
-import io.mio.core.commons.MioMessage;
-import io.mio.core.commons.MioProcessor;
+import io.mio.core.MioMessage;
+import io.mio.core.MioProcessor;
 import io.mio.core.extension.SPI;
 
 /**

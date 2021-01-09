@@ -1,4 +1,4 @@
-package io.mio.core.commons;
+package io.mio.core;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

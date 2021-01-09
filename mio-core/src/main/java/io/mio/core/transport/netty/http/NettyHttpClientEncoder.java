@@ -1,7 +1,7 @@
 package io.mio.core.transport.netty.http;
 
 import io.mio.core.MioConstants;
-import io.mio.core.commons.MioMessage;
+import io.mio.core.MioMessage;
 import io.mio.core.serialize.Serialize;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

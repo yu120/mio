@@ -1,9 +1,10 @@
 package io.mio.core.transport.netty;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.mio.core.MioConstants;
-import io.mio.core.commons.MioException;
-import io.mio.core.commons.MioMessage;
-import io.mio.core.commons.MioProcessor;
+import io.mio.core.MioException;
+import io.mio.core.MioMessage;
+import io.mio.core.MioProcessor;
 import io.mio.core.compress.Compress;
 import io.mio.core.extension.Extension;
 import io.mio.core.extension.ExtensionLoader;
@@ -68,8 +69,8 @@ public class NettyMioServer implements MioServer {
 
         // create socket channel type and thread group
         Class<? extends ServerChannel> channelClass;
-        ThreadFactory bossThreadFactory = MioConstants.newThreadFactory("mio-server-boss", true);
-        ThreadFactory workerThreadFactory = MioConstants.newThreadFactory("mio-server-worker", true);
+        ThreadFactory bossThreadFactory = new ThreadFactoryBuilder().setNameFormat("mio-server-boss").setDaemon(true).build();
+        ThreadFactory workerThreadFactory = new ThreadFactoryBuilder().setNameFormat("mio-server-worker").setDaemon(true).build();
         if (IS_LINUX_PLATFORM && serverConfig.isUseLinuxNativeEpoll() && Epoll.isAvailable()) {
             channelClass = EpollServerSocketChannel.class;
             this.bossGroup = new EpollEventLoopGroup(serverConfig.getBossThread(), bossThreadFactory);

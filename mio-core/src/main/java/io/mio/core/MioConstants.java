@@ -2,8 +2,6 @@ package io.mio.core;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * MioConstants
@@ -54,27 +52,6 @@ public class MioConstants {
      * HTTP response status key
      */
     public static final String RESPONSE_STATUS_KEY = "status";
-
-    /**
-     * The new {@link ThreadFactory} instance
-     *
-     * @param name   thread name
-     * @param daemon thread daemon
-     * @return {@link ThreadFactory}
-     */
-    public static ThreadFactory newThreadFactory(String name, boolean daemon) {
-        return new ThreadFactory() {
-            private final AtomicInteger index = new AtomicInteger(0);
-
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread t = new Thread(r);
-                t.setName(name + "-pool-" + index.getAndIncrement());
-                t.setDaemon(daemon);
-                return t;
-            }
-        };
-    }
 
     /**
      * The build {@link SocketAddress}

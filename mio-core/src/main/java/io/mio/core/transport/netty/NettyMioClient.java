@@ -1,10 +1,11 @@
 package io.mio.core.transport.netty;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.mio.core.MioConstants;
-import io.mio.core.commons.MioCallback;
-import io.mio.core.commons.MioException;
-import io.mio.core.commons.MioFuture;
-import io.mio.core.commons.MioMessage;
+import io.mio.core.MioCallback;
+import io.mio.core.MioException;
+import io.mio.core.MioFuture;
+import io.mio.core.MioMessage;
 import io.mio.core.compress.Compress;
 import io.mio.core.extension.Extension;
 import io.mio.core.extension.ExtensionLoader;
@@ -64,7 +65,7 @@ public class NettyMioClient implements MioClient {
 
         // create socket channel type and thread group
         Class<? extends SocketChannel> channelClass;
-        ThreadFactory threadFactory = MioConstants.newThreadFactory("mio-client-worker", true);
+        ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("mio-client-worker").setDaemon(true).build();
         if (clientConfig.isUseLinuxNativeEpoll()) {
             channelClass = EpollSocketChannel.class;
             this.eventLoopGroup = new EpollEventLoopGroup(clientConfig.getClientThread(), threadFactory);

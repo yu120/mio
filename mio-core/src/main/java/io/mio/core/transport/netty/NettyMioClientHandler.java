@@ -1,8 +1,8 @@
 package io.mio.core.transport.netty;
 
 import io.mio.core.MioConstants;
-import io.mio.core.commons.MioCallback;
-import io.mio.core.commons.MioMessage;
+import io.mio.core.MioCallback;
+import io.mio.core.MioMessage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;

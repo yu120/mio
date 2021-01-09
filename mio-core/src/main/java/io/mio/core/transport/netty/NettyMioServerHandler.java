@@ -1,9 +1,9 @@
 package io.mio.core.transport.netty;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.mio.core.MioConstants;
-import io.mio.core.commons.MioMessage;
-import io.mio.core.commons.MioProcessor;
-import io.mio.core.commons.StandardThreadExecutor;
+import io.mio.core.MioMessage;
+import io.mio.core.MioProcessor;
 import io.mio.core.transport.ServerConfig;
 import io.mio.core.utils.ExceptionUtils;
 import io.netty.channel.Channel;
@@ -13,10 +13,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * NettyMioServerHandler
@@ -57,7 +54,7 @@ public class NettyMioServerHandler extends SimpleChannelInboundHandler<MioMessag
             this.standardThreadExecutor = new StandardThreadExecutor(
                     serverConfig.getBizCoreThreads(), serverConfig.getBizMaxThreads(),
                     serverConfig.getBizKeepAliveTime(), TimeUnit.MILLISECONDS, serverConfig.getBizQueueCapacity(),
-                    MioConstants.newThreadFactory(threadName, true));
+                    new ThreadFactoryBuilder().setNameFormat(threadName).setDaemon(true).build());
         }
     }
 
