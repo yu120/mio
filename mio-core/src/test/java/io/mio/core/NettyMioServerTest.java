@@ -1,10 +1,10 @@
-package io.mio.transport.netty4;
+package io.mio.core;
 
 import io.mio.core.commons.MioMessage;
 import io.mio.core.commons.MioProcessor;
-import io.mio.core.transport.ServerConfig;
 import io.mio.core.transport.MioServer;
 import io.mio.core.transport.MioTransport;
+import io.mio.core.transport.ServerConfig;
 
 import java.util.function.Consumer;
 

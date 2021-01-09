@@ -1,4 +1,4 @@
-package io.mio.transport.netty4.http;
+package io.mio.core.transport.netty4.http;
 
 import io.mio.core.MioConstants;
 import io.mio.core.commons.MioMessage;

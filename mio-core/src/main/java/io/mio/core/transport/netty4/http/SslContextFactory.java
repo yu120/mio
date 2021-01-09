@@ -1,4 +1,4 @@
-package io.mio.transport.netty4.http;
+package io.mio.core.transport.netty4.http;
 
 import io.mio.core.transport.ClientConfig;
 import io.mio.core.transport.ServerConfig;

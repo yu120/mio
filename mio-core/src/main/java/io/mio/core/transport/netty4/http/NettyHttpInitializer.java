@@ -1,9 +1,9 @@
-package io.mio.transport.netty4.http;
+package io.mio.core.transport.netty4.http;
 
 import io.mio.core.compress.Compress;
 import io.mio.core.extension.Extension;
 import io.mio.core.serialize.Serialize;
-import io.mio.transport.netty4.NettyInitializer;
+import io.mio.core.transport.netty4.NettyInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.*;
 

@@ -1,4 +1,4 @@
-package io.mio.transport.netty4.mio;
+package io.mio.core.transport.netty4.mio;
 
 import io.mio.core.MioConstants;
 import io.mio.core.commons.MioException;
