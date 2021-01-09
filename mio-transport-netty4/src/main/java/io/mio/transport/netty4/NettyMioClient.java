@@ -5,7 +5,6 @@ import io.mio.core.commons.*;
 import io.mio.core.compress.Compress;
 import io.mio.core.extension.Extension;
 import io.mio.core.extension.ExtensionLoader;
-import io.mio.core.extension.TypeReference;
 import io.mio.core.serialize.Serialize;
 import io.mio.core.transport.ClientConfig;
 import io.mio.core.transport.MioClient;
@@ -54,7 +53,7 @@ public class NettyMioClient implements MioClient {
     public void initialize(final ClientConfig clientConfig) {
         this.clientConfig = clientConfig;
         this.clientHandler = new NettyMioClientHandler(mioCallbackKey);
-        this.nettyInitializer = ExtensionLoader.getLoader(new TypeReference<NettyInitializer<ChannelPipeline>>() {
+        this.nettyInitializer = ExtensionLoader.getLoader(new ExtensionLoader.TypeReference<NettyInitializer<ChannelPipeline>>() {
         }).getExtension(clientConfig.getCodec());
 
         // create socket channel type and thread group

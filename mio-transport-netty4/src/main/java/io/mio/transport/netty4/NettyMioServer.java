@@ -7,7 +7,6 @@ import io.mio.core.transport.MioServer;
 import io.mio.core.commons.*;
 import io.mio.core.extension.Extension;
 import io.mio.core.extension.ExtensionLoader;
-import io.mio.core.extension.TypeReference;
 import io.mio.core.transport.ServerConfig;
 import io.mio.transport.netty4.http.SslContextFactory;
 import io.netty.bootstrap.ServerBootstrap;
@@ -61,8 +60,9 @@ public class NettyMioServer implements MioServer {
     public void initialize(final ServerConfig serverConfig, final MioProcessor<MioMessage> mioProcessor) {
         this.serverConfig = serverConfig;
         this.serverHandler = new NettyMioServerHandler(serverConfig, mioProcessor);
-        this.nettyInitializer = ExtensionLoader.getLoader(new TypeReference<NettyInitializer<ChannelPipeline>>() {
-        }).getExtension(serverConfig.getCodec());
+        this.nettyInitializer = ExtensionLoader.getLoader(
+                new ExtensionLoader.TypeReference<NettyInitializer<ChannelPipeline>>() {
+                }).getExtension(serverConfig.getCodec());
 
         // create socket channel type and thread group
         Class<? extends ServerChannel> channelClass;

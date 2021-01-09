@@ -1,6 +1,8 @@
 package io.mio.core.utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * ByteUtils
@@ -34,12 +36,12 @@ public class ByteUtils {
      * @return hex
      */
     public static String bytes2Hex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (byte tempByte : bytes) {
-            sb.append(byte2Hex(tempByte)).append(" ");
+        List<String> hexes = new ArrayList<>();
+        for (byte b : bytes) {
+            hexes.add(String.format("0x%02X", b));
         }
 
-        return sb.toString();
+        return String.join(" ", hexes.toArray(new String[0]));
     }
 
     /**

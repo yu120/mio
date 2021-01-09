@@ -446,4 +446,33 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /**
+     * TypeReference
+     *
+     * @param <T>
+     * @author lry
+     */
+    public static abstract class TypeReference<T> {
+
+        private Class<T> classType;
+
+        @SuppressWarnings("unchecked")
+        public TypeReference() {
+            Type superClass = this.getClass().getGenericSuperclass();
+            if (superClass instanceof ParameterizedType) {
+                Type parameterizedType = ((ParameterizedType) superClass).getActualTypeArguments()[0];
+                if (parameterizedType instanceof ParameterizedType) {
+                    classType = (Class<T>) ((ParameterizedType) parameterizedType).getRawType();
+                } else {
+                    classType = (Class<T>) parameterizedType;
+                }
+            }
+        }
+
+        public Class<T> getClassType() {
+            return classType;
+        }
+
+    }
+
 }
