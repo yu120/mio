@@ -4,7 +4,6 @@ import io.mio.core.MioConstants;
 import io.mio.core.MioMessage;
 import io.mio.core.compress.Compress;
 import io.mio.core.serialize.Serialize;
-import io.mio.core.utils.ByteUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -15,26 +14,10 @@ import java.util.List;
 
 /**
  * NettyMioDecoder
- *
- * <pre>
- * ====================================================================================================================
- * [Protocol]
- * ====================================================================================================================
- * [*] magic(1 bit)
- * [*] protocol version(1 bit)
- * [*] message event(1 bit,eg: heartbeat,normal,exception)
- * [*] request/response(1 bit)
- * [*] serialization id (1 bit)
- * status (2 bits)
- * message id(1 bit)
- * [*] data length(4 bits)
- * [*] data(attachments+data+exception, N bits)
- * [*] xor(1 bit)
- * ====================================================================================================================
- * Consider:
- * 6.crc data(crc), cyclic redundancy detection.The XOR algorithm is used to
- * calculate whether the whole packet has errors during transmission
- * </pre>
+ * <p>
+ * ===================================================================================================================================
+ * [Protocol]：magic(1 byte) + serialize(1 byte) + attachment length(4 byte) + data length(4 byte) + attachment(M byte) + data(N byte)
+ * ===================================================================================================================================
  * <p>
  * Tips：Decrypt the message flow to protocol data and add it to the online document
  *
@@ -57,7 +40,7 @@ public class NettyMioDecoder extends ByteToMessageDecoder {
         }
 
         // Step 2：防止socket字节流攻击,防止客户端传来的数据过大。且太大数据是不合理的(单位字节:byte)
-        if (buffer.readableBytes() > maxContentLength) {
+        if (buffer.readableBytes() > MioConstants.BASE_READ_LENGTH + maxContentLength) {
             buffer.skipBytes(buffer.readableBytes());
             return;
         }
@@ -88,36 +71,35 @@ public class NettyMioDecoder extends ByteToMessageDecoder {
 
         // Step 4：Read version,length, and check content length
         byte version = buffer.readByte();
-        int length = buffer.readInt();
+        int attachmentLength = buffer.readInt();
+        int dataLength = buffer.readInt();
         // 判断请求数据包的剩余数据是否到齐
-        if (buffer.readableBytes() < length + MioConstants.XOR_BYTE) {
+        if (buffer.readableBytes() < attachmentLength + dataLength) {
             // Restore read pointer
             buffer.readerIndex(beginReaderIndex);
             return;
         }
 
         // Step 5：Read attachments data
-        byte[] body = new byte[length];
-        buffer.readBytes(body);
+        byte[] attachmentBytes = new byte[attachmentLength];
+        buffer.readBytes(attachmentBytes);
 
-        // Step 6: Read and check xor
-        byte[] xorArray = ByteUtils.concat(ByteUtils.concat(version, ByteUtils.int2bytesBig(length)), body);
-        if (buffer.readByte() != ByteUtils.xor(xorArray)) {
-            return;
-        }
+        // Step 6：Read attachments data
+        byte[] dataBytes = new byte[dataLength];
+        buffer.readBytes(dataBytes);
 
         // Step 7：uncompress data
         if (compress != null) {
             try {
-                body = compress.uncompress(body);
+                dataBytes = compress.uncompress(dataBytes);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
         // Step 8：build to output
-        final MioMessage mioMessage = serialize.deserialize(body, MioMessage.class);
-        mioMessage.setVersion(version);
+        final MioMessage mioMessage = serialize.deserialize(dataBytes, MioMessage.class);
+        mioMessage.decodeAttachments(attachmentBytes);
         mioMessage.wrapper(channel.localAddress(), channel.remoteAddress());
         out.add(mioMessage);
     }

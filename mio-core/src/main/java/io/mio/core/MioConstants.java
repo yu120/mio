@@ -24,17 +24,17 @@ public class MioConstants {
      */
     private static final int VERSION_BYTE = 1;
     /**
+     * Attachment length(int，4 byte）
+     */
+    private static final int ATTACHMENT_LENGTH_BYTE = 4;
+    /**
      * Data length(int，4 byte）
      */
-    private static final int LENGTH_BYTE = 4;
-    /**
-     * Xor byte length(byte, 1 byte)
-     */
-    public static final int XOR_BYTE = 1;
+    private static final int DATA_LENGTH_BYTE = 4;
     /**
      * Read basic length (read only after reaching)
      */
-    public static final int BASE_READ_LENGTH = MAGIC_BYTE + VERSION_BYTE + LENGTH_BYTE;
+    public static final int BASE_READ_LENGTH = MAGIC_BYTE + VERSION_BYTE + ATTACHMENT_LENGTH_BYTE + DATA_LENGTH_BYTE;
 
     /**
      * HTTP uri key

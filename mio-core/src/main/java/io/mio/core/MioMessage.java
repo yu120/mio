@@ -6,8 +6,10 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * MioMessage
@@ -91,10 +93,6 @@ public class MioMessage implements Serializable {
      */
     private String error;
     /**
-     * The body data
-     */
-    private Object data;
-    /**
      * The attachments data
      * <p>
      * 1.protocol version
@@ -104,12 +102,12 @@ public class MioMessage implements Serializable {
      * 5.service name
      * 6.group name
      */
-    private Map<String, Object> attachments;
-
+    private final Map<String, Object> attachments = new LinkedHashMap<>();
     /**
-     * The RPC version
+     * The body data
      */
-    private transient byte version;
+    private Object data;
+
     /**
      * The local net socket address
      */
@@ -129,16 +127,41 @@ public class MioMessage implements Serializable {
      */
     public MioMessage(Object data, Map<String, Object> attachments) {
         this.data = data;
-        if (attachments == null || attachments.isEmpty()) {
-            this.attachments = new LinkedHashMap<>();
-        } else {
-            this.attachments = new LinkedHashMap<>(attachments);
+        if (attachments != null && attachments.size() > 0) {
+            this.attachments.putAll(attachments);
         }
     }
 
     public MioMessage(byte code, String error) {
         this.code = code;
         this.error = error;
+    }
+
+    public byte[] encodeAttachments() throws Exception {
+        if (attachments.isEmpty()) {
+            return new byte[0];
+        }
+
+        List<String> keyValues = new ArrayList<>();
+        for (Map.Entry<String, Object> entry : attachments.entrySet()) {
+            keyValues.add(String.format("%s=%s", URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8.name()),
+                    URLEncoder.encode(String.valueOf(entry.getValue()), StandardCharsets.UTF_8.name())));
+        }
+
+        return String.join("&", keyValues).getBytes(StandardCharsets.UTF_8);
+    }
+
+    public void decodeAttachments(byte[] attachmentBytes) throws Exception {
+        if (attachmentBytes == null || attachmentBytes.length == 0) {
+            return;
+        }
+
+        String[] keyValues = new String(attachmentBytes, StandardCharsets.UTF_8).split("&");
+        for (String keyValue : keyValues) {
+            String[] keyValueArray = keyValue.split("=");
+            attachments.put(URLDecoder.decode(keyValueArray[0], StandardCharsets.UTF_8.name()),
+                    URLDecoder.decode(keyValueArray[1], StandardCharsets.UTF_8.name()));
+        }
     }
 
     /**

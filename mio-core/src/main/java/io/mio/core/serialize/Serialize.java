@@ -31,23 +31,4 @@ public interface Serialize {
      */
     <T> T deserialize(byte[] bytes, Class<T> clz) throws IOException;
 
-    /**
-     * The serialize multi object
-     *
-     * @param objects object array implements java.io.Serializable
-     * @return byte[] data
-     * @throws IOException IO exception {@link IOException}
-     */
-    byte[] serializeMulti(Object[] objects) throws IOException;
-
-    /**
-     * The deserialize multi object
-     *
-     * @param bytes   byte[] data
-     * @param classes object class array
-     * @return object array
-     * @throws IOException IO exception {@link IOException}
-     */
-    Object[] deserializeMulti(byte[] bytes, Class<?>[] classes) throws IOException;
-
 }
