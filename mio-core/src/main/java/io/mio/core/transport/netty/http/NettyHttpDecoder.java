@@ -3,7 +3,6 @@ package io.mio.core.transport.netty.http;
 import io.mio.core.MioConstants;
 import io.mio.core.MioMessage;
 import io.mio.core.serialize.Serialize;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
@@ -52,24 +51,13 @@ public class NettyHttpDecoder extends MessageToMessageDecoder<FullHttpMessage> {
         }
 
         // parse body data
-        byte[] body = readByteBuf(msg.content());
+        byte[] body = new byte[msg.content().readableBytes()];
+        msg.content().getBytes(0, body);
 
         // build message
         final MioMessage mioMessage = serialize.deserialize(body, MioMessage.class);
         mioMessage.wrapper(channel.localAddress(), channel.remoteAddress());
         out.add(mioMessage);
-    }
-
-    /**
-     * The read {@link ByteBuf}
-     *
-     * @param byteBuf {@link ByteBuf}
-     * @return byte[]
-     */
-    private byte[] readByteBuf(ByteBuf byteBuf) {
-        byte[] byteData = new byte[byteBuf.readableBytes()];
-        byteBuf.getBytes(0, byteData);
-        return byteData;
     }
 
     /**
