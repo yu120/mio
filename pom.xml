@@ -18,7 +18,7 @@
         <netty.version>4.1.43.Final</netty.version>
         <hessian.version>4.0.63</hessian.version>
 
-        <log4j2.version>2.12.1</log4j2.version>
+        <log4j2.version>2.16.0</log4j2.version>
         <disruptor.version>3.4.2</disruptor.version>
     </properties>
 
